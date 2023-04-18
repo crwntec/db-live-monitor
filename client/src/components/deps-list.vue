@@ -4,7 +4,7 @@
     </div>
     <div v-if="!error">
         <h1>{{ station }}</h1>
-        <li :key="item.tripId" v-for="item in stops">{{ item.line.name }} nach {{ item.direction }} um {{ convertIRISTime(item.plannedWhen.split('|')[0])}}(+{{ calculateDelay(item.plannedWhen,item.when)}})</li>
+        <li :key="item.tripId" v-for="item in stops">{{ item.line.name }} {{ item.hasDeparture ? 'nach' : ''}} {{ item.direction }} um {{ convertIRISTime(item.plannedWhen.split('|'), item)}}(+{{ calculateDelay(item.plannedWhen.split('|'),item.when.split('|'),item)}})</li>
     </div>
 </template>
 <script lang="ts">
@@ -46,18 +46,20 @@ export default defineComponent({
         
     },
     methods: {
-        convertIRISTime(dateString: string) {
-            const hour = Number(dateString.slice(6, 8));
-            const minute = Number(dateString.slice(8, 10));
+        convertIRISTime(dateStringArr: string[], item: Departures.Stop) {
+            let dateString = item.hasDeparture ? dateStringArr[1] : dateStringArr[0]
+            const hour = Number(dateString.slice(6, 8)).toLocaleString('de-DE', {minimumIntegerDigits: 2, useGrouping: false});
+            const minute = Number(dateString.slice(8, 10)).toLocaleString('de-DE', {minimumIntegerDigits: 2, useGrouping: false});
             return `${hour}:${minute}`
         },
-        calculateDelay(plannedTime:string, currentTime:string){
-            const delay = ((parseInt(currentTime)-parseInt(plannedTime)) / 100).toFixed(2)
+        calculateDelay(plannedTime:string[], currentTime:string[], item:Departures.Stop){
+            let [plannedArr, plannedDep] = plannedTime
+            let [currentArr, currentDep] = currentTime
+            const delay = ((parseInt(item.hasArrival ? currentArr : currentDep)-parseInt(item.hasArrival ? plannedArr : plannedDep)) / 100).toFixed(2)
             const hour = parseInt(delay.toString().split('.')[0])
             const minute = parseInt(delay.toString().split('.')[1])
-            console.log(delay)
 
-            return hour/60+minute
+            return (hour/60+minute).toFixed(0)
         }
     },
     unmounted: function () {

@@ -5,6 +5,7 @@ import { profile as dbProfile} from "hafas-client/p/db/index.js";
 import fs from 'fs'
 import moment from 'moment/moment.js';
 import https from 'https';
+import { log } from 'console';
 const userAgent = "hafas-test";
 const client = createClient(dbProfile, userAgent);
 
@@ -16,35 +17,43 @@ let parsed = JSON.parse(rawdata)
 
 
 
-const convertTimetable = (data) => {
-    const timetable = data.elements[0];
-    let newJSON = {"station": timetable.attributes.station,"stops": []};
+const convertTimetable = (data, changes) => {
+    const dataTimetable = data.elements[0];
+    const changesTimetable = changes.elements[0];
+    let newJSON = {"station": dataTimetable.attributes.station,"stops": []};
     let i = 0
-    timetable.elements = timetable.elements.filter((element)=> {
+    dataTimetable.elements = dataTimetable.elements.filter((element)=> {
         return element !== undefined;
-     });
+    });
+    changesTimetable.elements = changesTimetable.elements.filter((element)=> {
+        return element !== undefined;
+    });
 
-    timetable.elements.forEach(e => {
+
+    dataTimetable.elements.forEach(e => {
         i++
+        const changes = changesTimetable.elements.find(o=>o.attributes.id == e.attributes.id)
+        const messages = changes !== undefined ? changes.elements.filter(o=>o.name == 'm') : []
+        const newArr = changes.elements.find(o=>o.name == 'ar')
+        let hasNewArr = newArr !== undefined
+        const newDep = changes.elements.find(o=>o.name == 'dp')
+        let hasNewDep = newDep !== undefined
         const line = e.elements.find(o => o.name == 'tl');
         const arrival = e.elements.find(o => o.name == 'ar');
-        let hasArrival = true
+        let hasArrival = arrival !== undefined
         const departure = e.elements.find(o => o.name == 'dp');
-        let hasDeparture = true
-        if (arrival == undefined) {
-            hasArrival = false
-        } else if (departure ==undefined){
-            hasDeparture = false
-        }
-        const depString = hasDeparture ? departure.attributes.pt : "-"
+        let hasDeparture = departure !==undefined
         const arrString = hasArrival ? arrival.attributes.pt : "-"
+        const depString = hasDeparture ? departure.attributes.pt : "-"
+        const newArrString = hasNewArr ? newArr.attributes.ct : arrString
+        const newDepString = hasNewDep ? newDep.attributes.ct : depString
         const cat = line.attributes.f
         const lineString = cat=='F' ? line.attributes.n : hasArrival ? arrival.attributes.l : departure.attributes.l;
         newJSON.stops.push({
             "tripId": e.attributes.id,
             "hasArrival": hasArrival,
             "hasDeparture": hasDeparture,
-            "when": arrString + "|" + depString,
+            "when": newArrString  + "|" + newDepString,
             "plannedWhen": arrString + "|" + depString ,
             "platform": hasArrival ? arrival.attributes.pp : departure.attributes.pp,
             "plannedPlatform": hasArrival ? arrival.attributes.pp : departure.attributes.pp,
@@ -90,23 +99,39 @@ server.on('connection', (socket, req)=>{
 
     }
 
-    const fetchIRISDepartures = () => {
+    const fetchIRISDepartures = async () => {
         if (ibnr) {
-            const date = moment(Date.now()).format("YYMMDD")
-            const hour = moment(Date.now()).format("HH")
-            const url = `https://iris.noncd.db.de/iris-tts/timetable/plan/${ibnr}/${date}/${hour}`;
-            var data = '';
-            https.get(url, (res)=>{
-                if (res.statusCode >= 200 && res.statusCode < 400) {
-                    res.on('data', function(data_) { data += data_.toString(); });
-                    res.on('end', function() {
-                      let parsedXML = JSON.parse(xml2json(data))
-                      let converted = convertTimetable(parsedXML)
-                      //console.log(converted);
-                      socket.send(JSON.stringify(converted))
-                    });
-                  }
-            })  
+            const date = moment(Date.now()).utcOffset(120).format("YYMMDD")
+            const hour = moment(Date.now()).utcOffset(120).format("HH")
+            const timetableUrl = `https://iris.noncd.db.de/iris-tts/timetable/plan/${ibnr}/${date}/${hour}`;
+            const fchgUrl = `https://iris.noncd.db.de/iris-tts/timetable/fchg/${ibnr}/`;
+            //log(timetableUrl)
+            let parsedTimetable = await new Promise((resolve, reject) => {
+                https.get(timetableUrl, (res)=>{
+                    let data = '';
+                    if (res.statusCode >= 200 && res.statusCode < 400) {
+                        res.on('data', async function(data_) { data += data_.toString();});
+                        return res.on('end', async function() {
+                            resolve(JSON.parse(xml2json(data.toString())))
+                        
+                        });
+                }
+                })
+            })
+            let parsedFchg = await new Promise((resolve, reject) => {
+                https.get(fchgUrl, (res)=>{
+                    let data = '';
+                    if (res.statusCode >= 200 && res.statusCode < 400) {
+                        res.on('data', async function(data_) { data += data_.toString();});
+                        return res.on('end', async function() {
+                            resolve(JSON.parse(xml2json(data.toString())))
+                        
+                        });
+                }
+                })
+            })
+            let converted = convertTimetable(parsedTimetable, parsedFchg)
+            socket.send(JSON.stringify(converted))
         } else {
             socket.send(404)
         }
