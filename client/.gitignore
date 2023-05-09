@@ -19,6 +19,8 @@ coverage
 
 # Editor directories and files
 .vscode/*
+.eslintrc.cjs
+.prettierrc.json
 !.vscode/extensions.json
 .idea
 *.suo
