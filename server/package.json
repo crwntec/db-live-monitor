@@ -1,7 +1,6 @@
 {
   "type": "module",
   "dependencies": {
-    "hafas-client": "^6.0.4",
     "moment": "^2.29.4",
     "ws": "^8.13.0",
     "xml-js": "^1.6.11"
