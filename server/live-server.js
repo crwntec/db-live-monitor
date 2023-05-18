@@ -30,10 +30,11 @@ const convertTimetable = (data1, data2, changes) => {
         data2.elements[0].elements.forEach(e=>dataTimetable.elements.push(e))
     } else {
         dataTimetable = data1
-        // log("a", data1)
     }
     const changesTimetable = changes.elements[0];
-    let newJSON = {"station": dataTimetable.attributes.station,"stops": []};
+    if(dataTimetable.attributes == undefined || changesTimetable.elements == undefined){
+        return
+    }let newJSON = {"station": dataTimetable.attributes.station,"stops": []};
     let i = 0
     dataTimetable.elements = dataTimetable.elements.filter((element)=> {
         return element !== undefined;
@@ -44,7 +45,8 @@ const convertTimetable = (data1, data2, changes) => {
     dataTimetable.elements.forEach(e => {
         if (e.attributes == undefined){log(e)}
         //i++
-        const changes = changesTimetable.elements.find(o=>o.attributes.id == e.attributes.id) == undefined ? lastChanges.elements.find(o=>o.attributes.id == e.attributes.id) : changesTimetable.elements.find(o=>o.attributes.id == e.attributes.id)
+
+        const changes = changesTimetable.elements.find(o=>o.attributes.id == e.attributes.id) == undefined ? lastChanges.elements[0].elements.find(o=>o.attributes.id == e.attributes.id) : changesTimetable.elements.find(o=>o.attributes.id == e.attributes.id)
         const himMessages = changes !== undefined ? changes.elements.filter(o=>o.name == 'm') : []
         
         let convertedMessages = []
@@ -65,12 +67,18 @@ const convertTimetable = (data1, data2, changes) => {
 
         const newArr = changes !== undefined ? changes.elements.find(o=>o.name == 'ar') : undefined
         let hasNewArr = newArr !== undefined
-        let hasNewArrTime = newArr !== undefined ? newArr.attributes.ct !== undefined : false
+        let hasNewArrTime = newArr !== undefined && newArr.attributes !== undefined ? newArr.attributes.ct !== undefined : false
 
         const newDep = changes !== undefined ? changes.elements.find(o=>o.name == 'dp') : undefined
         let hasNewDep = newDep !== undefined
         let hasNewDepTime = newDep !== undefined ? newDep.attributes !== undefined : false
 
+        let currentStatus = ""
+        let hasNewArrPlatform = false
+        let currentArrPlatform = ""
+        let hasNewDepPlatform = false
+        let currentDepPlatform = ""
+        
         if(hasNewArr && newArr.elements !== undefined){
             newArr.elements.filter(e=>e!==undefined).forEach(e=>{
                 if(e.attributes.t=='d'){
@@ -80,6 +88,15 @@ const convertTimetable = (data1, data2, changes) => {
                     qualityChanges.push(e.attributes)
                 }
             })
+            currentStatus = newArr.attributes.cs !== undefined ? newArr.attributes.cs : ""
+            hasNewArrPlatform = newArr.attributes.cp !== undefined
+            currentArrPlatform = hasNewArrPlatform ? newArr.attributes.cp : ""
+            
+        }
+        if(hasNewDep && newDep.attributes !== undefined){
+            hasNewDepPlatform = newDep.attributes.cp !== undefined
+            currentDepPlatform = hasNewDepPlatform ? newDep.attributes.cp : ""
+            
         }
 
         const line = e.elements.find(o => o.name == 'tl');
@@ -96,12 +113,21 @@ const convertTimetable = (data1, data2, changes) => {
         const newArrString = hasNewArr && hasNewArrTime ? newArr.attributes.ct : arrString
         const newDepString = hasNewDep && hasNewDepTime ? newDep.attributes.ct : depString
 
+        const arPath = hasArrival ? arrival.attributes.ppth.split('|') : ""
+        const plannedPath = hasDeparture ? departure.attributes.ppth.split('|') : [];
+        let currentPath = hasNewDep && newDep.attributes !== undefined ? departure.attributes.ppth != undefined ?  departure.attributes.ppth.split('|') : [] : [];
+
+        const removedStops = plannedPath.filter(stop=>!currentPath.includes(stop))
+        const additionalStops = currentPath.filter(stop=>!plannedPath.includes(stop))
+
         const cat = line.attributes.f
 
         const lineString = cat=='F' ? line.attributes.n : hasArrival ? arrival.attributes.l : departure.attributes.l;
 
         delayCauses = delayCauses.sort((a,b)=> parseInt(a.timestamp) - parseInt(b.timestamp))
         qualityChanges = qualityChanges.sort((a,b)=> parseInt(a.timestamp) - parseInt(b.timestamp))
+
+        
 
         newJSON.stops.push({
             "tripId": e.attributes.id,
@@ -110,12 +136,20 @@ const convertTimetable = (data1, data2, changes) => {
             "hasArrival": hasArrival,
             "hasDeparture": hasDeparture,
             "hasNewArr": hasNewArr,
+            "hasNewTime": hasNewArrTime ? newArr.attributes.ct != arrString : false,
             "when": newArrString  + "|" + newDepString,
-            "plannedWhen": arrString + "|" + depString ,
+            "plannedWhen": arrString + "|" + depString,
+            "cancelled": currentStatus == "c",
             "causesOfDelay": delayCauses,
-            "platform": hasArrival ? arrival.attributes.pp : departure.attributes.pp,
+            "hasNewPlatform": hasNewArrPlatform || hasNewDepPlatform,
+            "platform": hasArrival ? hasNewArrPlatform ? currentArrPlatform : arrival.attributes.pp : hasNewDepPlatform ? currentDepPlatform : departure.attributes.pp,
             "plannedPlatform": hasArrival ? arrival.attributes.pp : departure.attributes.pp,
-            "direction": hasDeparture ? departure.attributes.ppth.split('|').at(-1) : "ending here",
+            "plannedPath": plannedPath,
+            "currentPath": currentPath,
+            "removedStops": removedStops,
+            "additionalStops": additionalStops,
+            "direction": hasDeparture ? plannedPath.at(-1) : hasArrival ? "von " + arPath.at([0]) : {},
+            "isEnding": !hasDeparture,
             "line": {
                 "fahrtNr": line.attributes.n,
                 "name": line.attributes.c + lineString,
@@ -217,9 +251,13 @@ server.on('connection', (socket, req)=>{
         }
     }
     var timetable = {}
-    fetchIRISDepartures().then((res)=>timetable = res)
+    let flag = false
+    fetchIRISDepartures().then((res)=>{
+        timetable = res
+        flag = true
+    })
     const fetchChanges = async () => {
-        if (ibnr) {
+        if (ibnr && flag) {
             const rchgUrl = `https://iris.noncd.db.de/iris-tts/timetable/rchg/${ibnr}/`;
             let parsedRchg = await new Promise((resolve, reject) => {
                 https.get(rchgUrl, (res)=>{
@@ -243,7 +281,7 @@ server.on('connection', (socket, req)=>{
     }
 
 
-    setTimeout(fetchChanges, 400)
+    setTimeout(fetchChanges, 3000)
 
     socket.on('message', (message) => {
         console.log('Received message:', message);

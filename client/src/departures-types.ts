@@ -10,17 +10,30 @@ export interface Stop {
     hasArrival:      boolean;
     hasDeparture:    boolean;
     hasNewArr:       boolean;
+    hasNewTime:      boolean;
     when:            string;
     plannedWhen:     string;
+    cancelled:       boolean;
     causesOfDelay:   CausesOfDelay[];
+    hasNewPlatform:  boolean;
     platform:        string;
     plannedPlatform: string;
+    plannedPath:     string[];
+    currentPath:     string[];
+    removedStops:    PathChange[];
+    additionalStops: PathChange[];
     direction:       string;
+    isEnding:        boolean;
     line:            Line;
 }
 
+export interface PathChange {
+    id:      string;
+    newStop: string;
+}
+
 export interface CausesOfDelay {
-    id: string;
+    id:        string;
     cat:       number;
     text:      string;
     timestamp: string;

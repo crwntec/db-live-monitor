@@ -4,12 +4,19 @@
   </div>
   <div v-if="!error">
     <h1>{{ station }}</h1>
-    <li :key="item.tripId" v-for="item in stops">
-      {{ item.line.name }} {{ item.hasDeparture ? 'nach' : '' }} {{ item.direction }} um
-      {{ convertIRISTime(item.plannedWhen.split('|'), item) }} heute:
-      {{ convertIRISTime(item.when.split('|'), item) }} (+{{
-        calculateDelay(item.plannedWhen.split('|'), item.when.split('|'), item)
-      }}) || <span :key="cause.id" v-for="cause in item.causesOfDelay"> {{ convertTimestamp(cause.timestamp) }} : {{cause.text}} || </span>
+    <li :key="item.tripId" v-for="item in stops" >
+      <span :style="{'text-decoration': item.cancelled ? 'line-through' : ''}">
+        {{ item.line.name }} {{ item.hasDeparture ? 'nach' : '' }} {{ item.direction }} um
+        <span :style="{'color': item.hasNewTime ? 'red' : 'black'}">{{ convertIRISTime(item.when.split('|'), item) }}</span>
+        (+{{
+          calculateDelay(item.plannedWhen.split('|'), item.when.split('|'), item)
+        }})
+        {{ item.isEnding ? "nach": "von" }} Gleis <span :style="{'color': item.hasNewPlatform ? 'red' : 'black'}">{{ item.platform }}</span>
+      </span>
+      || <span :key="cause.id" v-for="cause in item.causesOfDelay"> {{ convertTimestamp(cause.timestamp) }} : {{cause.text}} || </span>
+      <span v-if="item.removedStops.length > 0">Ohne Halt in: <span :key="stop.id" v-for="stop in item.removedStops">++{{ stop }}</span></span>
+      <span v-if="item.additionalStops.length > 0">Hält zusätzlich in: <span :key="stop.id" v-for="stop in item.additionalStops">++{{ stop }}</span></span>
+      {{ item.cancelled ? "Fahrt fällt aus!": "" }}
     </li>
   </div>
 </template>
