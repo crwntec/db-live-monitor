@@ -2,27 +2,49 @@
   <div>
     <h1 v-if="error">{{ errorMsg }}</h1>
   </div>
-  <div v-if="!error">
-    <h1>{{ station }}</h1>
-    <li :key="item.tripId" v-for="item in stops" >
-      <span :style="{'text-decoration': item.cancelled ? 'line-through' : ''}">
-        {{ item.line.name }} {{ item.hasDeparture ? 'nach' : '' }} {{ item.direction }} um
-        <span :style="{'color': item.hasNewTime ? 'red' : 'black'}">{{ convertIRISTime(item.when.split('|'), item) }}</span>
-        (+{{
-          calculateDelay(item.plannedWhen.split('|'), item.when.split('|'), item)
-        }})
-        {{ item.isEnding ? "nach": "von" }} Gleis <span :style="{'color': item.hasNewPlatform ? 'red' : 'black'}">{{ item.platform }}</span>
-      </span>
-      || <span :key="cause.id" v-for="cause in item.causesOfDelay"> {{ convertTimestamp(cause.timestamp) }} : {{cause.text}} || </span>
-      <span v-if="item.removedStops.length > 0">Ohne Halt in: <span :key="stop.id" v-for="stop in item.removedStops">++{{ stop }}</span></span>
-      <span v-if="item.additionalStops.length > 0">Hält zusätzlich in: <span :key="stop.id" v-for="stop in item.additionalStops">++{{ stop }}</span></span>
-      {{ item.cancelled ? "Fahrt fällt aus!": "" }}
+  <div v-if="!error" class="container">
+    <h1 class="heading">{{ station }}</h1>
+    <li :key="item.tripId" v-for="item in stops" class="stop" >
+      <div :class="{stopRow:true, cancelled: item.cancelled}">
+        <span :class="{
+            line:true, regional: item.line.productName.charAt(0)=='R', 
+            sbahn: item.line.productName.charAt(0)=='S', 
+            longDistance: item.line.productName.charAt(0)=='I' || item.line.productName.charAt(0)=='E',
+            vias: item.line.productName.charAt(0)=='V',
+            flx: item.line.productName.charAt(0)=='F',
+            tha: item.line.productName.charAt(0)=='T'
+            }">{{ item.line.name }}
+        </span>
+        <span class="direction">
+          {{ item.direction }}
+        </span>
+        <div class="info">
+          <span v-if="item.hasNewTime" class="originalTime">{{convertIRISTime(item.plannedWhen.split('|'), item)}}</span>
+          <span class="when" :style="{'color': item.hasNewTime ? 'red' : 'rgb(138, 255, 127)'}">
+            {{ convertIRISTime(item.when.split('|'), item) }}
+            (+{{
+              calculateDelay(item.plannedWhen.split('|'), item.when.split('|'), item)
+            }})
+          </span>
+          
+          <span class="platform">
+            <span :style="{'color': item.hasNewPlatform ? 'red' : 'white'}">{{ item.platform }}</span>
+          </span>
+        </div>
+        <div class="messages">
+          <span class="delayCause" :key="cause.id" v-for="cause in item.causesOfDelay">{{ item.causesOfDelay[item.causesOfDelay.length-1].id != cause.id ? cause.text + '++' : cause.text }}</span>
+          <span v-if="item.removedStops.length > 0 && !item.onlyPlanData">Ohne Halt in: <span :key="stop.id" v-for="stop in item.removedStops">{{ stop }}</span></span>
+          <span v-if="item.additionalStops.length > 0">Hält zusätzlich in: <span :key="stop.id" v-for="stop in item.additionalStops">{{ stop }}</span></span>
+        </div>
+        {{ item.cancelled ? "Fahrt fällt aus!": "" }}
+      </div>
     </li>
   </div>
 </template>
 <script lang="ts">
 import { defineComponent } from 'vue'
 import type * as Departures from '../departures-types'
+import "../assets/main.css"
 
 export default defineComponent({
   name: 'Deps-List',

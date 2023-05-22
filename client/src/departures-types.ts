@@ -14,6 +14,7 @@ export interface Stop {
     when:            string;
     plannedWhen:     string;
     cancelled:       boolean;
+    onlyPlanData:    boolean;
     causesOfDelay:   CausesOfDelay[];
     hasNewPlatform:  boolean;
     platform:        string;
