@@ -96,6 +96,10 @@ wss.on('connection', async (socket, req)=>{
             assignChanges(parsedFchg)
             let hasNextTimetable = parsedNextTimetable.elements[0].elements != undefined
             let converted = convertTimetable(parsedCurrentTimetable, hasNextTimetable ? parsedNextTimetable : null, parsedFchg, fullChanges)
+            if(!converted){
+                socket.send(404)
+                return null
+            }
             socket.send(JSON.stringify(converted))
             const currentTimetableStops = parsedCurrentTimetable.elements[0].elements;
             const nextTimetableStops = parsedNextTimetable.elements[0].elements;
@@ -110,7 +114,7 @@ wss.on('connection', async (socket, req)=>{
     let flag = false
     fetchIRISDepartures().then((res)=>{
         timetable = res
-        flag = true
+        flag = timetable!=null
     })
     const fetchChanges = async () => {
         if (ibnr && flag) {

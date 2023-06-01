@@ -1,6 +1,7 @@
 <template>
-  <div>
+  <div class="error">
     <h1 v-if="error">{{ errorMsg }}</h1>
+    <router-link to="/"><button class="errButton">Zurück</button></router-link>
   </div>
   <div v-if="!error" class="container">
     <h1 class="heading">{{ station }}</h1>
@@ -54,14 +55,15 @@ export default defineComponent({
   },
   created: function () {
     console.log('Connecting to socket...')
-    let station = this.$route.params.station
-    this.connection = new WebSocket(`ws:localhost:8080/wss?station=${station}`)
+    let ibnr = this.$route.params.station
+    const station= this.$route.query.i
+    this.connection = new WebSocket(`ws:localhost:8080/wss?station=${ibnr}`)
 
     this.connection.onmessage = (event: MessageEvent) => {
       //console.log(event.data);
       if (event.data == 404) {
         this.error = true
-        this.errorMsg = `${station} is not a valid station`
+        this.errorMsg = `${station} ist kein bekannter Bahnhof`
       } else {
         let data: Departures.Timetable = JSON.parse(event.data)
         let departures: Departures.Stop[] = data.stops

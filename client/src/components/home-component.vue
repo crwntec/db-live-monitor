@@ -49,7 +49,7 @@ export default {
                     {{decodeURIComponent(suggestion.value)}}
                 </div>
             </div>
-            <router-link :to="{path: '/' + parseInt(this.currentSuggestion.extId)}" custom v-slot="{ navigate }"><button @click="navigate" role="link" class="stationSubmit">Suchen</button></router-link>
+            <router-link :to="{path: '/' + parseInt(this.currentSuggestion.extId), query: {i:this.input}}" custom v-slot="{ navigate }"><button @click="navigate" role="link" class="stationSubmit">Suchen</button></router-link>
         </div>
     </div>
 </template>
