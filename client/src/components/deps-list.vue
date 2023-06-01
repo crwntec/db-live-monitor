@@ -6,14 +6,7 @@
     <h1 class="heading">{{ station }}</h1>
     <li :key="item.tripId" v-for="item in stops" class="stop" >
       <div :class="{stopRow:true, cancelled: item.cancelled}">
-        <span :class="{
-            line:true, regional: item.line.productName.charAt(0)=='R', 
-            sbahn: item.line.productName.charAt(0)=='S', 
-            longDistance: item.line.productName.charAt(0)=='I' || item.line.productName.charAt(0)=='E',
-            vias: item.line.productName.charAt(0)=='V',
-            flx: item.line.productName.charAt(0)=='F',
-            tha: item.line.productName.charAt(0)=='T'
-            }">{{ item.line.name }}
+        <span class="line" :style="{backgroundColor: getColor(item.line.productName)}">{{ item.line.name }}
         </span>
         <span class="direction">
           {{ item.direction }}
@@ -44,7 +37,9 @@
 <script lang="ts">
 import { defineComponent } from 'vue'
 import type * as Departures from '../departures-types'
+import "../assets/monitor.css"
 import "../assets/main.css"
+import { trainCatColors } from '@/assets/trainCatColors'
 
 export default defineComponent({
   name: 'Deps-List',
@@ -60,7 +55,7 @@ export default defineComponent({
   created: function () {
     console.log('Connecting to socket...')
     let station = this.$route.params.station
-    this.connection = new WebSocket(`ws:localhost:8080/${station}`)
+    this.connection = new WebSocket(`ws:localhost:8080/wss?station=${station}`)
 
     this.connection.onmessage = (event: MessageEvent) => {
       //console.log(event.data);
@@ -103,6 +98,64 @@ export default defineComponent({
       const minute = parseInt(delay.toString().split('.')[1])
 
       return (hour / 60 + minute).toFixed(0)
+    },
+    getColor(prodName: string) {
+      const p = prodName.toLowerCase();
+      switch(true) {
+        case p.includes('via'):
+          return trainCatColors.VIAS;
+        case p.includes('flx'):
+          return trainCatColors.FLX;
+        case p.charAt(0)=='t':
+          return trainCatColors.SNCF;
+        case p.includes('nj'):
+        case p.includes('rj'):
+          return trainCatColors.ÖBB;
+        case p.includes('sbb'):
+          return trainCatColors.SBB;
+        case p.includes('akn'):
+          return trainCatColors.AKN;
+        case p.includes('alx'):
+          return trainCatColors.ALX;
+        case p.includes('brb'):
+        case p.includes('nwb'):
+        case p.includes('mrb'):
+        case p.includes('weg'):
+          return trainCatColors.TRANSDEV;
+        case p.includes('be'):
+          return trainCatColors.BE;
+        case p.includes('me'):
+        case p.includes('eno'):
+          return trainCatColors.METRONOM;
+        case p.includes('erb'):
+          return trainCatColors.ERB;
+        case p.includes('erx'):
+          return trainCatColors.ERX;
+        case p.includes('hzl'):
+          return trainCatColors.HZL;
+        case p.includes('nbe'):
+          return trainCatColors.NBE;
+        case p.includes('nob'):
+          return trainCatColors.NOB;
+        case p.includes('rt'):
+          return trainCatColors.RT;
+        case p.includes('rtb'):
+          return trainCatColors.RTB;
+        case p.includes('wfb'):
+          return trainCatColors.WFB;
+        case p.includes('neg'):
+          return trainCatColors.NEG;
+         case p.includes('re'):
+        case p.includes('rb'):
+          return trainCatColors.REGIONAL;
+        case p.charAt(0)=='s':
+          return trainCatColors.SBAHN;
+        case p.includes('ic'):
+        case p.includes('ec'):
+          return trainCatColors.LONGDISTANCE;
+        case p.includes('bus'):
+          return trainCatColors.BUS;
+      }
     }
   },
   unmounted: function () {

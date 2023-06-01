@@ -1,102 +1,10 @@
 @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@100;300;400&display=swap');
-body{
-    background-color: #101010;
-    margin: 0;
+:root {
+    color-scheme: dark;
+    --accent-color: #649DB1
 }
-
-.container {
+body{
     color: white;
     font-family: 'Roboto', sans-serif;
     margin: 0;
 }
-.stop {
-    list-style: none;
-}
-.heading {
-    background-color: #649DB1;
-    margin: 0;
-    padding: 15px;
-}
-.stopRow{
-    padding: 15px;
-    border-bottom: 1px solid gray; 
-    display: grid;
-    height: 10vh;
-    align-items: center;
-    grid-template-columns: 1fr 1.8fr 0.6fr;
-    grid-template-rows: 0.2fr 1.2fr;
-    gap: 0px 0px;
-    grid-auto-flow: row;
-    grid-template-areas:
-      "line messages info"
-      "line direction info";
-}
-.line{
-    border-radius: 7px;
-    padding: 10px;
-    grid-area: line;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: fit-content;
-    height: fit-content;
-}
-.delayCause{
-    color: #e91d1d;
-}
-.regional {
-    background: rgb(255, 115, 0);
-}
-.sbahn {
-    background-color: green;
-}
-.longDistance {
-    background-color: red;
-}
-.vias {
-    background-color: #1360a2;
-}
-.flx {
-    background-color: rgb(109, 160, 33);
-}
-.tha {
-    background-color: rgb(191, 33, 59)
-}
-  
-.direction { 
-    grid-area: direction;
-    display: flex;
-    align-items: center;
-    font-weight: 550;
- }
-  
-  
-.info {
-    display: grid;
-    grid-template-columns: 1fr;
-    grid-template-rows: 1fr 1fr 1fr;
-    row-gap: 10px 0px 0px;
-    grid-auto-flow: row;
-    grid-template-areas:
-      "originalTime"
-      "when"
-      "platform";
-    grid-area: info;
- } 
-.when { 
-    grid-area: when;
-}
-.originalTime{ 
-    grid-area: originalTime;
-    text-decoration: line-through;
-    color: rgb(138, 255, 127);
-}
-.platform { 
-    grid-area: platform;
-    font-weight: bold;
-}
-.messages { grid-area: messages; }
-.cancelled{
-    background-color: #915400;
-}
-  

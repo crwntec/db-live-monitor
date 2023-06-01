@@ -1,6 +1,6 @@
 {
-  "name": "hafas-live-view",
-  "version": "0.0.0",
+  "name": "db-live-monitor",
+  "version": "2.1.0",
   "private": true,
   "scripts": {
     "dev": "vite",

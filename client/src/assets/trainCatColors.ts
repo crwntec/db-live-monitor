@@ -1,0 +1,26 @@
+export enum trainCatColors {
+    REGIONAL = 'rgb(255, 115, 0)',
+    SBAHN = 'green',
+    LONGDISTANCE = 'red',
+    BUS = 'rgb(0, 102, 97)',
+    
+    VIAS = 'rgb(19, 96, 162)',
+    FLX = 'rgb(109, 160, 33)',  
+    SNCF = 'rgb(190, 16, 96)',  
+    ÖBB = 'rgb(33, 33, 89)',  
+    AKN = 'rgb(0, 114, 188)',
+    ALX = 'rgb(42, 129, 163)',
+    TRANSDEV = 'rgb(0, 70, 140)',
+    BE = 'rgb(0, 124, 193)',
+    METRONOM = 'rgb(21, 78, 157)',
+    ERB = 'rgb(112, 189, 193)',
+    ERX = 'rgb(84, 40, 108)',
+    HZL = 'rgb(178, 26, 44)',
+    NBE = 'rgb(26, 70, 142)',
+    NOB = 'rgb(0, 83, 167)',
+    RT = 'rgb(101, 105, 104)',
+    RTB = 'rgb(190, 192, 222)',
+    SBB = 'rgb(237, 20, 31)',
+    WFB = 'rgb(0, 164, 227)',
+    NEG = '#b92037'
+}
