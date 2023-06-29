@@ -8,5 +8,8 @@
     "moment": "^2.29.4",
     "ws": "^8.13.0",
     "xml-js": "^1.6.11"
+  },
+  "scripts": {
+    "start": "node live-server.js"
   }
 }
