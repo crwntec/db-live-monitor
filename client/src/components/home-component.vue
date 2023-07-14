@@ -23,7 +23,8 @@ export default {
             if (inputStr=='' || inputStr.length <= 2) {
                this.suggestions = []
             } else {
-                const res = await fetch(`http://localhost:8080/search/${inputStr}`)
+                // eslint-disable-next-line no-undef
+                const res = await fetch(`$${process.env.backendURI}:8080/search/${inputStr}`)
                 this.suggestions = (await res.json())
             }
         }
