@@ -57,6 +57,7 @@ export default defineComponent({
     console.log('Connecting to socket...')
     let ibnr = this.$route.params.station
     const station= this.$route.query.i
+    // eslint-disable-next-line no-undef
     this.connection = new WebSocket(`ws:${process.env.backendURI}:8080/wss?station=${ibnr}`)
 
     this.connection.onmessage = (event: MessageEvent) => {
