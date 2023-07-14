@@ -28,8 +28,16 @@ const stationSearch = (req, res) => {
         res.send(data)
     })
 }
-
+app.get("/",(req,res)=>{
+    res.redirect("/info")
+})
 app.get("/search/:string",(req,res)=> stationSearch(req,res))
+app.get("/info", (req,res)=>{
+    res.send(`Client Ip: ${req.ip}</br>
+              Client Info: ${req.get('User-Agent')}</br>
+              Time: ${Date.now().toString()}  
+            `)
+})
 
 wss.on('connection', async (socket, req)=>{
     let ibnr;
