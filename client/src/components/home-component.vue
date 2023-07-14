@@ -24,7 +24,7 @@ export default {
                this.suggestions = []
             } else {
                 // eslint-disable-next-line no-undef
-                const res = await fetch(`${process.env.backendURI}:8080/search/${inputStr}`)
+                const res = await fetch(`https://${process.env.backendURI}:8080/search/${inputStr}`)
                 this.suggestions = (await res.json())
             }
         }
