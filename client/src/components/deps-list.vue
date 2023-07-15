@@ -1,7 +1,7 @@
 <!-- eslint-disable no-undef -->
 <template>
-  <div class="error">
-    <h1 v-if="error">{{ errorMsg }}</h1>
+  <div class="error" v-if="error">
+    <h1 >{{ errorMsg }}</h1>
     <router-link to="/"><button class="errButton">Zurück</button></router-link>
   </div>
   <div v-if="!error" class="container">
@@ -57,7 +57,7 @@ export default defineComponent({
   created: function () {
     console.log('Connecting to socket...')
     let ibnr = this.$route.params.station
-    const station= this.$route.query.i
+    const station = this.$route.query.i || this.$route
     // eslint-disable-next-line no-undef
     this.connection = new WebSocket(`wss://${import.meta.env.VITE_BACKENDURI}/wss?station=${ibnr}`)
 
