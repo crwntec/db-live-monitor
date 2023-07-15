@@ -24,7 +24,7 @@ export default {
             if (inputStr=='' || inputStr.length <= 2) {
                this.suggestions = []
             } else {
-                const res = await fetch(`https://${BACKENDURI}/search/${inputStr}`)
+                const res = await fetch(`https://${import.meta.env.VITE_BACKENDURI}/search/${inputStr}`)
                 this.suggestions = (await res.json())
             }
         }
