@@ -1,3 +1,4 @@
+<!-- eslint-disable no-undef -->
 <script lang="ts">
 import "../assets/home.css"
 import "../assets/main.css"
@@ -23,8 +24,7 @@ export default {
             if (inputStr=='' || inputStr.length <= 2) {
                this.suggestions = []
             } else {
-                // eslint-disable-next-line no-undef
-                const res = await fetch(`https://${process.env.backendURI}:8080/search/${inputStr}`)
+                const res = await fetch(`https://${process.env.backendURI}/search/${inputStr}`)
                 this.suggestions = (await res.json())
             }
         }

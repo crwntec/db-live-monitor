@@ -1,3 +1,4 @@
+<!-- eslint-disable no-undef -->
 <template>
   <div class="error">
     <h1 v-if="error">{{ errorMsg }}</h1>
@@ -58,17 +59,15 @@ export default defineComponent({
     let ibnr = this.$route.params.station
     const station= this.$route.query.i
     // eslint-disable-next-line no-undef
-    this.connection = new WebSocket(`ws:${process.env.backendURI}:8080/wss?station=${ibnr}`)
+    this.connection = new WebSocket(`ws://${process.env.backendURI}/wss?station=${ibnr}`)
 
     this.connection.onmessage = (event: MessageEvent) => {
-      //console.log(event.data);
       if (event.data == 404) {
         this.error = true
         this.errorMsg = `${station} ist kein bekannter Bahnhof`
       } else {
         let data: Departures.Timetable = JSON.parse(event.data)
         let departures: Departures.Stop[] = data.stops
-        //console.log(departures);
 
         this.station = data.station
         this.stops = departures

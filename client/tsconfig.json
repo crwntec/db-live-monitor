@@ -10,5 +10,14 @@
     {
       "path": "./tsconfig.cypress-ct.json"
     }
-  ]
+  ],
+  "compilerOptions": {
+    "target": "ES6",
+    "module": "CommonJS",
+    "outDir": "dist",
+    "sourceMap": true,
+    "ignoreDeprecations": "5.0",
+    "types": ["node"],
+    "noImplicitThis": false
+  }
 }
