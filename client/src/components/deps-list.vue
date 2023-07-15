@@ -59,7 +59,7 @@ export default defineComponent({
     let ibnr = this.$route.params.station
     const station= this.$route.query.i
     // eslint-disable-next-line no-undef
-    this.connection = new WebSocket(`ws://${import.meta.env.VITE_BACKENDURI}/wss?station=${ibnr}`)
+    this.connection = new WebSocket(`wss://${import.meta.env.VITE_BACKENDURI}/wss?station=${ibnr}`)
 
     this.connection.onmessage = (event: MessageEvent) => {
       if (event.data == 404) {
