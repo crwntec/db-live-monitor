@@ -57,7 +57,7 @@ export default defineComponent({
   created: function () {
     console.log('Connecting to socket...')
     let ibnr = this.$route.params.station
-    const station = this.$route.query.i || this.$route
+    const station = this.$route.query.i || this.$route.path.replace('/','')
     // eslint-disable-next-line no-undef
     this.connection = new WebSocket(`wss://${import.meta.env.VITE_BACKENDURI}/wss?station=${ibnr}`)
 
