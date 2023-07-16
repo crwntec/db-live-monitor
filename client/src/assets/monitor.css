@@ -28,6 +28,8 @@
     border-bottom: 1px solid gray; 
     display: grid;
     height: 10vh;
+    max-width: 100%;
+    overflow: hidden;
     align-items: center;
     grid-template-columns: 1fr 1.8fr 0.6fr;
     grid-template-rows: 0.2fr 1.2fr;
@@ -61,6 +63,7 @@
   
 .info {
     display: grid;
+    height: 100%;
     grid-template-columns: 1fr;
     grid-template-rows: 1fr 1fr 1fr;
     row-gap: 10px 0px 0px;

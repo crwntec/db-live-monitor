@@ -23,6 +23,8 @@
           </span>
           
           <span class="platform">
+            <span v-if="item.hasNewPlatform" :style="{'text-decoration': item.hasNewPlatform ? 'line-through' : ''}">{{ item.plannedPlatform }}</span>
+            <br>
             <span :style="{'color': item.hasNewPlatform ? 'red' : 'white'}">{{ item.platform }}</span>
           </span>
         </div>
@@ -64,7 +66,7 @@ export default defineComponent({
     this.connection.onmessage = (event: MessageEvent) => {
       if (event.data == 404) {
         this.error = true
-        this.errorMsg = `${station} ist kein bekannter Bahnhof`
+        this.errorMsg = this.$route.query.i=='' ? 'Bitte Bahnhof eingeben' :`Für ${station} liegen keine Daten vor ` 
       } else {
         let data: Departures.Timetable = JSON.parse(event.data)
         let departures: Departures.Stop[] = data.stops
