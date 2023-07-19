@@ -15,7 +15,7 @@ export interface Stop {
     plannedWhen:     string;
     cancelled:       boolean;
     onlyPlanData:    boolean;
-    causesOfDelay:   CausesOfDelay[];
+    causesOfDelay:   CauseOfDelay[];
     hasNewPlatform:  boolean;
     platform:        string;
     plannedPlatform: string;
@@ -26,6 +26,7 @@ export interface Stop {
     direction:       string;
     isEnding:        boolean;
     line:            Line;
+    shouldScroll:    boolean;
 }
 
 export interface PathChange {
@@ -33,7 +34,7 @@ export interface PathChange {
     newStop: string;
 }
 
-export interface CausesOfDelay {
+export interface CauseOfDelay {
     id:        string;
     cat:       number;
     text:      string;

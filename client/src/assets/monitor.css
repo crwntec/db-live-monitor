@@ -1,4 +1,4 @@
-.error{
+.error {
     margin: 10px;
     position: absolute;
     margin-left: auto;
@@ -7,6 +7,7 @@
     right: 0;
     text-align: center;
 }
+
 .errButton {
     background-color: var(--accent-color);
     border: none;
@@ -15,79 +16,124 @@
     border-radius: 4px;
     cursor: pointer;
 }
+
 .stop {
     list-style: none;
 }
+
 .heading {
     background-color: var(--accent-color);
     margin: 0;
     padding: 15px;
 }
-.stopRow{
-    padding: 15px;
-    border-bottom: 1px solid gray; 
-    display: grid;
-    height: 10vh;
-    max-width: 100%;
-    overflow: hidden;
-    align-items: center;
-    grid-template-columns: 1fr 1.8fr 0.6fr;
-    grid-template-rows: 0.2fr 1.2fr;
-    gap: 0px 0px;
-    grid-auto-flow: row;
-    grid-template-areas:
-      "line messages info"
-      "line direction info";
+
+.stops {
+    margin: 0;
 }
-.line{
+
+.stopRow {
+    padding: 10px;
+    border-bottom: 1px solid gray;
+    display: grid;
+    height: 12vh;
+    align-items: center;
+    overflow-y: hidden;
+    grid-template-columns: 1fr 1.8fr 0.6fr 0.4fr;
+    grid-template-rows: 0.4fr auto;
+    gap: 0px 3vw;
+    grid-template-areas:
+        ". messages . ."
+        "line direction info platform";
+}
+
+.line {
     border-radius: 7px;
     padding: 10px;
-    grid-area: line;
+}
+
+.lineContainer {
     display: flex;
     align-items: center;
-    justify-content: center;
-    width: fit-content;
-    height: fit-content;
+    grid-area: line;
+    max-width: 80%;
 }
-.delayCause{
+
+.delayCause {
     color: #e91d1d;
 }
-  
-.direction { 
+
+.direction {
     grid-area: direction;
     display: flex;
     align-items: center;
     font-weight: 550;
- }
-  
-  
+}
+
+
 .info {
-    display: grid;
-    height: 100%;
-    grid-template-columns: 1fr;
-    grid-template-rows: 1fr 1fr 1fr;
-    row-gap: 10px 0px 0px;
-    grid-auto-flow: row;
-    grid-template-areas:
-      "originalTime"
-      "when"
-      "platform";
+    display: flex;
+    flex-direction: column;
     grid-area: info;
- } 
-.when { 
+}
+
+.when {
     grid-area: when;
 }
-.originalTime{ 
+
+.originalTime {
     grid-area: originalTime;
     text-decoration: line-through;
     color: rgb(138, 255, 127);
 }
-.platform { 
+
+.platform {
     grid-area: platform;
+    margin-right: 2px;
     font-weight: bold;
 }
-.messages { grid-area: messages; }
-.cancelled{
+
+.messages {
+    overflow: hidden;
+    grid-area: messages;
+}
+.delayCause {
+    display: inline-block;
+    white-space: nowrap;
+}
+#scrollAnimation {
+    animation: scroll 20s linear infinite;
+}
+
+.cancelled {
     background-color: #915400;
 }
-  
+
+@keyframes scroll {
+    0%, 10% {
+        transform: translateX(150%);
+    }
+    90%,100% {
+        transform: translateX(-150%);
+    }
+}
+
+@media only screen and (min-width: 800px) {
+    .stopsContainer {
+        max-width: 70vw;
+        margin: auto;
+    }
+    .stopRow {
+        font-size: 1vw;
+    }
+}
+
+@media only screen and (min-width: 380px) and (max-width: 800px) {
+    .stopRow {
+        font-size: 3.5vw;
+        height: 14vh;
+        grid-template-rows: 0.2fr auto;
+    }
+    .stops{
+        padding: 10px;
+    }
+}

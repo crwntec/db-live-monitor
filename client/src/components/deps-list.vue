@@ -6,36 +6,44 @@
   </div>
   <div v-if="!error" class="container">
     <h1 class="heading">{{ station }}</h1>
-    <li :key="item.tripId" v-for="item in stops" class="stop" >
-      <div :class="{stopRow:true, cancelled: item.cancelled}">
-        <span class="line" :style="{backgroundColor: getColor(item.line.productName)}">{{ item.line.name }}
-        </span>
-        <span class="direction">
-          {{ item.direction }}
-        </span>
-        <div class="info">
-          <span v-if="item.hasNewTime" class="originalTime">{{convertIRISTime(item.plannedWhen.split('|'), item)}}</span>
-          <span class="when" :style="{'color': item.hasNewTime ? 'red' : 'rgb(138, 255, 127)'}">
-            {{ convertIRISTime(item.when.split('|'), item) }}
-            (+{{
-              calculateDelay(item.plannedWhen.split('|'), item.when.split('|'), item)
-            }})
-          </span>
-          
-          <span class="platform">
-            <span v-if="item.hasNewPlatform" :style="{'text-decoration': item.hasNewPlatform ? 'line-through' : ''}">{{ item.plannedPlatform }}</span>
-            <br>
-            <span :style="{'color': item.hasNewPlatform ? 'red' : 'white'}">{{ item.platform }}</span>
-          </span>
-        </div>
-        <div class="messages">
-          <span class="delayCause" :key="cause.id" v-for="cause in item.causesOfDelay">{{ item.causesOfDelay[item.causesOfDelay.length-1].id != cause.id ? cause.text + '++' : cause.text }}</span>
-          <span v-if="item.removedStops.length > 0 && !item.onlyPlanData">Ohne Halt in: <span :key="stop.id" v-for="stop in item.removedStops">{{ stop }}</span></span>
-          <span v-if="item.additionalStops.length > 0">Hält zusätzlich in: <span :key="stop.id" v-for="stop in item.additionalStops">{{ stop }}</span></span>
-        </div>
-        {{ item.cancelled ? "Fahrt fällt aus!": "" }}
-      </div>
-    </li>
+    <div class="stopsContainer">
+      <ul class="stops">
+        <li :key="index" v-for="(item,index) in stops" class="stop" >
+          <div :class="{stopRow:true, cancelled: item.cancelled}">
+            <div class="lineContainer">
+              <span class="line" :style="{backgroundColor: getColor(item.line.productName)}">{{ item.line.name }}
+              </span>
+            </div>
+            <span class="direction">
+              {{ item.direction }}
+            </span>
+            <div class="info">
+              <span v-if="item.hasNewTime" class="originalTime">{{convertIRISTime(item.plannedWhen.split('|'), item)}}</span>
+              <span class="when" :style="{'color': item.hasNewTime ? 'red' : 'rgb(138, 255, 127)'}">
+                {{ convertIRISTime(item.when.split('|'), item) }}
+                (+{{
+                  calculateDelay(item.plannedWhen.split('|'), item.when.split('|'), item)
+                }})
+              </span>
+            </div>
+            <div class="platform">
+                <span v-if="item.hasNewPlatform" :style="{'text-decoration': item.hasNewPlatform ? 'line-through' : ''}">{{ item.plannedPlatform }}</span>
+                <span :style="{'color': item.hasNewPlatform ? 'red' : 'white'}">{{ item.platform }}</span>
+            </div>
+            <div
+            class="messages"
+            v-resize="() => checkOverflow(item, index)"
+            :ref="`containerRef-${index}`"
+            >
+              <span class="delayCause" ref="dcRef" :id="isScrollableArr.includes(item.tripId) ? 'scrollAnimation': ''">{{ getDelayMessage(item.causesOfDelay).join('++')}}</span>
+              <span v-if="item.removedStops.length > 0 && !item.onlyPlanData">Ohne Halt in: <span :key="stop.id" v-for="stop in item.removedStops">{{ stop }}</span></span>
+              <span v-if="item.additionalStops.length > 0">Hält zusätzlich in: <span :key="stop.id" v-for="stop in item.additionalStops">{{ stop }}</span></span>
+            </div>
+            {{ item.cancelled ? "Fahrt fällt aus!": "" }}
+          </div>
+        </li>
+      </ul>
+    </div>
   </div>
 </template>
 <script lang="ts">
@@ -51,6 +59,7 @@ export default defineComponent({
     return {
       connection: {} as WebSocket,
       stops: [] as Departures.Stop[],
+      isScrollableArr: [] as Object[],
       station: '',
       error: false,
       errorMsg: ''
@@ -159,6 +168,45 @@ export default defineComponent({
           return trainCatColors.LONGDISTANCE;
         case p.includes('bus'):
           return trainCatColors.BUS;
+      }
+    },
+    getDelayMessage(dCauses: Departures.CauseOfDelay[]){
+      let messages: string[]=[]
+      dCauses.forEach((c)=>messages.push(c.text))
+      return messages
+    },
+    checkOverflow(item: Departures.Stop,index: Number) {
+      const containerElement = this.$refs[`containerRef-${index}`][0] as HTMLElement;
+      const textElement = containerElement.querySelector('.delayCause') as HTMLElement;
+      const isOverflowing = textElement.scrollWidth > containerElement.clientWidth;
+      isOverflowing ? this.isScrollableArr.push(item.tripId) : {}
+      this.isScrollableArr = this.isScrollableArr.filter((obj,index)=>{
+        return this.isScrollableArr.indexOf(obj)===index
+      })
+    }
+  },
+  directives: {
+    resize: {
+      mounted(el, binding) {
+        const callback = binding.value;
+        let observer = null;
+
+        const resizeHandler = () => {
+          if (typeof callback === 'function') {
+            callback();
+          }
+        };
+
+        observer = new ResizeObserver(resizeHandler);
+        observer.observe(el);
+
+        el._resizeObserver = observer;
+      },
+      unmounted(el) {
+        if (el._resizeObserver) {
+          el._resizeObserver.disconnect();
+          delete el._resizeObserver;
+        }
       }
     }
   },
