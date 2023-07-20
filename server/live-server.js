@@ -15,6 +15,8 @@ const server = http.createServer(app)
 
 server.listen(8080,()=>console.log("running"))
 
+let refreshRate = 15000
+
 const wss = new WebSocketServer({server: server, path:"/wss" });
 
 const ds100Pattern = /^[abdefhklmnrstuw]{1}[a-z]|[A-Z]{1,4}$/;
@@ -46,6 +48,7 @@ wss.on('connection', async (socket, req)=>{
 
     let url = new URL(req.url, `http://${req.headers.host}`);
     let stationStr = url.searchParams.get("station");
+    refreshRate = url.searchParams.get("refreshRate") || 15000
     if(ds100Pattern.test(stationStr)){
         var station = stations.find(s => s.DS100 == stationStr)
         if (station){
@@ -144,7 +147,7 @@ wss.on('connection', async (socket, req)=>{
             } else {
                 let converted = convertTimetable(timetable, null, parsedRchg, fullChanges)
                 socket.send(JSON.stringify(converted))
-                setTimeout(fetchChanges, 3000)
+                setTimeout(fetchChanges, refreshRate)
             }
         } else {
             socket.send(404)
@@ -152,7 +155,7 @@ wss.on('connection', async (socket, req)=>{
     }
 
 
-    setTimeout(fetchChanges, 3000)
+    setTimeout(fetchChanges, refreshRate)
 
     socket.on('message', (message) => {
         console.log('Received message:', message);

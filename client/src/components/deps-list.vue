@@ -62,7 +62,8 @@ export default defineComponent({
       isScrollableArr: [] as Object[],
       station: '',
       error: false,
-      errorMsg: ''
+      errorMsg: '',
+      refreshRate: 15000
     }
   },
   created: function () {
@@ -70,7 +71,7 @@ export default defineComponent({
     let ibnr = this.$route.params.station
     const station = this.$route.query.i || this.$route.path.replace('/','')
     // eslint-disable-next-line no-undef
-    this.connection = new WebSocket(`wss://${import.meta.env.VITE_BACKENDURI}/wss?station=${ibnr}`)
+    this.connection = new WebSocket(`wss://${import.meta.env.VITE_BACKENDURI}/wss?station=${ibnr}&refreshRate=${this.refreshRate}`)
 
     this.connection.onmessage = (event: MessageEvent) => {
       if (event.data == 404) {
