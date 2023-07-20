@@ -139,10 +139,13 @@ wss.on('connection', async (socket, req)=>{
                 }
                 })
             })
-            // log(timetable)
-            let converted = convertTimetable(timetable, null, parsedRchg, fullChanges)
-            socket.send(JSON.stringify(converted))
-            setTimeout(fetchChanges, 3000)
+            if(fullChanges == {}){
+                socket.send(500)
+            } else {
+                let converted = convertTimetable(timetable, null, parsedRchg, fullChanges)
+                socket.send(JSON.stringify(converted))
+                setTimeout(fetchChanges, 3000)
+            }
         } else {
             socket.send(404)
         }
