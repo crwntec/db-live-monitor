@@ -16,8 +16,9 @@
     "module": "CommonJS",
     "outDir": "dist",
     "sourceMap": true,
-    "ignoreDeprecations": "5.0",
+    "ignoreDeprecations": "5.5",
     "types": ["node"],
-    "noImplicitThis": false
+    "noImplicitThis": true,
+    "strict": true
   }
 }

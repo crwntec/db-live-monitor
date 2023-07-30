@@ -6,7 +6,7 @@ export interface Timetable {
 export interface Stop {
     tripId:          string;
     himMessages:     HimMessage[];
-    qualityChanges:  QualityChange[];
+    qualityChanges:  Message[];
     hasArrival:      boolean;
     hasDeparture:    boolean;
     hasNewArr:       boolean;
@@ -15,26 +15,29 @@ export interface Stop {
     plannedWhen:     string;
     cancelled:       boolean;
     onlyPlanData:    boolean;
-    causesOfDelay:   CauseOfDelay[];
+    causesOfDelay:   Message[];
     hasNewPlatform:  boolean;
     platform:        string;
     plannedPlatform: string;
+    arrivalPath:     string[];
     plannedPath:     string[];
     currentPath:     string[];
     removedStops:    PathChange[];
     additionalStops: PathChange[];
-    direction:       string;
+    from:            string;
+    to:              string;
     isEnding:        boolean;
     line:            Line;
     shouldScroll:    boolean;
 }
+
 
 export interface PathChange {
     id:      string;
     newStop: string;
 }
 
-export interface CauseOfDelay {
+export interface Message {
     id:        string;
     cat:       number;
     text:      string;
@@ -61,12 +64,4 @@ export interface Line {
     name:        string;
     productName: string;
     operator:    string;
-}
-
-export interface QualityChange {
-    id:       string;
-    t:        string;
-    c:        string;
-    ts:       string;
-    "ts-tts": string;
 }

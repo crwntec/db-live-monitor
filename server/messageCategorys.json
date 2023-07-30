@@ -1,4 +1,7 @@
 [
+   
+   { "cat":0, "text": "Unbekannt"},
+   { "cat":1, "text": "Unbekannt"},
    { "cat":2, "text": "Polizeiliche Ermittlung"},
    { "cat":3, "text": "Feuerwehreinsatz neben der Strecke"},
    { "cat":5, "text": "Ärztliche Versorgung eines Fahrgastes"},
@@ -26,6 +29,7 @@
    { "cat":25, "text": "Warten auf verspätete Zugteile"},
    { "cat":28, "text": "Gegenstände im Gleis"},
    { "cat":29, "text": "Ersatzverkehr mit Bus ist eingerichtet"},
+   { "cat":30, "text": "Unbekannt"},
    { "cat":31, "text": "Bauarbeiten"},
    { "cat":32, "text": "Verzögerung beim Ein-/Ausstieg"},
    { "cat":33, "text": "Oberleitungsstörung"},
@@ -78,7 +82,8 @@
    { "cat":66, "text": "Hochwasser"},
 
 
-    {"cat": 67, "text": "Behördliche Anordnung"},
+   {"cat": 67, "text": "Behördliche Anordnung"},
+   {"cat": 68, "text": "Unbekannt"},
 
 
    { "cat":70, "text": "WLAN nicht verfügbar"},

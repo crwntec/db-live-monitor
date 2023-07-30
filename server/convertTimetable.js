@@ -68,11 +68,18 @@ export const convertTimetable = (data1, data2, changes, fullChanges) => {
 
         if (hasNewArr && newArr.elements !== undefined) {
             newArr.elements.filter(e => e !== undefined).forEach(e => {
+                var category = messageLookup(e.attributes.c);
+                var messageObj = {
+                    id: e.attributes.id,
+                    cat: category ? category.cat : e.attributes.c, 
+                    text: category ? category.text : "Unbekannt", 
+                    timestamp: e.attributes.ts
+                }
                 if (e.attributes.t == 'd') {
-                    var category = messageLookup(e.attributes.c);
-                    category !== undefined ? delayCauses.push({ id: e.attributes.id, cat: category.cat, text: category.text, timestamp: e.attributes.ts }) : {};
+                    category !== undefined ? delayCauses.push(messageObj) : {};
                 } else if (e.attributes.t == 'q') {
-                    qualityChanges.push(e.attributes);
+                    var category = messageLookup(e.attributes.c);
+                    category !== undefined ? qualityChanges.push(messageObj) : {}
                 }
             });
             if (newArr.attributes !== undefined) {
@@ -118,7 +125,7 @@ export const convertTimetable = (data1, data2, changes, fullChanges) => {
 
         delayCauses = delayCauses.sort((a, b) => parseInt(a.timestamp) - parseInt(b.timestamp));
         qualityChanges = qualityChanges.sort((a, b) => parseInt(a.timestamp) - parseInt(b.timestamp));
-
+        
 
 
         newJSON.stops.push({
@@ -137,11 +144,13 @@ export const convertTimetable = (data1, data2, changes, fullChanges) => {
             "hasNewPlatform": hasNewArrPlatform || hasNewDepPlatform,
             "platform": hasArrival ? hasNewArrPlatform ? currentArrPlatform : arrival.attributes.pp : hasNewDepPlatform ? currentDepPlatform : departure.attributes.pp,
             "plannedPlatform": hasArrival ? arrival.attributes.pp : departure.attributes.pp,
+            "arrivalPath": hasArrival ? arPath : [],
             "plannedPath": plannedPath,
             "currentPath": currentPath,
             "removedStops": removedStops,
             "additionalStops": additionalStops,
-            "direction": hasDeparture ? plannedPath.at(-1) : hasArrival ? "von " + arPath.at([0]) : {},
+            "from":  hasArrival ? arPath.at([0]) : dataTimetable.attributes.station,
+            "to": hasDeparture ? plannedPath.at(-1) : dataTimetable.attributes.station,
             "isEnding": !hasDeparture,
             "line": {
                 "fahrtNr": line.attributes.n,

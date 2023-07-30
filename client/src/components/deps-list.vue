@@ -5,43 +5,58 @@
     <router-link to="/"><button class="errButton">Zurück</button></router-link>
   </div>
   <div v-if="!error" class="container">
-    <h1 class="heading">{{ station }}</h1>
+    <h1 class="heading"><router-link to="/">{{ station }}</router-link></h1>
     <div class="stopsContainer">
+      <trainDetailModal v-show="showModal" :data="modalData" :station="station" @close-modal="hideModal" />
       <ul class="stops">
-        <li :key="index" v-for="(item,index) in stops" class="stop" >
-          <div :class="{stopRow:true, cancelled: item.cancelled}">
-            <div class="lineContainer">
-              <span class="line" :style="{backgroundColor: getColor(item.line.productName)}">{{ item.line.name }}
-              </span>
-            </div>
-            <span class="direction">
-              {{ item.direction }}
-            </span>
-            <div class="info">
-              <span v-if="item.hasNewTime" class="originalTime">{{convertIRISTime(item.plannedWhen.split('|'), item)}}</span>
-              <span class="when" :style="{'color': item.hasNewTime ? 'red' : 'rgb(138, 255, 127)'}">
-                {{ convertIRISTime(item.when.split('|'), item) }}
-                (+{{
-                  calculateDelay(item.plannedWhen.split('|'), item.when.split('|'), item)
-                }})
-              </span>
-            </div>
-            <div class="platform">
-                <span v-if="item.hasNewPlatform" :style="{'text-decoration': item.hasNewPlatform ? 'line-through' : ''}">{{ item.plannedPlatform }}</span>
-                <span :style="{'color': item.hasNewPlatform ? 'red' : 'white'}">{{ item.platform }}</span>
-            </div>
-            <div
-            class="messages"
-            v-resize="() => checkOverflow(item, index)"
-            :ref="`containerRef-${index}`"
+        <!-- <li :key="index" v-for="(item,index) in stops" class="stop" @click="displayModal(item)" >
+          
+        </li> -->
+        <DynamicScroller
+          :items="stops"
+          :min-item-size="93"
+          key-field="tripId"
+          class="Scroller"
+        >
+          <template v-slot="{ item, active }">
+            <DynamicScrollerItem
+              :item="item"
+              :active="active"
+              @click="displayModal(item)"
             >
-              <span class="delayCause" ref="dcRef" :id="isScrollableArr.includes(item.tripId) ? 'scrollAnimation': ''">{{ getDelayMessage(item.causesOfDelay).join('++')}}</span>
-              <span v-if="item.removedStops.length > 0 && !item.onlyPlanData">Ohne Halt in: <span :key="stop.id" v-for="stop in item.removedStops">{{ stop }}</span></span>
-              <span v-if="item.additionalStops.length > 0">Hält zusätzlich in: <span :key="stop.id" v-for="stop in item.additionalStops">{{ stop }}</span></span>
+            <div :class="{stopRow:true, cancelled: item.cancelled}">
+              <div class="lineContainer">
+                <span class="line" :style="{backgroundColor: getColor(item.line.productName)}">{{ item.line.name }}
+                </span>
+              </div>
+              <span class="direction">
+                {{item.hasDeparture ? item.to : "von " + item.from }}
+              </span>
+              <div class="info">
+                <span v-if="item.hasNewTime" class="originalTime">{{convertIRISTime(item.plannedWhen.split('|'), item, false)}}</span>
+                <span class="when" :style="{'color': item.hasNewTime ? 'red' : 'rgb(138, 255, 127)'}">
+                  {{ convertIRISTime(item.when.split('|'), item, false) }}
+                  (+{{
+                    calculateDelay(item.plannedWhen.split('|'), item.when.split('|'), item)
+                  }})
+                </span>
+              </div>
+              <div class="platform">
+                  <span v-if="item.hasNewPlatform" :style="{'text-decoration': item.hasNewPlatform ? 'line-through' : ''}">{{ item.plannedPlatform }}</span>
+                  <span :style="{'color': item.hasNewPlatform ? 'red' : 'white'}">{{ " " + item.platform }}</span>
+              </div>
+              <div
+              class="messages"
+              >
+                <span class="delayCause">{{ getDelayMessage(item.causesOfDelay).join('++')}}</span>
+                <span v-if="item.removedStops.length > 0 && !item.onlyPlanData">Ohne Halt in: <span :key="stop.id" v-for="stop in item.removedStops">{{ stop }}</span></span>
+                <span v-if="item.additionalStops.length > 0">Hält zusätzlich in: <span :key="stop.id" v-for="stop in item.additionalStops">{{ stop }}</span></span>
+              </div>
+              {{ item.cancelled ? "Fahrt fällt aus!": "" }}
             </div>
-            {{ item.cancelled ? "Fahrt fällt aus!": "" }}
-          </div>
-        </li>
+            </DynamicScrollerItem>
+          </template>
+        </DynamicScroller>
       </ul>
     </div>
   </div>
@@ -52,9 +67,12 @@ import type * as Departures from '../departures-types'
 import "../assets/monitor.css"
 import "../assets/main.css"
 import { trainCatColors } from '@/assets/trainCatColors'
+import trainDetailModal from './train-detail-modal.vue'
+import 'vue-virtual-scroller/dist/vue-virtual-scroller.css'
 
 export default defineComponent({
   name: 'Deps-List',
+  components: {trainDetailModal},
   data: function () {
     return {
       connection: {} as WebSocket,
@@ -63,7 +81,9 @@ export default defineComponent({
       station: '',
       error: false,
       errorMsg: '',
-      refreshRate: 15000
+      refreshRate: 15000,
+      showModal: false,
+      modalData: null
     }
   },
   created: function () {
@@ -71,7 +91,7 @@ export default defineComponent({
     let ibnr = this.$route.params.station
     const station = this.$route.query.i || this.$route.path.replace('/','')
     // eslint-disable-next-line no-undef
-    this.connection = new WebSocket(`wss://${import.meta.env.VITE_BACKENDURI}/wss?station=${ibnr}&refreshRate=${this.refreshRate}`)
+    this.connection = new WebSocket(`${import.meta.env.DEV ? 'ws://127.0.0.1:8080': 'wss://' + import.meta.env.VITE_BACKENDURI}/wss?station=${ibnr}&refreshRate=${this.refreshRate}`)
 
     this.connection.onmessage = (event: MessageEvent) => {
       if (event.data == 404) {
@@ -87,8 +107,9 @@ export default defineComponent({
     }
   },
   methods: {
-    convertIRISTime(dateStringArr: string[], item: Departures.Stop) {
-      let dateString = item.hasDeparture ? dateStringArr[1] : dateStringArr[0]
+    convertIRISTime(dateStringArr: string[], item: Departures.Stop, arrival: boolean) {
+      //let dateString = item.hasDeparture ? dateStringArr[1] : dateStringArr[0]
+      let dateString = arrival ? dateStringArr[0] : item.hasDeparture ? dateStringArr[1] : dateStringArr[0]
       const hour = Number(dateString.slice(6, 8)).toLocaleString('de-DE', {
         minimumIntegerDigits: 2,
         useGrouping: false
@@ -99,7 +120,12 @@ export default defineComponent({
       })
       return `${hour}:${minute}`
     },
-    convertTimestamp(ts: string) { return `${ts.slice(6,8)}:${ts.slice(8,10)}`},
+    convertTimestamp(ts: string, date: boolean) { 
+      if (date) {
+        return `${ts.slice(4,6)}.${ts.slice(2,4)}.${ts.slice(0,2)}`
+      }
+      return `${ts.slice(6,8)}:${ts.slice(8,10)}`
+    },
     calculateDelay(plannedTime: string[], currentTime: string[], item: Departures.Stop) {
       let [plannedArr, plannedDep] = plannedTime
       let [currentArr, currentDep] = currentTime
@@ -171,44 +197,18 @@ export default defineComponent({
           return trainCatColors.BUS;
       }
     },
-    getDelayMessage(dCauses: Departures.CauseOfDelay[]){
+    getDelayMessage(dCauses: Departures.Message[]){
       let messages: string[]=[]
       dCauses.forEach((c)=>messages.push(c.text))
       return messages
     },
-    checkOverflow(item: Departures.Stop,index: Number) {
-      const containerElement = this.$refs[`containerRef-${index}`][0] as HTMLElement;
-      const textElement = containerElement.querySelector('.delayCause') as HTMLElement;
-      const isOverflowing = textElement.scrollWidth > containerElement.clientWidth;
-      isOverflowing ? this.isScrollableArr.push(item.tripId) : {}
-      this.isScrollableArr = this.isScrollableArr.filter((obj,index)=>{
-        return this.isScrollableArr.indexOf(obj)===index
-      })
-    }
-  },
-  directives: {
-    resize: {
-      mounted(el, binding) {
-        const callback = binding.value;
-        let observer = null;
-
-        const resizeHandler = () => {
-          if (typeof callback === 'function') {
-            callback();
-          }
-        };
-
-        observer = new ResizeObserver(resizeHandler);
-        observer.observe(el);
-
-        el._resizeObserver = observer;
-      },
-      unmounted(el) {
-        if (el._resizeObserver) {
-          el._resizeObserver.disconnect();
-          delete el._resizeObserver;
-        }
-      }
+    displayModal(data: Departures.Stop) {
+      this.modalData = data
+      this.showModal = true
+    },
+    hideModal() {
+      this.modalData = null
+      this.showModal = false
     }
   },
   unmounted: function () {

@@ -25,6 +25,7 @@
     background-color: var(--accent-color);
     margin: 0;
     padding: 15px;
+    cursor: pointer;
 }
 
 .stops {
@@ -32,6 +33,7 @@
 }
 
 .stopRow {
+    font-size: 0.8vw;
     padding: 10px;
     border-bottom: 1px solid gray;
     display: grid;
@@ -109,15 +111,15 @@
 }
 
 @keyframes scroll {
-    0%, 10% {
-        transform: translateX(150%);
+    0%, 1% {
+        transform: translateX(110%);
     }
-    90%,100% {
-        transform: translateX(-150%);
+    99%,100% {
+        transform: translateX(-110%);
     }
 }
 
-@media only screen and (min-width: 800px) {
+@media only screen and (min-width: 800px) and (max-width: 1100px) {
     .stopsContainer {
         max-width: 70vw;
         margin: auto;
@@ -127,7 +129,7 @@
     }
 }
 
-@media only screen and (min-width: 380px) and (max-width: 800px) {
+@media only screen and (min-width: 300px) and (max-width: 800px) {
     .stopRow {
         font-size: 3.5vw;
         height: 14vh;

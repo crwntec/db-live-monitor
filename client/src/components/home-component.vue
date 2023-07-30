@@ -29,7 +29,7 @@ export default {
             if (inputStr=='' || inputStr.length <= 2) {
                this.suggestions = []
             } else {
-                const res = await fetch(`https://${import.meta.env.VITE_BACKENDURI}/search/${inputStr}`)
+                const res = await fetch(`${import.meta.env.DEV ? 'http://127.0.0.1:8080': import.meta.env.VITE_BACKENDURI}/search/${inputStr}`)
                 this.suggestions = (await res.json())
             }
         },
