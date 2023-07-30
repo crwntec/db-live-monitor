@@ -91,7 +91,7 @@ export default defineComponent({
     let ibnr = this.$route.params.station
     const station = this.$route.query.i || this.$route.path.replace('/','')
     // eslint-disable-next-line no-undef
-    this.connection = new WebSocket(`/${import.meta.env.DEV ? 'ws://127.0.0.1:8080': import.meta.env.VITE_BACKENDURI.replace(/https:\/{2}/g,'wss://')}wss?station=${ibnr}&refreshRate=${this.refreshRate}`)
+    this.connection = new WebSocket(`/${import.meta.env.DEV ? 'ws://127.0.0.1:8080': import.meta.env.VITE_BACKENDURI.replace(/https:\/{2}/g,'wss://')}/wss?station=${ibnr}&refreshRate=${this.refreshRate}`)
 
     this.connection.onmessage = (event: MessageEvent) => {
       if (event.data == 404) {
