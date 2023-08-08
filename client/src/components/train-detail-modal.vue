@@ -37,7 +37,6 @@
                 </ul>
             </div>
             <div class="additionalDetails" v-if="trainOrder">
-                {{ trainOrder }}
                 <div class="trainOrder">
                     <div class="coach" :key="coach.id" v-for="coach in trainOrder.firstTrain">
                         <div class="coachDetails">
