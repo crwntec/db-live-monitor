@@ -8,6 +8,7 @@ import express from 'express'
 import cors from 'cors'
 import { convertTimetable } from './convertTimetable.js';
 import { stationRequest } from './stationRequest.js';
+import { getTrainOrder } from './getTrainOrder.js';
 
 const app = express()
 app.use(cors())
@@ -40,6 +41,24 @@ app.get("/info", (req,res)=>{
               Time: ${Date.now().toString()}  
             `)
 })
+app.get("/wr/:nr/:ts",(req,response)=>{
+    let trainNumber = req.params.nr
+    let timestamp = "20" + req.params.ts
+    https.get(`https://ist-wr.noncd.db.de/wagenreihung/1.0/${trainNumber}/${timestamp}`, (res) => {
+        var data = ""
+        res.on('data', (d)=>data += d)
+        res.on('error', (e)=>console.log(e))
+        res.on('end', ()=>{
+            if(JSON.parse(data).error == undefined) {
+                let trainOrderObj = getTrainOrder(JSON.parse(data))
+                response.send(trainOrderObj)
+            } else {
+                response.status(204).send(JSON.parse(data).error.msg)
+            }
+        })
+    })
+})
+
 
 wss.on('connection', async (socket, req)=>{
     let ibnr;

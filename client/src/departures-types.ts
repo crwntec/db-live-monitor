@@ -65,3 +65,26 @@ export interface Line {
     productName: string;
     operator:    string;
 }
+
+export interface TrainOrder {
+    baureihe:       string;
+    firstTrain:     Train[];
+    doubleTraction: boolean;
+    secondTrain:    Train[];
+    onlyPlanData:   boolean;
+}
+
+export interface Train {
+    typ:             string;
+    class:           Class;
+    baureihe:        string;
+    ordnungsNummer?: string;
+    abschnitt:       string;
+    austtattung:     string[];
+}
+
+export enum Class {
+    Halbspeisewagen2Klasse = "Halbspeisewagen 2.Klasse",
+    Klasse1 = "1. Klasse",
+    Klasse2 = "2. Klasse",
+}

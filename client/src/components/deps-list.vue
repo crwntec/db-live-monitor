@@ -7,7 +7,7 @@
   <div v-if="!error" class="container">
     <h1 class="heading"><router-link to="/">{{ station }}</router-link></h1>
     <div class="stopsContainer">
-      <trainDetailModal v-show="showModal" :data="modalData" :station="station" @close-modal="hideModal" />
+      <trainDetailModal v-show="showModal" :data="modalData" :trainOrder="trainOrder" :station="station" @close-modal="hideModal" />
       <ul class="stops">
         <!-- <li :key="index" v-for="(item,index) in stops" class="stop" @click="displayModal(item)" >
           
@@ -83,7 +83,8 @@ export default defineComponent({
       errorMsg: '',
       refreshRate: 15000,
       showModal: false,
-      modalData: null
+      modalData: null as unknown,
+      trainOrder: null
     }
   },
   created: function () {
@@ -202,12 +203,20 @@ export default defineComponent({
       dCauses.forEach((c)=>messages.push(c.text))
       return messages
     },
-    displayModal(data: Departures.Stop) {
+    async displayModal(data: Departures.Stop) {
+      if (data.hasDeparture) {
+        const res = await fetch(`${import.meta.env.DEV ? 'http://127.0.0.1:8080': import.meta.env.VITE_BACKENDURI}/wr/${data.line.fahrtNr}/${data.plannedWhen.split('|')[1]}`)
+        if (res.status !== 204) {
+          let resText = await res.text()
+          this.trainOrder = JSON.parse(resText)
+        }
+      }
       this.modalData = data
       this.showModal = true
     },
     hideModal() {
       this.modalData = null
+      this.trainOrder = null
       this.showModal = false
     }
   },

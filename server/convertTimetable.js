@@ -111,7 +111,7 @@ export const convertTimetable = (data1, data2, changes, fullChanges) => {
 
         const arPath = hasArrival ? arrival.attributes.ppth.split('|') : "";
         const plannedPath = hasDeparture ? departure.attributes.ppth.split('|') : [];
-        let currentPath = hasNewDep && newDep.attributes !== undefined ? departure.attributes.ppth != undefined ? departure.attributes.ppth.split('|') : [] : [];
+        let currentPath = hasNewDep && newDep.attributes !== undefined && hasDeparture ? departure.attributes.ppth != undefined ? departure.attributes.ppth.split('|') : [] : [];
 
         const onlyPlanData = currentPath.length == 0 && hasDeparture;
 

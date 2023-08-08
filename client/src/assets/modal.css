@@ -1,0 +1,121 @@
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    display: flex;
+    justify-content: center;
+    background-color: #2c2c2cce;
+    z-index: 10;
+}
+
+.modal {
+    background-color: #121212;
+    height: 70vh;
+    width: 90vw;
+    margin-top: 10%;
+    padding: 60px 0;
+    border-radius: 20px;
+    font-size: .8vw;
+    padding: 1em;
+    overflow-y: scroll;
+}
+
+.modal::-webkit-scrollbar {
+    display: none;
+}
+
+.header {
+    text-align: center;
+    border-bottom: 2px solid grey;
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+}
+
+.genInfo {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    padding: 10px;
+    font-size: 1rem;
+}
+
+.arr {
+    display: flex;
+    flex-direction: column;
+    margin: auto;
+}
+
+.dep {
+    display: flex;
+    flex-direction: column;
+    margin: auto;
+}
+
+.fromTo {
+    text-align: center;
+}
+
+.previousStop {
+    color: #cccccc;
+}
+
+.currentStop {
+    font-weight: bold;
+}
+
+.plat {
+    text-align: center;
+}
+.additionalDetails {
+    margin-top: 12vh;
+}
+.trainOrder {
+    display: flex;
+    flex-direction: row-reverse;
+    /*flex-wrap: wrap-reverse;*/
+    align-items: center;
+    justify-content: flex-end;
+    overflow-x: auto;
+    font-size: .6vw;
+}
+.coach {
+    display: flex;
+    flex-direction: column;
+    margin-top: 5px;
+}
+.coachDetails {
+    padding: 10px;
+    border: 1px solid grey;
+}
+.section{
+    text-align: center;
+}
+.br {
+    text-align: center;
+}
+
+@media only screen and (min-width: 300px) and (max-width: 1100px) {
+    .modal {
+        font-size: 3vw;
+        width: 95vw;
+    }
+
+    .arr {
+        text-align: left;
+    }
+
+    .dep {
+        text-align: right;
+    }
+    .trainOrder {
+        font-size: 2vw;
+        overflow-x: scroll;
+    }
+    .coachDetails {
+        padding: 5px;
+    }
+}

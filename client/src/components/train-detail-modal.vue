@@ -36,6 +36,43 @@
                     <li class="followingStop" :key="stop" v-for="stop in data.plannedPath">{{ stop }}</li>
                 </ul>
             </div>
+            <div class="additionalDetails" v-if="trainOrder">
+                {{ trainOrder }}
+                <div class="trainOrder">
+                    <div class="coach" :key="coach.id" v-for="coach in trainOrder.firstTrain">
+                        <div class="coachDetails">
+                            <div>
+                                {{ coach.id }}
+                            </div>
+                            <div v-if="coach.kategorie !=='Lok' ">
+                                {{ coach.typ }}
+                            </div>
+                            <div v-if="coach.kategorie == 'Lok'">
+                                {{ coach.baureihe }}
+                            </div>
+                            <div>
+                                {{ coach.kategorie }}
+                            </div>
+                        </div>
+                        <span class="section">{{ coach.abschnitt }}</span>
+                    </div>
+                    <div class="coach" :key="coach.id" v-for="coach in trainOrder.secondTrain">
+                            <div class="coachDetails">
+                                <div>
+                                    {{ coach.id }}
+                                </div>
+                                <div>
+                                    {{ coach.typ }}
+                                </div>
+                                <div>
+                                    {{ coach.kategorie }}
+                                </div>
+                            </div>
+                            <span class="section">{{ coach.abschnitt }}</span>
+                        </div>
+                </div>
+                <div class="br"> ------------ Baureihe {{ trainOrder.baureihe }} ------------></div>
+            </div>
         </div>
     </div>
 </template>
@@ -43,88 +80,16 @@
 import type { PropType } from 'vue';
 import type * as Departures from '../departures-types';
 import { defineComponent } from 'vue'
+import "../assets/modal.css"
 
 export default defineComponent({
   props: {
-    data: Object as PropType<Departures.Stop>,
-    station: String
+    data: Object as PropType<Departures.Stop> | undefined,
+    station: String,
+    trainOrder: Object as PropType<Departures.TrainOrder>
   }
 })
 </script>
 <style lang="css">
-    .modal-overlay {
-    position: fixed;
-    top: 0;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    display: flex;
-    justify-content: center;
-    background-color: #2c2c2cce;
-    z-index: 10;
-    }
-    .modal {
-        background-color: #121212;  
-        height: 70vh;
-        width: 50vw;
-        margin-top: 10%;
-        padding: 60px 0;
-        border-radius: 20px;
-        font-size: .6vw;
-        padding: 1em;
-        overflow-y: scroll;
-    }
-    .modal::-webkit-scrollbar {
-        display: none;
-    }
-    .header {
-        text-align: center;
-        border-bottom: 2px solid grey;
-        display: flex;
-        align-items: center;
-        flex-direction: column;
-    }
-    .genInfo {
-        display: flex;
-        flex-direction: row;
-        align-items: center;
-        justify-content: center;
-        padding: 10px;
-        font-size: 1rem;
-    }
-    .arr{
-        display: flex;
-        flex-direction: column;
-        margin: auto;
-    }
-    .dep{
-        display: flex;
-        flex-direction: column;
-        margin: auto;
-    }
-    .fromTo {
-        text-align: center;
-    }
-    .previousStop {
-        color: #cccccc;
-    }
-    .currentStop {
-        font-weight: bold;
-    }
-    .plat {
-        text-align: center;
-    }
-
-    @media only screen and (min-width: 300px) and (max-width: 800px) {
-        .modal {
-            font-size: 3.5vw;
-            width: 80vw;
-        }
-        .arr {
-            text-align: left;
-        }
-        .dep {
-            text-align: right;
-        }
-    }
+    
 </style>
