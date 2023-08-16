@@ -7,7 +7,7 @@
   <div v-if="!error" class="container">
     <h1 class="heading"><router-link to="/">{{ station }}</router-link></h1>
     <div class="stopsContainer">
-      <trainDetailModal v-show="showModal" :data="modalData" :trainOrder="trainOrder" :station="station" @close-modal="hideModal" />
+      <trainDetailModal v-show="showModal" :data="modalData" :trainOrder="trainOrder" :station="station" @close-modal="hideModal" @updateModalData="handleUpdate" />
       <ul class="stops">
         <!-- <li :key="index" v-for="(item,index) in stops" class="stop" @click="displayModal(item)" >
           
@@ -202,6 +202,13 @@ export default defineComponent({
       let messages: string[]=[]
       dCauses.forEach((c)=>messages.push(c.text))
       return messages
+    },
+    getTripById(id: string){
+      return this.stops.find(o=>o.tripId.includes(id))
+    },
+    handleUpdate(newData: Departures.Stop) {
+      this.hideModal()
+      this.displayModal(newData)
     },
     async displayModal(data: Departures.Stop) {
       if (data.hasDeparture) {

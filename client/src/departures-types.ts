@@ -24,6 +24,8 @@ export interface Stop {
     currentPath:     string[];
     removedStops:    PathChange[];
     additionalStops: PathChange[];
+    hasWings:        boolean;
+    wing:            Wing;
     from:            string;
     to:              string;
     isEnding:        boolean;
@@ -31,6 +33,16 @@ export interface Stop {
     shouldScroll:    boolean;
 }
 
+export interface Wing {
+    wing: string;
+    start: WingLocation;
+    end:    WingLocation;
+}
+
+export interface WingLocation {
+    station: string;
+    plannedTime: string;
+}
 
 export interface PathChange {
     id:      string;

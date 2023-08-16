@@ -19,14 +19,18 @@
                     <span v-if="data.hasNewTime && data.hasDeparture">Geplant: {{ $parent?.convertIRISTime(data.plannedWhen.split('|'), data, false) }}</span>
                 </div>
             </div>
-            <div class="himMessages">
+            <div class="" v-if="data.onlyPlanData"><span>📝 Derzeit sind für diese Fahrt nur Plandaten bekannt</span></div>
+            <div class="messages">
                 <ul>
                     <li :key="himMsg.id" v-for="himMsg in data.himMessages">
                         <span v-if="himMsg.from">🔧 Vom {{ $parent?.convertTimestamp(himMsg.from,true) }} bis zum {{ $parent?.convertTimestamp(himMsg.to,true) }} kommt es auf der Linie {{ data.line.name }} zu Änderungen (Halteausfälle, Verspätungen, etc...). Grund dafür sind/ist (eine) {{ himMsg.cat }}</span>
                     </li>
-                    <li :key="msg.id" v-for="msg in data.causesOfDelay"><span v-if="msg.timestamp"> {{ $parent?.convertTimestamp(msg.timestamp, false) }}: {{ msg.text }}</span></li>
-                    <li :key="qMsg.id" v-for="qMsg in data.qualityChanges"><span v-if="qMsg.timestamp">{{ $parent?.convertTimestamp(qMsg.timestamp, false) }}: {{ qMsg.text }}</span></li>
+                    <li :key="msg.id" v-for="msg in data.causesOfDelay"><span v-if="msg.timestamp"> ⚠️{{ $parent?.convertTimestamp(msg.timestamp, false) }}: {{ msg.text }}</span></li>
+                    <li :key="qMsg.id" v-for="qMsg in data.qualityChanges"><span v-if="qMsg.timestamp">⚠️{{ $parent?.convertTimestamp(qMsg.timestamp, false) }}: {{ qMsg.text }}</span></li>
                 </ul>
+            </div>
+            <div v-if="data.hasWings" class="wings">
+                <span>Fährt von {{ data.wing.start.station }} bis {{ data.wing.end.station }} vereint mit <a class="trainLink" @click="loadTrain">{{ $parent?.getTripById(data.wing.wing).line.name + "(" + $parent?.getTripById(data.wing.wing).line.fahrtNr + ")" }}</a></span>
             </div>
             <div class="trip">
                 Fahrtverlauf:
@@ -86,7 +90,15 @@ export default defineComponent({
     data: Object as PropType<Departures.Stop> | undefined,
     station: String,
     trainOrder: Object as PropType<Departures.TrainOrder>
-  }
+  },
+  methods: {
+    loadTrain() {
+        const trip = this.$parent.getTripById(this.data.wing.wing);
+      if (trip) {
+        this.$emit('updateModalData', trip); // Update the data object with the new trip
+      }
+    },
+  },
 })
 </script>
 <style lang="css">

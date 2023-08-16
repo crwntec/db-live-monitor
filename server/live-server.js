@@ -1,14 +1,14 @@
 import { WebSocketServer } from 'ws';
-import { xml2json } from 'xml-js'
 import stations from './stations.json' assert {type: 'json'};
 import moment from 'moment/moment.js';
-import https from 'https';
+import axios from 'axios';
 import http from 'http';
 import express from 'express'
 import cors from 'cors'
 import { convertTimetable } from './convertTimetable.js';
 import { stationRequest } from './stationRequest.js';
 import { getTrainOrder } from './getTrainOrder.js';
+import { makeRequest } from './makeRequest.js';
 
 const app = express()
 app.use(cors())
@@ -41,23 +41,19 @@ app.get("/info", (req,res)=>{
               Time: ${Date.now().toString()}  
             `)
 })
-app.get("/wr/:nr/:ts",(req,response)=>{
-    let trainNumber = req.params.nr
-    let timestamp = "20" + req.params.ts
-    https.get(`https://ist-wr.noncd.db.de/wagenreihung/1.0/${trainNumber}/${timestamp}`, (res) => {
-        var data = ""
-        res.on('data', (d)=>data += d)
-        res.on('error', (e)=>console.log(e))
-        res.on('end', ()=>{
-            if(JSON.parse(data).error == undefined) {
-                let trainOrderObj = getTrainOrder(JSON.parse(data))
-                response.send(trainOrderObj)
-            } else {
-                response.status(204).send(JSON.parse(data).error.msg)
-            }
-        })
-    })
-})
+app.get("/wr/:nr/:ts", async (req, response) => {
+    const trainNumber = req.params.nr;
+    const timestamp = "20" + req.params.ts;
+    
+    try {
+        const res = await axios.get(`https://ist-wr.noncd.db.de/wagenreihung/1.0/${trainNumber}/${timestamp}`);
+        const trainOrderObj = getTrainOrder(res.data);
+        response.send(trainOrderObj);
+    } catch (error) {
+        response.sendStatus(204)
+    }
+});
+
 
 
 wss.on('connection', async (socket, req)=>{
@@ -88,44 +84,12 @@ wss.on('connection', async (socket, req)=>{
             const currentTimetableUrl = `https://iris.noncd.db.de/iris-tts/timetable/plan/${ibnr}/${currentDate}/${currentHour}`;
             const nextTimetableUrl = `https://iris.noncd.db.de/iris-tts/timetable/plan/${ibnr}/${nextDate}/${nextHour}`;
             const fchgUrl = `https://iris.noncd.db.de/iris-tts/timetable/fchg/${ibnr}/`;
-            let parsedCurrentTimetable = await new Promise((resolve, reject) => {
-                https.get(currentTimetableUrl, (res)=>{
-                    let data = '';
-                    if (res.statusCode >= 200 && res.statusCode < 400) {
-                        res.on('data', async function(data_) { data += data_.toString();});
-                        return res.on('end', async function() {
-                            resolve(JSON.parse(xml2json(data.toString())))
-                        
-                        });
-                }
-                })
-            })
-            let parsedNextTimetable = await new Promise((resolve, reject) => {
-                https.get(nextTimetableUrl, (res)=>{
-                    let data = '';
-                    if (res.statusCode >= 200 && res.statusCode < 400) {
-                        res.on('data', async function(data_) { data += data_.toString();});
-                        return res.on('end', async function() {
-                            resolve(JSON.parse(xml2json(data.toString())))
-                        
-                        });
-                }
-                })
-            })
-            let parsedFchg = await new Promise((resolve, reject) => {
-                https.get(fchgUrl, (res)=>{
-                    let data = '';
-                    if (res.statusCode >= 200 && res.statusCode < 400) {
-                        res.on('data', async function(data_) { data += data_.toString();});
-                        return res.on('end', async function() {
-                            resolve(JSON.parse(xml2json(data.toString())))
-                        });
-                }
-                })
-            })
+            const parsedCurrentTimetable = await makeRequest(currentTimetableUrl);
+            const parsedNextTimetable = await makeRequest(nextTimetableUrl);
+            const parsedFchg = await makeRequest(fchgUrl);
             assignChanges(parsedFchg)
             let hasNextTimetable = parsedNextTimetable.elements[0].elements != undefined
-            let converted = convertTimetable(parsedCurrentTimetable, hasNextTimetable ? parsedNextTimetable : null, parsedFchg, fullChanges)
+            let converted = await convertTimetable(parsedCurrentTimetable, hasNextTimetable ? parsedNextTimetable : null, parsedFchg, fullChanges)
             if(!converted){
                 socket.send(404)
                 return null
@@ -149,22 +113,15 @@ wss.on('connection', async (socket, req)=>{
     const fetchChanges = async () => {
         if (ibnr && flag) {
             const rchgUrl = `https://iris.noncd.db.de/iris-tts/timetable/rchg/${ibnr}/`;
-            let parsedRchg = await new Promise((resolve, reject) => {
-                https.get(rchgUrl, (res)=>{
-                    let data = '';
-                    if (res.statusCode >= 200 && res.statusCode < 400) {
-                        res.on('data', async function(data_) { data += data_.toString();});
-                        return res.on('end', async function() {
-                            resolve(JSON.parse(xml2json(data.toString())))
-                        
-                        });
-                }
-                })
-            })
+            let parsedRchg = await makeRequest(rchgUrl);
             if(fullChanges == {}){
                 socket.send(500)
             } else {
-                let converted = convertTimetable(timetable, null, parsedRchg, fullChanges)
+                let converted = await convertTimetable(timetable, null, parsedRchg, fullChanges)
+                if(!converted){
+                    socket.send(404)
+                    return null
+                }
                 socket.send(JSON.stringify(converted))
                 setTimeout(fetchChanges, refreshRate)
             }

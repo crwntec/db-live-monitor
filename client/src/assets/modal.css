@@ -20,6 +20,7 @@
     font-size: .8vw;
     padding: 1em;
     overflow-y: scroll;
+    overflow-x: hidden;
 }
 
 .modal::-webkit-scrollbar {
@@ -70,8 +71,13 @@
 .plat {
     text-align: center;
 }
+.trainLink {
+    color: rgb(66, 165, 245);
+    cursor: pointer;
+}
 .additionalDetails {
     margin-top: 12vh;
+    overflow-x: auto;
 }
 .trainOrder {
     display: flex;
@@ -79,7 +85,6 @@
     /*flex-wrap: wrap-reverse;*/
     align-items: center;
     justify-content: flex-end;
-    overflow-x: auto;
     font-size: .6vw;
 }
 .coach {
@@ -113,7 +118,6 @@
     }
     .trainOrder {
         font-size: 2vw;
-        overflow-x: scroll;
     }
     .coachDetails {
         padding: 5px;
