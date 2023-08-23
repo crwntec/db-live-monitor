@@ -30,7 +30,7 @@
                 </span>
               </div>
               <span class="direction">
-                {{item.hasDeparture ? item.to : "von " + item.from }}
+                {{item.hasDeparture ? item.to : "von " + item.from.stop }}
               </span>
               <div class="info">
                 <span v-if="item.hasNewTime" class="originalTime">{{convertIRISTime(item.plannedWhen.split('|'), item, false)}}</span>
@@ -49,7 +49,7 @@
               class="messages"
               >
                 <span class="delayCause">{{ getDelayMessage(item.causesOfDelay).join('++')}}</span>
-                <span v-if="item.removedStops.length > 0 && !item.onlyPlanData">Ohne Halt in: <span :key="stop.id" v-for="stop in item.removedStops">{{ stop }}</span></span>
+                <span v-if="item.removedStops.length > 0 && !item.onlyPlanData">Ohne Halt in: <span :key="stop.id" v-for="stop in item.removedStops">{{ stop.stop }}</span></span>
                 <span v-if="item.additionalStops.length > 0">Hält zusätzlich in: <span :key="stop.id" v-for="stop in item.additionalStops">{{ stop }}</span></span>
               </div>
               {{ item.cancelled ? "Fahrt fällt aus!": "" }}
@@ -204,7 +204,7 @@ export default defineComponent({
       return messages
     },
     getTripById(id: string){
-      return this.stops.find(o=>o.tripId.includes(id))
+      return this.stops.find(o=>o.tripId.includes(id)) || null
     },
     handleUpdate(newData: Departures.Stop) {
       this.hideModal()

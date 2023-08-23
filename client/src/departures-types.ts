@@ -5,6 +5,8 @@ export interface Timetable {
 
 export interface Stop {
     tripId:          string;
+    hafasRef:        string;
+    hasHafasData:    boolean;
     himMessages:     HimMessage[];
     qualityChanges:  Message[];
     hasArrival:      boolean;
