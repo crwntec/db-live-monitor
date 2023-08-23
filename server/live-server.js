@@ -9,12 +9,11 @@ import { convertTimetable } from './convertTimetable.js';
 import { stationRequest } from './stationRequest.js';
 import { getTrainOrder } from './getTrainOrder.js';
 import { makeRequest } from './makeRequest.js';
+import pjson from './package.json';
 
 const app = express()
 app.use(cors())
 const server = http.createServer(app)
-
-const pjson = require('./package.json');
 
 server.listen(8080,()=>console.log("running"))
 
