@@ -14,6 +14,8 @@ const app = express()
 app.use(cors())
 const server = http.createServer(app)
 
+const pjson = require('./package.json');
+
 server.listen(8080,()=>console.log("running"))
 
 let refreshRate = 15000
@@ -36,7 +38,9 @@ app.get("/",(req,res)=>{
 })
 app.get("/search/:string",(req,res)=> stationSearch(req,res))
 app.get("/info", (req,res)=>{
-    res.send(`Client Ip: ${req.ip}</br>
+    res.send(`
+              Backend version: ${pjson.version}
+              Client Ip: ${req.ip}</br>
               Client Info: ${req.get('User-Agent')}</br>
               Time: ${Date.now().toString()}  
             `)
