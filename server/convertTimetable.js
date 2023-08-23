@@ -32,20 +32,7 @@ export const convertTimetable = (data1, data2, changes, fullChanges) => {
   return new Promise(async (resolve) => {
     let dataTimetable = {};
     let wingsCache = [];
-    const hafasJourneys = await hafas.departures("8000207", {
-      remarks: true,
-      duration: 120,
-      products: {
-        suburban: true,
-        subway: false,
-        tram: false,
-        bus: false,
-        ferry: false,
-        express: false,
-        regional: true,
-      },
-      language: 'de'
-    });
+    
     if (data2) {
       dataTimetable = {
         attributes: data1.elements[0].attributes,
@@ -68,6 +55,20 @@ export const convertTimetable = (data1, data2, changes, fullChanges) => {
     });
     changesTimetable.elements = changesTimetable.elements.filter((element) => {
       return element !== undefined;
+    });
+    const hafasJourneys = await hafas.departures(dataTimetable.attributes.eva, {
+      remarks: true,
+      duration: 120,
+      products: {
+        suburban: true,
+        subway: false,
+        tram: false,
+        bus: false,
+        ferry: false,
+        express: false,
+        regional: true,
+      },
+      language: 'de'
     });
     async function processStop(e) {
       if (e.attributes == undefined) {
