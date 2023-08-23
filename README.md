@@ -4,6 +4,7 @@
 Available at https://db-live-view.onrender.com
 ### Disclaimer
 This project is still under development so expect changes!
+I do not guarantee for the correctness and integrity of the shown data!
 
 ### About
 The App gets its data from the DB (Deutsche Bahn) via the so called IRIS  at iris.noncd.db.de
