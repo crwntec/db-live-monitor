@@ -9,7 +9,7 @@ import { convertTimetable } from './convertTimetable.js';
 import { stationRequest } from './stationRequest.js';
 import { getTrainOrder } from './getTrainOrder.js';
 import { makeRequest } from './makeRequest.js';
-import pjson from './package.json';
+import pjson from './package.json' assert {type: 'json'};
 
 const app = express()
 app.use(cors())
