@@ -56,7 +56,7 @@ export const convertTimetable = (data1, data2, changes, fullChanges) => {
     changesTimetable.elements = changesTimetable.elements.filter((element) => {
       return element !== undefined;
     });
-    const hafasJourneys = await hafas.departures(dataTimetable.attributes.eva, {
+    const hafasJourneys = await hafas.departures(changesTimetable.attributes.eva, {
       remarks: true,
       duration: 120,
       products: {
