@@ -4,6 +4,7 @@ export async function parseRemarks(remarks) {
 
   await remarks.forEach(async element => {
       const translated = {
+          id: Math.random().toString(16).slice(2),
           code: element.code,
           type: element.type,
           summary: element.summary,
@@ -15,5 +16,5 @@ export async function parseRemarks(remarks) {
         parsedRemarks.push(translated)
     }
   });
-  return hints, parsedRemarks
+  return [hints, parsedRemarks]
 }

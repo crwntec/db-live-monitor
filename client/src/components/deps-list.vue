@@ -7,7 +7,7 @@
   <div v-if="!error" class="container">
     <h1 class="heading"><router-link to="/">{{ station }}</router-link></h1>
     <div class="stopsContainer">
-      <trainDetailModal v-show="showModal" :data="modalData" :trainOrder="trainOrder" :station="station" @close-modal="hideModal" @updateModalData="handleUpdate" />
+      <trainDetailModal v-show="showModal" :show-modal="showModal" :data="modalData" :trainOrder="trainOrder" :station="station" @close-modal="hideModal" @updateModalData="handleUpdate" />
       <ul class="stops">
         <!-- <li :key="index" v-for="(item,index) in stops" class="stop" @click="displayModal(item)" >
           
@@ -30,7 +30,7 @@
                 </span>
               </div>
               <span class="direction">
-                {{item.hasDeparture ? item.to : "von " + item.from.stop }}
+                {{item.hasDeparture ? item.to : "von " + item.from }}
               </span>
               <div class="info">
                 <span v-if="item.hasNewTime" class="originalTime">{{convertIRISTime(item.plannedWhen.split('|'), item, false)}}</span>
@@ -73,20 +73,6 @@ import 'vue-virtual-scroller/dist/vue-virtual-scroller.css'
 export default defineComponent({
   name: 'Deps-List',
   components: {trainDetailModal},
-  data: function () {
-    return {
-      connection: {} as WebSocket,
-      stops: [] as Departures.Stop[],
-      isScrollableArr: [] as Object[],
-      station: '',
-      error: false,
-      errorMsg: '',
-      refreshRate: 15000,
-      showModal: false,
-      modalData: null as unknown,
-      trainOrder: null
-    }
-  },
   created: function () {
     console.log('Connecting to socket...')
     let ibnr = this.$route.params.station
@@ -105,6 +91,20 @@ export default defineComponent({
         this.station = data.station
         this.stops = departures
       }
+    }
+  },
+  data() {
+    return {
+      connection: {} as WebSocket,
+      stops: [] as Departures.Stop[],
+      isScrollableArr: [] as Object[],
+      station: '',
+      error: false,
+      errorMsg: '',
+      refreshRate: 15000,
+      showModal: false,
+      modalData: null as unknown,
+      trainOrder: null
     }
   },
   methods: {
@@ -212,9 +212,10 @@ export default defineComponent({
     },
     async displayModal(data: Departures.Stop) {
       if (data.hasDeparture) {
-        const res = await fetch(`${import.meta.env.DEV ? 'http://127.0.0.1:8080': import.meta.env.VITE_BACKENDURI}/wr/${data.line.fahrtNr}/${data.plannedWhen.split('|')[1]}`)
-        if (res.status !== 204) {
-          let resText = await res.text()
+        const wr = await fetch(`${import.meta.env.DEV ? 'http://127.0.0.1:8080': import.meta.env.VITE_BACKENDURI}/wr/${data.line.fahrtNr}/${data.plannedWhen.split('|')[1]}`)
+        
+        if (wr.status !== 204) {
+          let resText = await wr.text()
           this.trainOrder = JSON.parse(resText)
         }
       }
@@ -227,7 +228,7 @@ export default defineComponent({
       this.showModal = false
     }
   },
-  unmounted: function () {
+  unmounted() {
     this.connection.close()
   }
 })

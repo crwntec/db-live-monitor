@@ -3,12 +3,10 @@ import fs from "fs";
 import { log } from "console";
 import { makeRequest } from "./makeRequest.js";
 import { parseRemarks } from "./parseRemarks.js";
-import { createDbHafas } from "db-hafas";
 
 let rawCats = fs.readFileSync("messageCategorys.json");
 let parsedCats = JSON.parse(rawCats);
 
-const hafas = createDbHafas("dbm");
 
 const getWings = (tripId, wings) =>
   makeRequest(
@@ -55,20 +53,6 @@ export const convertTimetable = (data1, data2, changes, fullChanges) => {
     });
     changesTimetable.elements = changesTimetable.elements.filter((element) => {
       return element !== undefined;
-    });
-    const hafasJourneys = await hafas.departures(changesTimetable.attributes.eva, {
-      remarks: true,
-      duration: 120,
-      products: {
-        suburban: true,
-        subway: false,
-        tram: false,
-        bus: false,
-        ferry: false,
-        express: false,
-        regional: true,
-      },
-      language: 'de'
     });
     async function processStop(e) {
       if (e.attributes == undefined) {
@@ -147,12 +131,6 @@ export const convertTimetable = (data1, data2, changes, fullChanges) => {
 
       const line = e.elements.find((o) => o.name == "tl");
 
-      let hafasRef = null;
-      const possibleTrip = hafasJourneys.departures.find(
-        (o) => o.line.fahrtNr == line.attributes.n
-      );
-      if (possibleTrip !== undefined) hafasRef = possibleTrip;
-
       const arrival = e.elements.find((o) => o.name == "ar");
       let hasArrival = arrival !== undefined;
 
@@ -167,31 +145,7 @@ export const convertTimetable = (data1, data2, changes, fullChanges) => {
       const newDepString =
         hasNewDep && hasNewDepTime ? newDep.attributes.ct : depString;
 
-      let stopovers = null;
-      if (hafasRef !== null) {
-        const tripData = await hafas.trip(hafasRef.tripId, {
-          language: 'de'
-        });
-        stopovers = tripData.trip.stopovers;
-        hints, remarks = await parseRemarks(tripData.trip.remarks)
-      }
-      function combinePathInfo(stop) {
-        let hafasStop = null;
-        if (stopovers) {
-          hafasStop = stopovers.find((o) => o.stop.name == stop);
-        }
-        return {
-          stop: stop,
-          arTime: hafasStop ? convertISOTime(hafasStop.arrival) : null,
-          plArTime: hafasStop ? convertISOTime(hafasStop.plannedArrival) : null,
-          dpTime: hafasStop ? convertISOTime(hafasStop.departure) : null,
-          plDpTime: hafasStop ? convertISOTime(hafasStop.plannedDeparture) : null,
-        };
-      }
       const irisArPath = hasArrival ? arrival.attributes.ppth.split("|") : "";
-      const arPath = hasArrival
-        ? irisArPath.map((stop) => combinePathInfo(stop))
-        : [];
       const plannedPath = hasDeparture
         ? departure.attributes.ppth.split("|")
         : [];
@@ -201,25 +155,21 @@ export const convertTimetable = (data1, data2, changes, fullChanges) => {
             ? departure.attributes.ppth.split("|")
             : []
           : [];
-      let currentPath = hasDeparture
-        ? irisDpPath.map((stop) => combinePathInfo(stop))
-        : [];
-
-      const onlyPlanData = currentPath.length == 0 && hasDeparture;
+      const onlyPlanData = irisDpPath.length == 0 && hasDeparture;
 
       const removedStops = onlyPlanData
         ? []
         : plannedPath.filter(
             (plannedStop) =>
-              !currentPath.some(
+              irisDpPath.some(
                 (currentStop) => currentStop.stop === plannedStop
               )
           );
       const additionalStops = onlyPlanData
         ? []
-        : currentPath.filter(
+        : irisDpPath.filter(
             (currentStop) =>
-              !plannedPath.some(
+              plannedPath.some(
                 (plannedStop) => plannedStop === currentStop.stop
               )
           );
@@ -288,10 +238,6 @@ export const convertTimetable = (data1, data2, changes, fullChanges) => {
       );
       const stopObj = {
         tripId: e.attributes.id,
-        hafasRef: hafasRef ? hafasRef.tripId : null,
-        hasHafasData: hafasRef == null,
-        remarks: remarks,
-        hints: hints,
         qualityChanges: qualityChanges,
         hasArrival: hasArrival,
         hasDeparture: hasDeparture,
@@ -313,15 +259,14 @@ export const convertTimetable = (data1, data2, changes, fullChanges) => {
         plannedPlatform: hasArrival
           ? arrival.attributes.pp
           : departure.attributes.pp,
-        arrivalPath: hasArrival ? arPath : [],
+        arrivalPath: hasArrival ? irisArPath : [],
         plannedPath: plannedPath,
-        currentPath: currentPath,
-        stopovers: stopovers,
+        currentPath: irisDpPath,
         removedStops: removedStops,
         additionalStops: additionalStops,
         hasWings: hasWings,
         wing: wing,
-        from: hasArrival ? arPath.at([0]) : dataTimetable.attributes.station,
+        from: hasArrival ? irisArPath.at([0]) : dataTimetable.attributes.station,
         to: hasDeparture
           ? plannedPath.at(-1)
           : dataTimetable.attributes.station,
