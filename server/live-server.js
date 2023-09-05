@@ -11,6 +11,7 @@ import { getTrainOrder } from "./getTrainOrder.js";
 import { makeRequest } from "./makeRequest.js";
 import { createDbHafas } from "db-hafas";
 import { parseRemarks } from "./parseRemarks.js";
+import { getCache, updateCache } from "./cache.js";
 import pjson from "./package.json" assert { type: "json" };
 
 const app = express();
@@ -28,8 +29,10 @@ const ds100Pattern = /^[abdefhklmnrstuw]{1}[a-z]|[A-Z]{1,4}$/;
 const hafas = createDbHafas("dbm");
 
 let fullChanges = {};
-let hafasJourneys = {};
 const assignChanges = (changes) => (fullChanges = changes);
+let ibnr;
+const assignIBNR = (x) => (ibnr = x);
+
 
 const stationSearch = (req, res) => {
   stationRequest(req.params.string).then((data) => {
@@ -68,39 +71,33 @@ app.get("/wr/:nr/:ts", async (req, response) => {
 app.get("/details/:fahrtNr", async (req, res) => {
   let hafasRef = null;
   try {
-    const possibleTrips = await hafas.tripsByName(req.params.fahrtNr, {
-      onlyCurrentlyRunning: true,
-      products: {
-        suburban: true,
-        subway: false,
-        tram: false,
-        bus: req.query.isBus,
-        ferry: false,
-        regional: true,
-      },
-      language: "de",
-    });
-    const trip = possibleTrips.trips.slice(0);
-    if (trip !== undefined) hafasRef = trip[0];
+    let possibleTrips = getCache();
+    if (possibleTrips.length == 0) {
+      await updateCache(ibnr, hafas);
+      possibleTrips = getCache();
+    }
+    const trip = possibleTrips.find((o) => o.line.name == req.query.line && o.line.fahrtNr == req.params.fahrtNr);
+    if (trip !== undefined) hafasRef = trip;
     let stopovers = null;
     if (hafasRef !== null) {
-      const tripData = await hafas.trip(hafasRef.id, {
-        onlyCurrentlyRunning: true,
+      const tripData = await hafas.trip(hafasRef.tripId, {
+        onlyCurrentlyRunning: false,
         language: "de",
       });
       stopovers = tripData.trip.stopovers;
       let [hints, remarks] = await parseRemarks(tripData.trip.remarks);
-      const hafasTrip = {...tripData.trip,hints:hints,remarks:remarks}
+      const hafasTrip = { ...tripData.trip, hints: hints, remarks: remarks };
       res.send(hafasTrip);
+    } else {
+      res.sendStatus(204);
     }
   } catch (error) {
-    res.sendStatus(204)
+    console.error(error);
+    res.sendStatus(204);
   }
 });
 
 wss.on("connection", async (socket, req) => {
-  let ibnr;
-  const assignIBNR = (x) => (ibnr = x);
   const getIBNR = (stationStr) =>
     stationRequest(stationStr).then((data) =>
       assignIBNR(parseInt(data.suggestions[0].extId))
@@ -112,7 +109,7 @@ wss.on("connection", async (socket, req) => {
   if (ds100Pattern.test(stationStr)) {
     var station = stations.find((s) => s.DS100 == stationStr);
     if (station) {
-      ibnr = station.EVA_NR;
+      assignIBNR(parseInt(station.EVA_NR));
     } else {
       ibnr = null;
     }
@@ -132,24 +129,8 @@ wss.on("connection", async (socket, req) => {
       const parsedCurrentTimetable = await makeRequest(currentTimetableUrl);
       const parsedNextTimetable = await makeRequest(nextTimetableUrl);
       const parsedFchg = await makeRequest(fchgUrl);
-      hafasJourneys = await hafas.departures(
-        parsedFchg.elements[0].attributes.eva,
-        {
-          remarks: true,
-          duration: 120,
-          products: {
-            suburban: true,
-            subway: false,
-            tram: false,
-            bus: false,
-            ferry: false,
-            express: false,
-            regional: true,
-          },
-          language: "de",
-        }
-      );
       assignChanges(parsedFchg);
+      updateCache(ibnr, hafas);
       let hasNextTimetable =
         parsedNextTimetable.elements[0].elements != undefined;
       let converted = await convertTimetable(
@@ -185,6 +166,7 @@ wss.on("connection", async (socket, req) => {
   });
   const fetchChanges = async () => {
     if (ibnr && flag) {
+      updateCache(ibnr, hafas);
       const rchgUrl = `https://iris.noncd.db.de/iris-tts/timetable/rchg/${ibnr}/`;
       let parsedRchg = await makeRequest(rchgUrl);
       if (fullChanges == {}) {

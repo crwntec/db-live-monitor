@@ -148,7 +148,7 @@ export default defineComponent({
       try {
         this.loading = true;
         const response = await fetch(
-          `${import.meta.env.DEV ? 'http://127.0.0.1:8080' : import.meta.env.VITE_BACKENDURI}/details/${this.data?.line.fahrtNr}?isBus=${this.data?.line.productName.includes("Bus")}`
+          `${import.meta.env.DEV ? 'http://127.0.0.1:8080' : import.meta.env.VITE_BACKENDURI}/details/${this.data.line.fahrtNr}?isBus=${this.data.line.productName.includes("Bus")}&line=${this.data.line.name}`
         );
         if (response.status === 200) {
           const data = await response.json();
@@ -170,9 +170,9 @@ export default defineComponent({
     getTime(stops: Departures.Stop[] | null, currentStop: string): string {
       if (stops) {
         const stop = stops.find((o) => o.stop.name === currentStop);
-        const dateString = stop?.departure || stop?.arrival || '';
+        const dateString = stop?.departure || stop.plannedDeparture || stop?.arrival || '';
         const date = new Date(dateString);
-        return `${date.getHours()}:${date.getMinutes()}`;
+        return `${date.getHours().toLocaleString('de',{minimumIntegerDigits: 2})}:${date.getMinutes().toLocaleString('de', {minimumIntegerDigits: 2})}`;
       } else {
         return '';
       }
