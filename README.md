@@ -6,9 +6,9 @@ Available at https://db-live-view.onrender.com
 This project is still under development so expect changes!
 I do not guarantee for the correctness and integrity of the shown data!
 
-### About
-The App gets its data from the DB (Deutsche Bahn) via the so called IRIS  at iris.noncd.db.de
-The Backend fetches this data and supplies it via a WebSocker to the Frontend. 
+### Endpoints used
+IRIS: [[iris.noncd.db]] (For timetable data and train order)
+HAFAS (JS wrapper): [[https://github.com/public-transport/hafas-client/]] (For additional information)
 
 Thanks to derf from finalrewind.org for the inspiration. 
 
