@@ -17,8 +17,9 @@ import pjson from "./package.json" assert { type: "json" };
 const app = express();
 app.use(cors());
 const server = http.createServer(app);
+const PORT = process.env.PORT || 8080
 
-server.listen(8080, () => console.log("running"));
+server.listen(PORT, () => console.log("running"));
 
 let refreshRate = 15000;
 
