@@ -1,14 +1,15 @@
-# db-live-monitor
-## An inofficial live departure monitor for german railway stations
+# DB Live Monitor
+## Unofficial Live Departure Monitor for German Railway Stations
 
-Available at https://db-live-view.onrender.com
+Visit the live monitor at [https://db-live-view.onrender.com](https://db-live-view.onrender.com).
+
 ### Disclaimer
-This project is still under development so expect changes!
-I do not guarantee for the correctness and integrity of the shown data!
+Please note that this project is currently in development, so anticipate ongoing improvements and changes. I cannot guarantee the accuracy or completeness of the displayed data.
 
-### Endpoints used
-IRIS: [(https://iris.noncd.db)](https://iris.noncd.db.de/wbt/js/index.html) (For timetable data and train order)
-HAFAS (JS wrapper): [(https://github.com/public-transport/hafas-client/) ](https://github.com/public-transport/hafas-client/)(For additional information)
+### Data Sources
+We source our data from the following endpoints:
 
-Thanks to derf from finalrewind.org for the inspiration. 
+- **IRIS**: [https://iris.noncd.db.de/wbt/js/index.html](https://iris.noncd.db.de/wbt/js/index.html) (for timetable data and train order)
+- **HAFAS (JavaScript Wrapper)**: [https://github.com/public-transport/hafas-client/](https://github.com/public-transport/hafas-client/) (for additional information)
 
+Special thanks to derf from finalrewind.org for providing inspiration for this project.
