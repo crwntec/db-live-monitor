@@ -3,14 +3,14 @@ let journeyCache = [];
 let cacheEva;
 
 export const getCache = () => {
-    return journeyCache
+  return journeyCache
 };
 
 export const updateCache = async (eva, hafasClient) => {
   if (cacheEva !== eva && eva) cacheEva = eva
   const arr = await hafasClient.arrivals(cacheEva.toString(), {
     remarks: true,
-    duration: 150,
+    duration: 180,
     products: {
       suburban: true,
       subway: false,
@@ -24,7 +24,7 @@ export const updateCache = async (eva, hafasClient) => {
   });
   const dep = await hafasClient.departures(cacheEva.toString(), {
     remarks: true,
-    duration: 150,
+    duration: 180,
     products: {
       suburban: true,
       subway: false,

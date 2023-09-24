@@ -34,7 +34,8 @@ export default {
             }
         },
         openStation(){
-            if(this.input){
+            if (this.input) {
+                if (!this.hasSelected) this.currentSuggestion = this.suggestions[0]
                 this.$router.push('/' + parseInt(this.currentSuggestion.extId)+'?i='+this.input)
             }
         }

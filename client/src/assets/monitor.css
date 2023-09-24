@@ -9,12 +9,17 @@
 }
 
 .errButton {
-    background-color: var(--accent-color);
+    background-color: var(--accent);
+    color: var(--text-white);
     border: none;
     padding: 14px 20px;
     margin: 8px 0;
     border-radius: 4px;
     cursor: pointer;
+    transition: background-color 0.1s ease 0s;
+}
+.errButton:hover {
+    background-color: var(--highlight);
 }
 
 .stop {
@@ -22,7 +27,7 @@
 }
 
 .heading {
-    background-color: var(--accent-color);
+    background-color: var(--accent);
     margin: 0;
     padding: 15px;
     cursor: pointer;
@@ -30,6 +35,7 @@
 
 .stops {
     margin: 0;
+    background-color: var(--background);
 }
 
 .stopRow {
@@ -61,7 +67,7 @@
 }
 
 .delayCause {
-    color: #e91d1d;
+    color: var(--highlight);
 }
 
 .direction {

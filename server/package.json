@@ -1,6 +1,6 @@
 {
   "type": "module",
-  "version": "3.7.1",
+  "version": "3.8.1",
   "dependencies": {
     "axios": "^1.4.0",
     "cors": "^2.8.5",
@@ -13,6 +13,7 @@
     "xml-js": "^1.6.11"
   },
   "scripts": {
-    "start": "node live-server.js"
+    "start": "node live-server.js",
+    "dev": "nodemon live-server.js"
   }
 }

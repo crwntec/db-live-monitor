@@ -17,6 +17,8 @@
     width: 100%;
 }
 .stationInput {
+    background-color: var(--secondary);
+    color: var(--text-white);
     width: 100%;
     padding: 12px 20px;
     margin: 8px 0;
@@ -26,22 +28,26 @@
     box-sizing: border-box;
 }
 .stationSubmit{
-    background-color: var(--accent-color);
-    color: white;
+    background-color: var(--accent);
+    color: var(--text-white);
     border: none;
     padding: 14px 20px;
-    width: 100%;
-    margin: 8px 0;
-    border-radius: 4px;
+    width: 60%;
+    margin: auto;
+    margin-top: 8px;
+    border-radius: 0.4em;
     cursor: pointer;
+    transition: 0.1s ease 0s;
 }
 .stationSubmit:hover {
-    background-color: #45a049;
+    background-color: var(--highlight);
+    width: 100%;
+    border-radius: 0.8em;
 }
 .suggestions {
     width: 100%;
-    color: black;
-    background-color: white;
+    color: var(--text-white);
+    background-color: var(--secondary);
 }
 .suggestion{
     padding: 2.5px;

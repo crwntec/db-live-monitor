@@ -11,7 +11,7 @@
 }
 
 .modal {
-  background-color: #121212;
+  background-color: var(--bg-darker);
   height: 70vh;
   width: 90vw;
   margin-top: 10%;

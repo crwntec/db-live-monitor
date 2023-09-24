@@ -289,14 +289,26 @@ export const convertTimetable = (data1, data2, changes, fullChanges) => {
     const timestamp = moment(Date.now()).utcOffset(120).format("YYMMDDHHmm");
     newJSON.stops = processedStops.filter(
       (e) =>
-        parseInt(e.hasDeparture ? e.when.split("|")[1] : e.when.split("|")[0]) -
+        parseInt(
+          e.hasDeparture
+            ? e.when.split("|")[1]
+            : e.when.split("|")[0]
+        ) -
           parseInt(timestamp) >
         0
     );
     newJSON.stops = newJSON.stops.sort(
       (a, b) =>
-        parseInt(a.hasDeparture ? a.when.split("|")[1] : a.when.split("|")[0]) -
-        parseInt(b.hasDeparture ? b.when.split("|")[1] : b.when.split("|")[0])
+        parseInt(
+          a.hasDeparture
+            ? a.plannedWhen.split("|")[1]
+            : a.plannedWhen.split("|")[0]
+        ) -
+        parseInt(
+          b.hasDeparture
+            ? b.plannedWhen.split("|")[1]
+            : b.plannedWhen.split("|")[0]
+        )
     );
     resolve(newJSON);
   });

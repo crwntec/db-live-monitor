@@ -121,6 +121,7 @@
 import { defineComponent, type PropType } from 'vue';
 import type * as Departures from '../departures-types';
 import "../assets/modal.css"
+import "../assets/main.css"
 
 export default defineComponent({
   name: 'Train-Detail-Modal',
