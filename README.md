@@ -3,7 +3,7 @@
 
 Explore real-time departure information for German railway stations using the DB Live Monitor.
 
-[![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/P5P3PIBAI) [![Node.js](https://img.shields.io/badge/Node.js-14.x-green)](https://nodejs.org/) [![Vue.js](https://img.shields.io/badge/Vue.js-3.x-brightgreen)](https://vuejs.org/) [![IRIS](https://img.shields.io/badge/IRIS-Data%20Source-orange)](https://iris.noncd.db.de/wbt/js/index.html) [![HAFAS](https://img.shields.io/badge/HAFAS-Data%20Source-blue)](https://github.com/public-transport/hafas-client/)
+[![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/P5P3PIBAI) [![Node.js](https://img.shields.io/badge/Node.js-18.x-green)](https://nodejs.org/) [![Vue.js](https://img.shields.io/badge/Vue.js-3.x-brightgreen)](https://vuejs.org/) [![IRIS](https://img.shields.io/badge/IRIS-Data%20Source-orange)](https://iris.noncd.db.de/wbt/js/index.html) [![HAFAS](https://img.shields.io/badge/HAFAS-Data%20Source-blue)](https://github.com/public-transport/hafas-client/)
 
 Visit the live monitor at [https://db-live-view.onrender.com](https://db-live-view.onrender.com).
 
