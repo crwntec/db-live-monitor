@@ -63,7 +63,7 @@
 </template>
 <script lang="ts">
 import { defineComponent } from 'vue'
-import type * as Departures from '../departures-types'
+import type * as Departures from '../types/departures-types'
 import "../assets/monitor.css"
 import "../assets/main.css"
 import { trainCatColors } from '@/assets/trainCatColors'

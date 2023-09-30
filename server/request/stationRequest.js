@@ -1,5 +1,5 @@
 import https from 'https';
-import customURLEncode from './customDecoding.js';
+import customURLEncode from '../util/customDecoding.js';
 import iconv from 'iconv-lite'
 import he from 'he'
 

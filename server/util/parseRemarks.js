@@ -1,8 +1,8 @@
-export async function parseRemarks(remarks) {
+export function parseRemarks(remarks) {
   let hints = []
   let parsedRemarks = []
 
-  await remarks.forEach(async element => {
+  remarks.forEach(element => {
       const translated = {
           id: Math.random().toString(16).slice(2),
           code: element.code,

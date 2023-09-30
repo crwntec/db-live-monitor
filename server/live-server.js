@@ -1,18 +1,21 @@
 import { WebSocketServer } from "ws";
-import stations from "./stations.json" assert { type: "json" };
 import moment from "moment/moment.js";
 import axios from "axios";
 import http from "http";
 import express from "express";
 import cors from "cors";
-import { convertTimetable } from "./convertTimetable.js";
-import { stationRequest } from "./stationRequest.js";
-import { getTrainOrder } from "./getTrainOrder.js";
-import { makeRequest } from "./makeRequest.js";
 import { createDbHafas } from "db-hafas";
-import { parseRemarks } from "./parseRemarks.js";
-import { getCache, updateCache } from "./cache.js";
+
+import stations from "./data/stations.json" assert { type: "json" };
 import pjson from "./package.json" assert { type: "json" };
+
+import { convertTimetable } from "./conversion/convertTimetable.js";
+import { stationRequest } from "./request/stationRequest.js";
+import { getTrainOrder } from "./conversion/getTrainOrder.js";
+import { makeRequest } from "./request/makeRequest.js";
+import { parseRemarks } from "./util/parseRemarks.js";
+import parsePolyline from "./util/parsePolyline.js";
+import { getCache, updateCache } from "./cache/cache.js";
 
 const app = express();
 app.use(cors());
@@ -83,11 +86,13 @@ app.get("/details/:fahrtNr", async (req, res) => {
     if (hafasRef !== null) {
       const tripData = await hafas.trip(hafasRef.tripId, {
         onlyCurrentlyRunning: false,
+        polyline: true,
         language: "de",
       });
       stopovers = tripData.trip.stopovers;
-      let [hints, remarks] = await parseRemarks(tripData.trip.remarks);
-      const hafasTrip = { ...tripData.trip, hints: hints, remarks: remarks };
+      let [hints, remarks] = parseRemarks(tripData.trip.remarks);
+      let [polyline, stops] = parsePolyline(tripData.trip.polyline);
+      const hafasTrip = { ...tripData.trip, hints: hints, remarks: remarks, polyline: polyline, stops:stops };
       res.send(hafasTrip);
     } else {
       res.sendStatus(204);

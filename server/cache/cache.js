@@ -1,4 +1,3 @@
-import fs from "fs"
 let journeyCache = [];
 let cacheEva;
 

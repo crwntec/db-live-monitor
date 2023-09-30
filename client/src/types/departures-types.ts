@@ -71,7 +71,7 @@ export enum T {
   C = 'c',
   H = 'h',
   R = 'r'
-}
+} 
 
 export interface Line {
   fahrtNr: string
@@ -145,6 +145,8 @@ export interface HafasData {
   stopovers: Stopover[]
   remarks: Remark[]
   hints: Hint[]
+  polyline: Number[][]
+  stops: Object[]
 }
 
 interface Stopover {

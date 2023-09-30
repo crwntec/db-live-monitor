@@ -1,10 +1,9 @@
 import moment from "moment/moment.js";
 import fs from "fs";
 import { log } from "console";
-import { makeRequest } from "./makeRequest.js";
-import { parseRemarks } from "./parseRemarks.js";
+import { makeRequest } from "../request/makeRequest.js";
 
-let rawCats = fs.readFileSync("messageCategorys.json");
+let rawCats = fs.readFileSync("./data/messageCategorys.json");
 let parsedCats = JSON.parse(rawCats);
 
 

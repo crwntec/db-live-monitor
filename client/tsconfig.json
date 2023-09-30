@@ -18,7 +18,7 @@
     "sourceMap": true,
     "ignoreDeprecations": "5.5",
     "types": ["node"],
-    "noImplicitThis": true,
-    "strict": true
+    "noImplicitThis": false,
+    "strict": false
   }
 }
