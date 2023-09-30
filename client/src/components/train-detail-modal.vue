@@ -66,7 +66,6 @@ export default defineComponent({
     },
     getTime: function (stops: Departures.Stop[] | null, currentStop: string): string {
       if (stops) {
-        console.log(stops)
         const stop = stops.find((o) => o.stop.name === currentStop);
         const dateString = stop?.departure || stop.plannedDeparture || stop?.arrival || '';
         const date = new Date(dateString);

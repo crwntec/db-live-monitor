@@ -130,15 +130,12 @@ export default defineComponent({
     calculateDelay(plannedTime: string[], currentTime: string[], item: Departures.Stop) {
       let [plannedArr, plannedDep] = plannedTime
       let [currentArr, currentDep] = currentTime
-      const delay = (
-        (parseInt(item.hasArrival ? currentArr : currentDep) -
-          parseInt(item.hasArrival ? plannedArr : plannedDep)) /
-        100
-      ).toFixed(2)
-      const hour = parseInt(delay.toString().split('.')[0])
-      const minute = parseInt(delay.toString().split('.')[1])
-
-      return (hour / 60 + minute).toFixed(0)
+      const currMins = parseInt((item.hasArrival ? currentArr : currentDep).slice(6, 8)) * 60 + parseInt((item.hasArrival ? currentArr : currentDep).slice(8,10))
+      const planMins = parseInt((item.hasArrival ? plannedArr : plannedDep).slice(6, 8)) * 60 + parseInt((item.hasArrival ? plannedArr : plannedDep).slice(8, 10))
+      
+      const delay = Math.abs(currMins - planMins)
+      
+      return delay
     },
     getColor(prodName: string) {
       const p = prodName.toLowerCase();
