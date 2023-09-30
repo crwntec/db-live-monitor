@@ -16,10 +16,10 @@ To make all of this happen, I rely on a couple of data sources:
 A big shoutout to derf from finalrewind.org for sparking the inspiration that got this project going!
 
 ## Roadmap and Upcoming Features
-I'm super excited about what's coming next! Take a peek at our [Roadmap Issue](https://github.com/yourusername/yourrepository/issues/1) to see what's on the horizon and how you can get involved.
+I'm super excited about what's coming next! Take a peek at our [Roadmap Issue](https://github.com/crwntec/db-live-monitor/issues/1) to see what's on the horizon and how you can get involved.
 
 ## Contributing
-I'm all ears! If you spot a bug or have a fantastic idea, please share it with me by [creating a new issue](https://github.com/yourusername/yourrepository/issues).
+I'm all ears! If you spot a bug or have a fantastic idea, please share it with me by [creating a new issue](https://github.com/crwntec/db-live-monitor/issues).
 
 ## License
 This project operates under the [MIT License](LICENSE).
