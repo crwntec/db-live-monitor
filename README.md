@@ -18,6 +18,23 @@ A big shoutout to derf from finalrewind.org for sparking the inspiration that go
 ## Roadmap and Upcoming Features
 I'm super excited about what's coming next! Take a peek at our [Roadmap Issue](https://github.com/crwntec/db-live-monitor/issues/1) to see what's on the horizon and how you can get involved.
 
+## How to run it yourself
+To run the project yourself you need minimun NodeJS v.19.
+1. **Client Setup:**
+   ```shell
+   cd client
+   npm install
+   npm run exposed
+This gets the client-side up and running.
+
+2. **Server Setup:**
+    ```shell
+    cd server
+    npm install
+    npm start
+
+Now, the server is ready to roll!
+
 ## Contributing
 I'm all ears! If you spot a bug or have a fantastic idea, please share it with me by [creating a new issue](https://github.com/crwntec/db-live-monitor/issues).
 
