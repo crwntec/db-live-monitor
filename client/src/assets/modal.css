@@ -197,6 +197,15 @@
   animation: spin 2s linear infinite;
   margin-right: 10px;
 }
+.occupancyContainer {
+  display: flex;
+  align-items: center;
+  text-align: center;
+}
+.occupancy {
+  margin: .25em;
+  width: 20px;
+}
 
 @keyframes spin {
   0% {

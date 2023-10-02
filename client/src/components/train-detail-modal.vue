@@ -74,6 +74,20 @@ export default defineComponent({
         return '';
       }
     },
+    convertLoadFactor(loadFactor: string) {
+      switch (loadFactor) {
+        case "low":
+          return "Niedrig"
+        case "high":
+          return "Hoch"
+        case "very-high":
+          return "Sehr hoch"
+        case "full":
+          return "Zug ausgebucht"
+        default:
+          break;
+      }
+    }
   },
   computed: {
     options() {
@@ -147,6 +161,34 @@ export default defineComponent({
       <span class="loading" v-if="loading">
         <div class="loader"></div>Lade Daten
       </span>
+      <div v-if="hafasData && !loading" >
+        <span v-if="hafasData.loadFactor" class="occupancyContainer">Auslastung: 
+          <svg v-if="hafasData.loadFactor == 'low' " class="occupancy" viewBox="0 0 33 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <text></text>
+            <ellipse cx="16.5" cy="16" rx="16.5" ry="16" fill="#62E46F"/>
+            <line x1="7.32925" y1="17.6237" x2="15.3293" y2="24.6237" stroke="black"/>
+            <line x1="14.6" y1="24.7" x2="26.6" y2="8.7" stroke="black"/>
+          </svg>
+          <svg v-if="hafasData.loadFactor == 'high'" class="occupancy" viewBox="0 0 33 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <ellipse cx="16.5" cy="16" rx="16.5" ry="16" fill="#D4E13C"/>
+            <path d="M17 6L7.5 24H26L17 6Z" fill="black" stroke="black"/>
+            <circle cx="16.5" cy="20.5" r="1.5" fill="#D4E13C"/>
+            <path d="M18 18H15.5L15 10H18.5L18 18Z" fill="#D4E13C" stroke="black"/>
+          </svg>
+          <svg v-if="hafasData.loadFactor == 'very-high'" class="occupancy" viewBox="0 0 33 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <ellipse cx="16.5" cy="16" rx="16.5" ry="16" fill="#D9A215"/>
+            <circle cx="16.5" cy="15.5" r="9.5" stroke="black" stroke-width="2"/>
+            <circle cx="16.5" cy="20.5" r="1.5" fill="black"/>
+            <path d="M17.5714 17H15.4286L15 10H18L17.5714 17Z" fill="black"/>
+          </svg>
+          <svg v-if="hafasData.loadFactor == 'full'" class="occupancy" viewBox="0 0 33 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <ellipse cx="16.5" cy="16" rx="16.5" ry="16" fill="#E1463C"/>
+            <line x1="6.33448" y1="6.62835" x2="26.3345" y2="24.6284" stroke="black"/>
+            <line x1="24.3641" y1="7.34268" x2="8.3641" y2="24.3427" stroke="black"/>
+          </svg>
+          {{ convertLoadFactor(hafasData.loadFactor) }}
+        </span>
+      </div>
       <div class="messages">
         <ul>
           <div v-if="hafasData">
