@@ -90,6 +90,8 @@ export interface TrainOrder {
 
 export interface Train {
   typ: string
+  isLocomotive: boolean
+  isPowercar: boolean
   class: Class
   baureihe: string
   ordnungsNummer?: string

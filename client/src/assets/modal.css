@@ -82,28 +82,88 @@
 }
 
 .additionalDetails {
-  margin-top: 12vh;
+  margin-top: 2vh;
   overflow-x: auto;
 }
 .trainOrder {
+  height: 10em;
   display: flex;
   flex-direction: row-reverse;
-  /*flex-wrap: wrap-reverse;*/
   align-items: center;
   justify-content: flex-end;
   font-size: 0.6vw;
+  margin-bottom: 2.5em;
 }
+
+.controlCar {
+
+  padding-left: 2em;
+
+  border: 1px solid #FFFFFF;
+  border-radius: 5em 1em .5em .5em;
+}
+.flipped {
+  border-radius: 1em 5em .5em .5em;
+}
+
+.middleCar {
+  border: 1px solid #FFFFFF;
+  border-radius: 1em 1em .8em .8em;
+}
+
 .coach {
+  box-sizing: border-box;
+  width: 15em;
+  height: 6em;
   display: flex;
   flex-direction: column;
-  margin-top: 5px;
 }
+
+.locoContainer {
+  display: flex;
+  flex-direction: column;
+}
+
+
+.locomotive {
+  width: 21em;
+  height: 8em;
+}
+
+.powercarContainerTop {
+  margin-top: .15em;
+  height: 10em !important;
+  width: 20em;
+}
+
+.powercarContainer {
+  display: flex;
+  flex-direction: column;
+  height: 10em;
+}
+
+.powercar {
+  width: 20em;
+  height: 100%;
+}
+.flippedPowercar path {
+  transform: scaleX(-1);
+  transform-origin: center;
+}
+.flippedPowercar text {
+  transform: scaleX(1);
+}
+
+.locoDetails {
+    font-size: 2em;
+  }
+
 .coachDetails {
-  padding: 10px;
-  border: 1px solid grey;
+  padding: 1em;
 }
 .section {
   text-align: center;
+  margin-top: 1em;
 }
 .br {
   text-align: center;
@@ -163,7 +223,8 @@
   .trainOrder {
     font-size: 2vw;
   }
-  .coachDetails {
-    padding: 5px;
+  .coach {
+    padding: 3px;
   }
+  
 }

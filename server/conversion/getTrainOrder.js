@@ -16,6 +16,7 @@ const getClass = (fahrzeugtyp) => {
     case "W":
       const _w =
         fahrzeugtyp.slice(1, 2) == "R" ? "IC-Speisewagen" : "Schlafwagen";
+      return _w
     default:
       break;
   }
@@ -50,25 +51,28 @@ const normalizeCap = (str) => {
 };
 const strip = (str) => str.slice(1, 4);
 
-const constructWagon = (wagon) => {
+const constructcoach = (coach) => {
   return {
-    id: wagon.wagenordnungsnummer,
+    id: coach.wagenordnungsnummer,
     typ:
-      wagon.kategorie == "LOK"
-        ? "BR" + strip(wagon.fahrzeugtyp)
-        : wagon.fahrzeugtyp,
-    class: getClass(wagon.fahrzeugtyp),
+      coach.kategorie == "LOK"
+        ? "BR" + strip(coach.fahrzeugtyp)
+        : coach.fahrzeugtyp,
+    isLocomotive: coach.kategorie == "LOK",
+    isPowercar: coach.kategorie == "TRIEBKOPF",
+    isControlcar: coach.kategorie.includes("STEUERWAGEN"),
+    class: getClass(coach.fahrzeugtyp),
     baureihe:
-      wagon.kategorie == "LOK"
-        ? wagon.fahrzeugnummer.slice(5, 8)
-        : wagon.fahrzeugnummer.slice(4, 8),
+      coach.kategorie == "LOK"
+        ? coach.fahrzeugnummer.slice(5, 8)
+        : coach.fahrzeugnummer.slice(4, 8),
     kategorie:
-      wagon.kategorie == "LOK"
-        ? normalizeCap(wagon.kategorie)
-        : formatCategory(wagon.kategorie),
-    ordnungsNummer: wagon.fahrzeugnummer.slice(8, 12),
-    abschnitt: wagon.fahrzeugsektor,
-    austtattung: wagon.allFahrzeugausstattung.map((e) => e.ausstattungsart),
+      coach.kategorie == "LOK" || coach.kategorie == "TRIEBKOPF"
+        ? normalizeCap(coach.kategorie)
+        : formatCategory(coach.kategorie),
+    ordnungsNummer: coach.fahrzeugnummer.slice(8, 12),
+    abschnitt: coach.fahrzeugsektor,
+    austtattung: coach.allFahrzeugausstattung.map((e) => e.ausstattungsart),
   };
 };
 
@@ -80,21 +84,21 @@ export const getTrainOrder = (data) => {
     dotra = fzg2.allFahrzeug[0].kategorie !== "LOK";
   }
   let baureihe = "";
-  let wagons = [];
-  let wagonsFzg2 = [];
+  let coaches = [];
+  let coachesFzg2 = [];
   let onlyPlanData = data.data.istformation.istplaninformation;
-  fzg1.allFahrzeug.forEach((wagon) => {
-    if (wagon.kategorie == "LOK") {
+  fzg1.allFahrzeug.forEach((coach) => {
+    if (coach.kategorie == "LOK") {
       baureihe = "Lok + Wagen"
     }
-    wagons.push(constructWagon(wagon));
+    coaches.push(constructcoach(coach));
   });
   if (dotra) {
-    fzg2.allFahrzeug.forEach((wagon) => {
-      wagonsFzg2.push(constructWagon(wagon));
+    fzg2.allFahrzeug.forEach((coach) => {
+      coachesFzg2.push(constructcoach(coach));
     });
   }
-  switch (wagons[0].baureihe) {
+  switch (coaches[0].baureihe) {
     case "5401":
       baureihe = "401 (ICE 1)";
       break;
@@ -130,13 +134,16 @@ export const getTrainOrder = (data) => {
       break;
 
     default:
+      if (coaches[-1].baureihe == "5402") {
+        baureihe = "402 (ICE 2)";
+      }
       break;
   }
   return {
     baureihe: baureihe,
-    firstTrain: wagons,
+    firstTrain: coaches,
     doubleTraction: dotra,
-    secondTrain: wagonsFzg2,
+    secondTrain: coachesFzg2,
     onlyPlanData: onlyPlanData,
   };
 };

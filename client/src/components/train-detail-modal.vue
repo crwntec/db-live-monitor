@@ -204,8 +204,8 @@ export default defineComponent({
       </div>
       <div class="additionalDetails" v-if="trainOrder">
         <div class="trainOrder">
-          <div class="coach" :key="coach.id" v-for="coach in trainOrder.firstTrain">
-            <div class="coachDetails">
+          <div :class="[{ 'coach': coach.kategorie !== 'Lok', 'powercarContainerTop': coach.isPowercar ,'controlCar': coach.isControlcar, 'middleCar': coach.kategorie.includes('wagen') && !coach.isControlcar, 'flipped': index==0 }] " :key="coach.id" v-for="(coach,index) in trainOrder.firstTrain">
+            <div v-if="!coach.isLocomotive && !coach.isPowercar" class="coachDetails">
               <div>
                 {{ coach.id }}
               </div>
@@ -219,10 +219,25 @@ export default defineComponent({
                 {{ coach.kategorie }}
               </div>
             </div>
-            <span class="section">{{ coach.abschnitt }}</span>
+            <div class="locoContainer" v-if="coach.isLocomotive">
+                  <svg class="locomotive" viewBox="0 0 340 121" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M69.8969 21.9901H300.535C309.077 21.9901 316.848 26.9354 320.465 34.6744L326.322 47.2054C328.775 52.4526 330.611 57.9662 331.795 63.6361L338.129 93.9777C338.704 96.733 338.745 99.578 338.25 102.349V102.349C336.375 112.84 327.246 120.5 316.589 120.5H22.6206C12.3182 120.5 3.39564 113.351 1.14971 103.296L1.04987 102.849C0.358146 99.7524 0.344461 96.5427 1.00975 93.4402L7.98822 60.8974L15.1894 37.5148C18.0314 28.2865 26.5588 21.9901 36.2148 21.9901H69.8969ZM69.8969 21.9901L128.989 15.0599C129.28 15.0257 129.5 14.779 129.5 14.4858V14.4858C129.5 14.2049 129.298 13.9647 129.021 13.9164L78 5M78 5H63M78 5V0V9.5M269.5 21.9901L227.165 20.3345L269.5 18.5M63 0V9.5M269.5 18.5V15.5M269.5 18.5V21M269.5 18.5H274M274 18.5V15.5M274 18.5V21" stroke="white" stroke-width="2"/>
+                    <text class="locoDetails" x="50%" y="60%" text-anchor="middle" fill="white" >{{ coach.kategorie }}</text>
+                    <text class="locoDetails" x="50%" y="80%" text-anchor="middle" fill="white" >BR {{ coach.baureihe }}</text>
+                  </svg>
+                  <span class="section">{{ coach.abschnitt }}</span>
+            </div>
+            <div class="powercarContainer" v-if="coach.isPowercar">
+              <svg :class="['powercar', {'flippedPowercar': index!=0}]" viewBox="0 0 320 121" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M18.2325 25.5H224.762C276.532 25.5 318.5 67.468 318.5 119.238C318.5 121.04 317.04 122.5 315.238 122.5H5.23255C3.29955 122.5 1.73254 120.933 1.73254 119V42C1.73254 32.8873 9.11985 25.5 18.2325 25.5Z" stroke="white" stroke-width="2"/>
+                <path d="M59.1403 25L116 18.8679L59.1403 8.01887M59.1403 8.01887H37.0001V0V15.0943M59.1403 8.01887V0V15.0943" stroke="white" stroke-width="3"/>
+                <text class="locoDetails" x="50%" y="60%" text-anchor="middle" fill="white" >{{ coach.kategorie }}</text>
+              </svg>     
+            </div>
+            <span v-if="!coach.isLocomotive" class="section">{{ coach.abschnitt }}</span>
           </div>
-          <div class="coach" :key="coach.id" v-for="coach in trainOrder.secondTrain">
-            <div class="coachDetails">
+          <div :class="[{ 'coach': coach.kategorie !== 'Lok', 'powercarContainerTop': coach.isPowercar, 'controlCar': coach.isControlcar, 'middleCar': coach.kategorie.includes('wagen') && !coach.isControlcar, 'flipped': index == 0 }]" :key="coach.id" v-for="(coach, index) in trainOrder.secondTrain">
+            <div v-if="!coach.isLocomotive && !coach.isPowercar" class="coachDetails">
               <div>
                 {{ coach.id }}
               </div>
@@ -233,7 +248,22 @@ export default defineComponent({
                 {{ coach.kategorie }}
               </div>
             </div>
-            <span class="section">{{ coach.abschnitt }}</span>
+            <div class="locoContainer" v-if="coach.isLocomotive">
+                <svg class="locomotive" viewBox="0 0 340 121" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M69.8969 21.9901H300.535C309.077 21.9901 316.848 26.9354 320.465 34.6744L326.322 47.2054C328.775 52.4526 330.611 57.9662 331.795 63.6361L338.129 93.9777C338.704 96.733 338.745 99.578 338.25 102.349V102.349C336.375 112.84 327.246 120.5 316.589 120.5H22.6206C12.3182 120.5 3.39564 113.351 1.14971 103.296L1.04987 102.849C0.358146 99.7524 0.344461 96.5427 1.00975 93.4402L7.98822 60.8974L15.1894 37.5148C18.0314 28.2865 26.5588 21.9901 36.2148 21.9901H69.8969ZM69.8969 21.9901L128.989 15.0599C129.28 15.0257 129.5 14.779 129.5 14.4858V14.4858C129.5 14.2049 129.298 13.9647 129.021 13.9164L78 5M78 5H63M78 5V0V9.5M269.5 21.9901L227.165 20.3345L269.5 18.5M63 0V9.5M269.5 18.5V15.5M269.5 18.5V21M269.5 18.5H274M274 18.5V15.5M274 18.5V21" stroke="white" stroke-width="2"/>
+                  <text class="locoDetails" x="50%" y="60%" text-anchor="middle" fill="white" >{{ coach.kategorie }}</text>
+                  <text class="locoDetails" x="50%" y="80%" text-anchor="middle" fill="white" >{{ coach.baureihe }}</text>
+                </svg>
+                <span class="section">{{ coach.abschnitt }}</span>
+              </div>
+            <div class="powercarContainer" v-if="coach.isPowercar">
+                <svg :class="['powercar', { 'flippedPowercar': index != 0 }]" viewBox="0 0 320 121" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M18.2325 25.5H224.762C276.532 25.5 318.5 67.468 318.5 119.238C318.5 121.04 317.04 122.5 315.238 122.5H5.23255C3.29955 122.5 1.73254 120.933 1.73254 119V42C1.73254 32.8873 9.11985 25.5 18.2325 25.5Z" stroke="white" stroke-width="2"/>
+                  <path d="M59.1403 25L116 18.8679L59.1403 8.01887M59.1403 8.01887H37.0001V0V15.0943M59.1403 8.01887V0V15.0943" stroke="white" stroke-width="3"/>
+                  <text class="locoDetails" x="50%" y="60%" text-anchor="middle" fill="white" >{{ coach.kategorie }}</text>
+                </svg>     
+              </div>
+              <span v-if="!coach.isLocomotive" class="section">{{ coach.abschnitt }}</span>
           </div>
         </div>
         <div class="br"> ------------ Baureihe {{ trainOrder.baureihe }} ------------></div>

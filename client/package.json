@@ -1,6 +1,6 @@
 {
   "name": "db-live-monitor",
-  "version": "3.9.2",
+  "version": "3.9.4",
   "private": true,
   "scripts": {
     "dev": "vite",
