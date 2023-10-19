@@ -43,7 +43,7 @@ export default defineComponent({
       try {
         this.loading = true;
         const response = await fetch(
-          `${import.meta.env.DEV ? 'http://127.0.0.1:8080' : import.meta.env.VITE_BACKENDURI}/details/${this.data.line.fahrtNr}?isBus=${this.data.line.productName.includes("Bus")}&line=${this.data.line.name}`
+          `${import.meta.env.DEV ? 'http://127.0.0.1:8080' : import.meta.env.VITE_BACKENDURI}/details/${this.data.line.fahrtNr}?isBus=${this.data.line.productName.includes("Bus")}&line=${this.data.line.name}&isDeparture=${this.data.hasDeparture}`
         );
         if (response.status === 200) {
           const data = await response.json();

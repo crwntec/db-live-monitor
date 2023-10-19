@@ -14,11 +14,13 @@ export default {
             suggestions: [] as Suggestion[],
             showSuggestions: true,
             currentSuggestion: {} as Suggestion,
-            hasSelected: false
+            hasSelected: false,
+            abortController: new AbortController()
         }
     },
     watch: {
         input(newInput) {
+            this.abortController.abort()
             if(this.input.length==0 && !this.showSuggestions) this.showSuggestions = true
             if(this.input.length==0) this.suggestions=[]
             this.getStops(newInput)

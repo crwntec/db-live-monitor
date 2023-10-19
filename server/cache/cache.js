@@ -1,15 +1,27 @@
-let journeyCache = [];
-let cacheEva;
-
-export const getCache = () => {
-  return journeyCache
+export const getCachedDepartures = async (cachedHafas, eva) => {
+  const _dep = await cachedHafas.departures(eva, {
+    remarks: true,
+    when: new Date(Date.now()),
+    duration: 120,
+    products: {
+      suburban: true,
+      subway: false,
+      tram: false,
+      bus: true,
+      ferry: false,
+      express: false,
+      regional: true,
+    },
+    results: 120,
+    language: "de",
+  });
+  return _dep.departures
 };
-
-export const updateCache = async (eva, hafasClient) => {
-  if (cacheEva !== eva && eva) cacheEva = eva
-  const arr = await hafasClient.arrivals(cacheEva.toString(), {
+export const getCachedArrivals = async (cachedHafas, eva) => {
+  const _arr = await cachedHafas.arrivals(eva, {
     remarks: true,
-    duration: 180,
+    when: new Date(Date.now()),
+    duration: 120,
     products: {
       suburban: true,
       subway: false,
@@ -19,22 +31,8 @@ export const updateCache = async (eva, hafasClient) => {
       express: false,
       regional: true,
     },
+    results: 120,
     language: "de",
   });
-  const dep = await hafasClient.departures(cacheEva.toString(), {
-    remarks: true,
-    duration: 180,
-    products: {
-      suburban: true,
-      subway: false,
-      tram: false,
-      bus: true,
-      ferry: false,
-      express: false,
-      regional: true,
-    },
-    language: "de",
-  });
-  arr.arrivals.forEach(e=>journeyCache.push(e))
-  dep.departures.forEach(e=>journeyCache.push(e))
+  return _arr.arrivals;
 };

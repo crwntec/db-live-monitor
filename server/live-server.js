@@ -4,7 +4,6 @@ import axios from "axios";
 import http from "http";
 import express from "express";
 import cors from "cors";
-import { createDbHafas } from "db-hafas";
 
 import stations from "./data/stations.json" assert { type: "json" };
 import pjson from "./package.json" assert { type: "json" };
@@ -15,7 +14,10 @@ import { getTrainOrder } from "./conversion/getTrainOrder.js";
 import { makeRequest } from "./request/makeRequest.js";
 import { parseRemarks } from "./util/parseRemarks.js";
 import parsePolyline from "./util/parsePolyline.js";
-import { getCache, updateCache } from "./cache/cache.js";
+import { getCachedDepartures, getCachedArrivals } from "./cache/cache.js";
+import initHafas from "./util/initHafas.js";
+
+
 
 const app = express();
 app.use(cors());
@@ -30,7 +32,7 @@ const wss = new WebSocketServer({ server: server, path: "/wss" });
 
 const ds100Pattern = /^[abdefhklmnrstuw]{1}[a-z]|[A-Z]{1,4}$/;
 
-const hafas = createDbHafas("dbm");
+const hafas = initHafas()
 
 let fullChanges = {};
 const assignChanges = (changes) => (fullChanges = changes);
@@ -49,6 +51,11 @@ const stationSearch = (req, res) => {
 app.get("/", (req, res) => {
   res.redirect("/info");
 });
+app.get("/dbg", async (req, res) => {
+  const deps = await getCachedDepartures(hafas, '8000207')
+  console.log(deps.length)
+  res.send(deps)
+})
 app.get("/search/:string", (req, res) => stationSearch(req, res));
 app.get("/info", (req, res) => {
   res.send(`
@@ -75,12 +82,16 @@ app.get("/wr/:nr/:ts", async (req, response) => {
 app.get("/details/:fahrtNr", async (req, res) => {
   let hafasRef = null;
   try {
-    let possibleTrips = getCache();
-    if (possibleTrips.length == 0) {
-      await updateCache(ibnr, hafas);
-      possibleTrips = getCache();
+    let possibleTrips;
+    if (req.query.isDeparture == "true") {
+      possibleTrips = await getCachedDepartures(hafas, ibnr.toString());
+    } else if(req.query.isDeparture == "false") {
+      possibleTrips = await getCachedArrivals(hafas, ibnr.toString());
     }
-    const trip = possibleTrips.find((o) => o.line.name == req.query.line && o.line.fahrtNr == req.params.fahrtNr);
+    const trip = possibleTrips.find(
+      (o) =>
+        o.line.name == req.query.line && o.line.fahrtNr == req.params.fahrtNr
+    );
     if (trip !== undefined) hafasRef = trip;
     let stopovers = null;
     if (hafasRef !== null) {
@@ -92,7 +103,13 @@ app.get("/details/:fahrtNr", async (req, res) => {
       stopovers = tripData.trip.stopovers;
       let [hints, remarks] = parseRemarks(tripData.trip.remarks);
       let [polyline, stops] = parsePolyline(tripData.trip.polyline);
-      const hafasTrip = { ...tripData.trip, hints: hints, remarks: remarks, polyline: polyline, stops:stops };
+      const hafasTrip = {
+        ...tripData.trip,
+        hints: hints,
+        remarks: remarks,
+        polyline: polyline,
+        stops: stops,
+      };
       res.send(hafasTrip);
     } else {
       res.sendStatus(204);
@@ -136,7 +153,6 @@ wss.on("connection", async (socket, req) => {
       const parsedNextTimetable = await makeRequest(nextTimetableUrl);
       const parsedFchg = await makeRequest(fchgUrl);
       assignChanges(parsedFchg);
-      updateCache(ibnr, hafas);
       let hasNextTimetable =
         parsedNextTimetable.elements[0].elements != undefined;
       let converted = await convertTimetable(
@@ -172,7 +188,6 @@ wss.on("connection", async (socket, req) => {
   });
   const fetchChanges = async () => {
     if (ibnr && flag) {
-      updateCache(ibnr, hafas);
       const rchgUrl = `https://iris.noncd.db.de/iris-tts/timetable/rchg/${ibnr}/`;
       let parsedRchg = await makeRequest(rchgUrl);
       if (fullChanges == {}) {
