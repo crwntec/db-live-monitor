@@ -51,11 +51,6 @@ const stationSearch = (req, res) => {
 app.get("/", (req, res) => {
   res.redirect("/info");
 });
-app.get("/dbg", async (req, res) => {
-  const deps = await getCachedDepartures(hafas, '8000207')
-  console.log(deps.length)
-  res.send(deps)
-})
 app.get("/search/:string", (req, res) => stationSearch(req, res));
 app.get("/info", (req, res) => {
   res.send(`

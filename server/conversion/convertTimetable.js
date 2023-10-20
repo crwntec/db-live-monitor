@@ -22,6 +22,12 @@ function convertISOTime(timestamp) {
   return formattedTime;
 }
 
+const hasLeft = (when, hasDeparture) => {
+  const timestamp = moment(Date.now()).utcOffset(120).format("YYMMDDHHmm");
+  return (parseInt(hasDeparture ? when.split("|")[1] : when.split("|")[0]) -
+    parseInt(timestamp) < 0);
+}
+
 const messageLookup = (cat) => {
   return parsedCats.find((e) => e.cat == cat);
 };
@@ -245,6 +251,7 @@ export const convertTimetable = (data1, data2, changes, fullChanges) => {
         when: newArrString + "|" + newDepString,
         plannedWhen: arrString + "|" + depString,
         cancelled: currentStatus == "c",
+        hasLeft: hasLeft(newArrString + "|" + newDepString, hasDeparture),
         onlyPlanData: onlyPlanData,
         causesOfDelay: delayCauses,
         hasNewPlatform: hasNewArrPlatform || hasNewDepPlatform,
@@ -265,7 +272,9 @@ export const convertTimetable = (data1, data2, changes, fullChanges) => {
         additionalStops: additionalStops,
         hasWings: hasWings,
         wing: wing,
-        from: hasArrival ? irisArPath.at([0]) : dataTimetable.attributes.station,
+        from: hasArrival
+          ? irisArPath.at([0])
+          : dataTimetable.attributes.station,
         to: hasDeparture
           ? plannedPath.at(-1)
           : dataTimetable.attributes.station,
@@ -288,26 +297,13 @@ export const convertTimetable = (data1, data2, changes, fullChanges) => {
     const timestamp = moment(Date.now()).utcOffset(120).format("YYMMDDHHmm");
     newJSON.stops = processedStops.filter(
       (e) =>
-        parseInt(
+        (parseInt(
           e.hasDeparture
             ? e.when.split("|")[1]
             : e.when.split("|")[0]
         ) -
-          parseInt(timestamp) >
-        0
-    );
-    newJSON.stops = newJSON.stops.sort(
-      (a, b) =>
-        parseInt(
-          a.hasDeparture
-            ? a.plannedWhen.split("|")[1]
-            : a.plannedWhen.split("|")[0]
-        ) -
-        parseInt(
-          b.hasDeparture
-            ? b.plannedWhen.split("|")[1]
-            : b.plannedWhen.split("|")[0]
-        )
+          parseInt(timestamp)) >
+        - 3
     );
     resolve(newJSON);
   });

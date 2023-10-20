@@ -12,7 +12,7 @@ export const getCachedDepartures = async (cachedHafas, eva) => {
       express: false,
       regional: true,
     },
-    results: 120,
+    results: 200,
     language: "de",
   });
   return _dep.departures
@@ -31,7 +31,7 @@ export const getCachedArrivals = async (cachedHafas, eva) => {
       express: false,
       regional: true,
     },
-    results: 120,
+    results: 200,
     language: "de",
   });
   return _arr.arrivals;

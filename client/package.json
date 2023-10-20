@@ -1,6 +1,6 @@
 {
   "name": "db-live-monitor",
-  "version": "3.9.6",
+  "version": "4.0.0",
   "private": true,
   "scripts": {
     "dev": "vite",
@@ -17,6 +17,9 @@
     "format": "prettier --write src/"
   },
   "dependencies": {
+    "@fortawesome/fontawesome-svg-core": "^6.4.2",
+    "@fortawesome/free-solid-svg-icons": "^6.4.2",
+    "@fortawesome/vue-fontawesome": "^3.0.3",
     "dotenv": "^16.3.1",
     "vue": "^3.2.47",
     "vue-router": "^4.1.6",

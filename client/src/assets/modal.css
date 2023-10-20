@@ -132,7 +132,7 @@
 
 .powercarContainerTop {
   margin-top: .15em;
-  height: 10em !important;
+  height: 11em;
   width: 20em;
 }
 
@@ -234,6 +234,14 @@
   }
   .coach {
     padding: 3px;
+  }
+  .powercarContainer {
+    margin-top: 0;
+    height: 11em;
+  }
+  .powercar {
+    width: 18em;
+    margin-top: .4vw;
   }
   
 }

@@ -44,3 +44,7 @@ a {
   text-decoration: none;
   color: var(--text-white);
 }
+.link {
+  text-decoration: underline;
+  color: rgb(148, 148, 236);
+}
