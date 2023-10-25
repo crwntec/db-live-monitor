@@ -2,6 +2,7 @@
 <script lang="ts">
 import "../assets/home.css"
 import "../assets/main.css"
+import axios from "axios"
 interface Suggestion {
     extId: string,
     value: string
@@ -15,7 +16,8 @@ export default {
             showSuggestions: true,
             currentSuggestion: {} as Suggestion,
             hasSelected: false,
-            abortController: new AbortController()
+            abortController: new AbortController(),
+            apiBase: import.meta.env.DEV ? 'http://127.0.0.1:8080': import.meta.env.VITE_BACKENDURI
         }
     },
     watch: {
@@ -31,14 +33,20 @@ export default {
             if (inputStr=='' || inputStr.length <= 2) {
                this.suggestions = []
             } else {
-                const res = await fetch(`${import.meta.env.DEV ? 'http://127.0.0.1:8080': import.meta.env.VITE_BACKENDURI}/search/${inputStr}`)
-                this.suggestions = (await res.json())
+                const res = await axios.get(`${this.apiBase}/search/${inputStr}`)
+                this.suggestions = res.data
             }
         },
-        openStation(){
+        async openStation(){
             if (this.input) {
-                if (!this.hasSelected) this.currentSuggestion = this.suggestions[0]
-                this.$router.push('/' + parseInt(this.currentSuggestion.extId)+'?i='+this.input)
+                if (!this.hasSelected) {
+                    const res = await axios.get(`${this.apiBase}/verify/${this.input}`)
+                    if (res.data==true) {
+                        this.$router.push('/' + this.input)
+                    }
+                } else {
+                    this.$router.push('/' + parseInt(this.currentSuggestion.extId)+'?i='+this.input)
+                }
             }
         }
     }

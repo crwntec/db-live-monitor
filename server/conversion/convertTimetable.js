@@ -63,7 +63,9 @@ export const convertTimetable = (data1, data2, changes, fullChanges) => {
       if (e.attributes == undefined) {
         log(e);
       }
-
+      if (fullChanges.elements == undefined) {
+        console.log("fChg undefined")
+      }
       const changes =
         changesTimetable.elements.find(
           (o) => o.attributes.id == e.attributes.id

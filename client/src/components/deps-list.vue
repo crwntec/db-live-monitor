@@ -17,6 +17,7 @@
         <font-awesome-icon class="exit" icon="xmark" size="lg" @click="closeSettings" />
       </div>
       <div class="settings-option">
+        {{ sortBy + sortOption }}
         <label>
           Zugnummern anzeigen
           <input type="checkbox" v-model="showLineNumbers" />
@@ -139,8 +140,8 @@ export default defineComponent({
       trainOrder: null,
       showSettings: false,
       showLineNumbers: sessionStorage.getItem('showLineNumbers') === "true" || false,
-      sortOption: sessionStorage.getItem('sortOption'),
-      sortBy: sessionStorage.getItem('sortBy'),
+      sortOption: sessionStorage.getItem('sortOption') || "when",
+      sortBy: sessionStorage.getItem('sortBy') || "departure" ,
       version: pjson.version
     }
   },

@@ -36,7 +36,6 @@
   justify-content: space-between;
   flex-direction: row;
   z-index: 98;
-  width: 100vw;
 }
 .headerIcons {
   margin-right: 10em;

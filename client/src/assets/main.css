@@ -31,6 +31,19 @@
   --highlight: #ff7477ff;
   --text-white: rgb(252, 252, 252);
 }
+
+html::-webkit-scrollbar {
+  width: 10px;
+}
+html::-webkit-scrollbar-track {
+  border-radius: 10px;
+  background-color: #b9b9b9;
+  border: 1px solid #cacaca;
+}
+html::-webkit-scrollbar-thumb {
+  border-radius: 8px;
+  background-color: rgb(75, 75, 75);
+}
 body {
   background-color: var(--background);
   color: var(--text-white);

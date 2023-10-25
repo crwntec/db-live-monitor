@@ -51,6 +51,11 @@ const stationSearch = (req, res) => {
 app.get("/", (req, res) => {
   res.redirect("/info");
 });
+app.get("/verify/:string", (req,res)=>{
+  if (ds100Pattern.test(req.params.string)) {
+     res.send((stations.find((s) => s.DS100 == req.params.string))!==undefined);
+  }
+})
 app.get("/search/:string", (req, res) => stationSearch(req, res));
 app.get("/info", (req, res) => {
   res.send(`
