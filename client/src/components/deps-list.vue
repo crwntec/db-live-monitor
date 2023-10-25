@@ -12,34 +12,42 @@
       </div>
     </div>
     <div class="settingsModal" :class="{ 'show': showModal }" v-if="showSettings">
-      <div class="settingsHeader">
-        <h2>Einstellungen</h2>
-        <font-awesome-icon class="exit" icon="xmark" size="lg" @click="closeSettings" />
-      </div>
-      <div class="settings-option">
-        <label>
-          Zugnummern anzeigen
-          <input type="checkbox" v-model="showLineNumbers" />
-        </label>
-      </div>
-      <div class="settings-option">
-        <label>
-          Sortieren nach:
-          <select class="selectOption" v-model="sortBy">
-            <option value="departure">Abfahrtszeit</option>
-            <option value="arrival">Ankunftszeit</option>
-          </select>
-          <select class="selectOption" v-model="sortOption">
-            <option value="when">Aktueller {{ sortBy == "departure" ? 'Abfahrtszeit' : 'Ankunftszeit' }}</option>
-            <option value="plannedWhen">Ursprünglicher {{ sortBy == "departure" ? 'Abfahrtszeit' : 'Ankunftszeit' }}
-            </option>
-          </select>
-        </label>
-      </div>
-      <div class="footer">
-        <p>Aktuelle Version: <a class="link" href="https://github.com/crwntec/db-live-monitor">{{ version }}</a></p>
-        <p>Letzte Datenaktualisierung: {{ lastUpdate.toLocaleTimeString('de-DE') }}</p>
-      </div>
+      <form action="#">
+        <div class="settingsHeader">
+          <h2>Einstellungen</h2>
+          <font-awesome-icon class="exit" icon="xmark" size="lg" @click="closeSettings" />
+        </div>
+        <div class="settings-option">
+          <label>
+            Zugnummern anzeigen
+            <input type="checkbox" v-model="showLineNumbers" />
+          </label>
+        </div>
+        <div class="settings-option">
+          <label>
+            Sortieren nach:
+            <select class="selectOption" v-model="sortBy">
+              <option value="departure">Abfahrtszeit</option>
+              <option value="arrival">Ankunftszeit</option>
+            </select>
+            <select class="selectOption" v-model="sortOption">
+              <option value="when">Aktueller {{ sortBy == "departure" ? 'Abfahrtszeit' : 'Ankunftszeit' }}</option>
+              <option value="plannedWhen">Ursprünglicher {{ sortBy == "departure" ? 'Abfahrtszeit' : 'Ankunftszeit' }}
+              </option>
+            </select>
+          </label>
+        </div>
+        <div class="settings-option">
+          <label >Aktualisierungsrate in Sekunden:
+             <input class="refreshRate" type="nunmber" v-model="refreshRate" min="5" max="30">
+          </label>
+        </div>
+        <div class="footer">
+          <p>Aktuelle Version: <a class="link" href="https://github.com/crwntec/db-live-monitor">{{ version }}</a></p>
+          <p>Letzte Datenaktualisierung: {{ lastUpdate.toLocaleTimeString('de-DE') }}</p>
+          <button type="submit" class="save" @click="closeSettings">Einstellungen Übernehmen</button>
+        </div>
+      </form>
     </div>
     <div class="stopsContainer">
       <trainDetailModal v-show="showModal" :show-modal="showModal" :data="modalData" :trainOrder="trainOrder"
@@ -110,7 +118,7 @@ export default defineComponent({
     let ibnr = this.$route.params.station
     const station = this.$route.query.i || this.$route.path.replace('/', '')
     // eslint-disable-next-line no-undef
-    this.connection = new WebSocket(`${import.meta.env.DEV ? 'ws://127.0.0.1:8080' : import.meta.env.VITE_BACKENDURI.replace(/https:\/{2}/g, 'wss://')}/wss?station=${ibnr}&refreshRate=${this.refreshRate}`)
+    this.connection = new WebSocket(`${import.meta.env.DEV ? 'ws://127.0.0.1:8080' : import.meta.env.VITE_BACKENDURI.replace(/https:\/{2}/g, 'wss://')}/wss?station=${ibnr}&refreshRate=${this.refreshRate*1000}`)
 
     this.connection.onmessage = (event: MessageEvent) => {
       if (event.data == 404) {
@@ -134,7 +142,7 @@ export default defineComponent({
       station: '',
       error: false,
       errorMsg: '',
-      refreshRate: 15000,
+      refreshRate: Number(sessionStorage.getItem('refreshRate')) || 15,
       showModal: false,
       modalData: null as unknown,
       trainOrder: null,
@@ -287,6 +295,7 @@ export default defineComponent({
       sessionStorage.setItem('showLineNumbers', this.showLineNumbers.toString())
       sessionStorage.setItem('sortBy', this.sortBy)
       sessionStorage.setItem('sortOption', this.sortOption)
+      sessionStorage.setItem('refreshRate', this.refreshRate.toString())
     },
     sortStops(a: Departures.Stop, b: Departures.Stop) {
       if (this.sortOption == "when") {
