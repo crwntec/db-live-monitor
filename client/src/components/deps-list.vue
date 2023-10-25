@@ -17,7 +17,6 @@
         <font-awesome-icon class="exit" icon="xmark" size="lg" @click="closeSettings" />
       </div>
       <div class="settings-option">
-        {{ sortBy + sortOption }}
         <label>
           Zugnummern anzeigen
           <input type="checkbox" v-model="showLineNumbers" />
@@ -25,12 +24,12 @@
       </div>
       <div class="settings-option">
         <label>
-          Sortieren nach: 
+          Sortieren nach:
           <select class="selectOption" v-model="sortBy">
             <option value="departure">Abfahrtszeit</option>
             <option value="arrival">Ankunftszeit</option>
           </select>
-          <select  class="selectOption" v-model="sortOption">
+          <select class="selectOption" v-model="sortOption">
             <option value="when">Aktueller {{ sortBy == "departure" ? 'Abfahrtszeit' : 'Ankunftszeit' }}</option>
             <option value="plannedWhen">Ursprünglicher {{ sortBy == "departure" ? 'Abfahrtszeit' : 'Ankunftszeit' }}
             </option>
@@ -39,6 +38,7 @@
       </div>
       <div class="footer">
         <p>Aktuelle Version: <a class="link" href="https://github.com/crwntec/db-live-monitor">{{ version }}</a></p>
+        <p>Letzte Datenaktualisierung: {{ lastUpdate.toLocaleTimeString('de-DE') }}</p>
       </div>
     </div>
     <div class="stopsContainer">
@@ -62,11 +62,11 @@
                 <div class="info">
                   <span v-if="item.hasNewTime" class="originalTime">{{ convertIRISTime(item.plannedWhen.split('|'), item,
                     false) }}</span>
-                  <span class="when" :style="{ 'color': item.hasNewTime ? 'red' : 'rgb(138, 255, 127)' }">
+                  <span class="when" :style="{ 'color': getTimeColor(item) }">
                     {{ convertIRISTime(item.when.split('|'), item, false) }}
-                    (+{{
-                      calculateDelay(item.plannedWhen.split('|'), item.when.split('|'), item)
-                    }})
+                    ({{ calculateDelay(item.plannedWhen.split('|'), item.when.split('|'), item) >= 0 ? '+' +
+                      calculateDelay(item.plannedWhen.split('|'), item.when.split('|'), item) :
+                      calculateDelay(item.plannedWhen.split('|'), item.when.split('|'), item) }})
                   </span>
                 </div>
                 <div class="platform">
@@ -107,7 +107,6 @@ export default defineComponent({
   name: 'Deps-List',
   components: { trainDetailModal },
   created: function () {
-    console.log('Connecting to socket...')
     let ibnr = this.$route.params.station
     const station = this.$route.query.i || this.$route.path.replace('/', '')
     // eslint-disable-next-line no-undef
@@ -118,11 +117,12 @@ export default defineComponent({
         this.error = true
         this.errorMsg = this.$route.query.i == '' ? 'Bitte Bahnhof eingeben' : `Für ${station} liegen keine Daten vor `
       } else {
+        this.lastUpdate = new Date(Date.now())
         let data: Departures.Timetable = JSON.parse(event.data)
         let departures: Departures.Stop[] = data.stops
 
         this.station = data.station
-        this.stops = departures.sort((a,b)=>this.sortStops(a,b))
+        this.stops = departures.sort((a, b) => this.sortStops(a, b))
       }
     }
   },
@@ -141,8 +141,9 @@ export default defineComponent({
       showSettings: false,
       showLineNumbers: sessionStorage.getItem('showLineNumbers') === "true" || false,
       sortOption: sessionStorage.getItem('sortOption') || "when",
-      sortBy: sessionStorage.getItem('sortBy') || "departure" ,
-      version: pjson.version
+      sortBy: sessionStorage.getItem('sortBy') || "departure",
+      version: pjson.version,
+      lastUpdate: new Date(Date.now())
     }
   },
   methods: {
@@ -171,8 +172,10 @@ export default defineComponent({
       const currMins = parseInt((item.hasArrival ? currentArr : currentDep).slice(6, 8)) * 60 + parseInt((item.hasArrival ? currentArr : currentDep).slice(8, 10))
       const planMins = parseInt((item.hasArrival ? plannedArr : plannedDep).slice(6, 8)) * 60 + parseInt((item.hasArrival ? plannedArr : plannedDep).slice(8, 10))
 
-      const delay = Math.abs(currMins - planMins)
-
+      const delay = currMins - planMins
+      if (delay < 0) {
+        return delay
+      }
       return delay
     },
     getColor(prodName: string) {
@@ -233,6 +236,22 @@ export default defineComponent({
           return trainCatColors.BUS;
       }
     },
+    getTimeColor(item: Departures.Stop) {
+      const delay = this.calculateDelay(item.plannedWhen.split('|'), item.when.split('|'), item)
+
+      if (delay < 0) {
+        return 'rgb(66, 217, 255)'
+      }
+      if (delay == 0) {
+        return 'rgb(138, 255, 127)'
+      } else if (delay <= 5) {
+        return 'rgb(235, 200, 7)'
+      } else if (delay <= 10) {
+        return 'rgb(255, 161, 66)'
+      } else if (delay > 10) {
+        return 'rgb(255, 66, 66)'
+      }
+    },
     getDelayMessage(dCauses: Departures.Message[]) {
       let messages: string[] = []
       dCauses.forEach((c) => messages.push(c.text))
@@ -264,7 +283,7 @@ export default defineComponent({
     },
     closeSettings() {
       this.showSettings = false
-      this.stops = this.stops.sort((a,b)=>this.sortStops(a,b))
+      this.stops = this.stops.sort((a, b) => this.sortStops(a, b))
       sessionStorage.setItem('showLineNumbers', this.showLineNumbers.toString())
       sessionStorage.setItem('sortBy', this.sortBy)
       sessionStorage.setItem('sortOption', this.sortOption)

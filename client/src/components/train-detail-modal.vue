@@ -136,7 +136,7 @@ export default defineComponent({
       </div>
       <div class="genInfo">
         <div class="arr">
-          <span v-if="data.hasArrival">Ankunft: <span :style="{ 'color': data.hasNewTime ? 'red' : 'white' }">{{
+          <span v-if="data.hasArrival">Ankunft: <span :style="{ 'color': $parent.getTimeColor(data) }">{{
             $parent?.convertIRISTime(data.when.split('|'),
               data, true) }}</span></span>
           <span v-if="data.hasNewArr && data.hasArrival">Geplant: {{
@@ -149,7 +149,7 @@ export default defineComponent({
           <span :style="{ 'color': data.hasNewPlatform ? 'red' : 'white' }">{{ " " + data.platform }}</span>
         </div>
         <div class="dep">
-          <span v-if="data.hasDeparture">Abfahrt: <span :style="{ 'color': data.hasNewTime ? 'red' : 'white' }">
+          <span v-if="data.hasDeparture">Abfahrt: <span :style="{ 'color': $parent.getTimeColor(data) }">
               {{ $parent?.convertIRISTime(data.when.split('|'), data, false) }} </span></span>
           <span v-if="data.hasNewTime && data.hasDeparture">Geplant: {{
             $parent?.convertIRISTime(data.plannedWhen.split('|'), data, false) }}</span>
