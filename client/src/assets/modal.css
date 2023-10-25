@@ -166,7 +166,15 @@
   margin-top: 1em;
 }
 .br {
+  align-items: center;
+  justify-content: center;
   text-align: center;
+  display: flex;
+  flex-direction: row;
+}
+.brContainer {
+  display: flex;
+  flex-direction: column;
 }
 .cancelledTrain {
   color: rgb(216, 137, 48);

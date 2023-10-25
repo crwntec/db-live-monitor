@@ -82,6 +82,7 @@ export interface Line {
 
 export interface TrainOrder {
   baureihe: string
+  trainId: string
   firstTrain: Train[]
   doubleTraction: boolean
   secondTrain: Train[]
