@@ -64,12 +64,16 @@ export default defineComponent({
         this.openRemarks.push(remarkId);
       }
     },
-    getTime: function (stops: Departures.Stop[] | null, currentStop: string): string {
+    getTime: function (stops: Departures.HafasData[] | null, currentStop: string): string {
       if (stops) {
         const stop = stops.find((o) => o.stop.name === currentStop);
-        const dateString = stop?.departure || stop.plannedDeparture || stop?.arrival || '';
-        const date = new Date(dateString);
-        return `${date.getHours().toLocaleString('de', { minimumIntegerDigits: 2 })}:${date.getMinutes().toLocaleString('de', { minimumIntegerDigits: 2 })}`;
+        if (stop) {
+          const dateString = stop?.departure || stop.plannedDeparture || stop?.arrival || '';
+          const date = new Date(dateString);
+          return `${date.getHours().toLocaleString('de', { minimumIntegerDigits: 2 })}:${date.getMinutes().toLocaleString('de', { minimumIntegerDigits: 2 })}`;
+        } else {
+          return 'Unbekannte Zeit:'
+        }
       } else {
         return '';
       }
@@ -258,7 +262,7 @@ export default defineComponent({
                 {{ coach.id }}
               </div>
               <div v-if="coach.kategorie !== 'Lok'">
-                {{ coach.typ }}
+                {{ coach.class }}
               </div>
               <div v-if="coach.kategorie == 'Lok'">
                 {{ coach.baureihe }}
@@ -330,9 +334,8 @@ export default defineComponent({
           <span v-if="!coach.isLocomotive" class="section">{{ coach.abschnitt }}</span>
         </div>
       </div>
-      <div class="br"> ------------ <div class="brContainer"><span>Baureihe {{ trainOrder.baureihe }}</span><span> (
-            {{trainOrder.trainId.slice(0,3)=="ICE" ? 'Tz ' + trainOrder.trainId.replace(/[^0-9]/g, "") :
-            trainOrder.trainId}} )</span></div> ------------></div>
+      <div class="br"> ------------ <div class="brContainer"><span>Baureihe {{ trainOrder.baureihe }}</span><span> ( Tz
+            {{trainOrder.trainId}} )</span></div> ------------></div>
     </div>
   </div>
 </div></template>

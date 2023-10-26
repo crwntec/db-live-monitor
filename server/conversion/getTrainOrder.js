@@ -16,7 +16,7 @@ const getClass = (fahrzeugtyp) => {
     case "W":
       const _w =
         fahrzeugtyp.slice(1, 2) == "R" ? "IC-Speisewagen" : "Schlafwagen";
-      return _w
+      return _w;
     default:
       break;
   }
@@ -45,6 +45,41 @@ const formatCategory = (inputString) => {
   }
   return inputString;
 };
+
+const parseTrainId = (tid) => {
+  const isLongD = tid.startsWith("I");
+  const isRe_1 = tid.startsWith("T");
+  const isUIC = !isNaN(tid.slice(0, 1));
+
+  if (isLongD) {
+    const _ = tid.replace(/[A-Z]/g, "");
+    if (_.startsWith("0")) {
+      return _.substring(1);
+    }
+    return _;
+  }
+  if (isRe_1) {
+    const _ = tid.substring(2);
+    const _1 = _.slice(0,3)
+    const _2 = _.slice(3)
+    return `${_1}-${_2}`
+  }
+  if (isUIC) {
+    const regex = /^(\d{2})(\d{2})(\d{4})(\d{4})(\d{1})?$/;
+    const match = tid.match(regex);
+    if (match) {
+      const vehicleTypeCode = match[1];
+      const countryCode = match[2];
+      const buildSeries = match[3];
+      const orderNumber = match[4];
+
+      return `${vehicleTypeCode}-${countryCode}-${buildSeries}-${orderNumber}`;
+    } else {
+      return tid
+    }
+  }
+};
+
 const normalizeCap = (str) => {
   str = str.charAt(0).toUpperCase() + str.toLowerCase().slice(1);
   return str;
@@ -76,7 +111,7 @@ const constructcoach = (coach) => {
   };
 };
 
-export const getTrainOrder = (data) => {
+export const getTrainOrder = (data, isICE) => {
   let fzg1 = data.data.istformation.allFahrzeuggruppe[0];
   let fzg2 = data.data.istformation.allFahrzeuggruppe[1];
   let dotra = false;
@@ -84,13 +119,16 @@ export const getTrainOrder = (data) => {
     dotra = fzg2.allFahrzeug[0].kategorie !== "LOK";
   }
   let baureihe = "";
-  let trainId = fzg1.fahrzeuggruppebezeichnung
+  let trainId = fzg1.fahrzeuggruppebezeichnung;
   let coaches = [];
   let coachesFzg2 = [];
   let onlyPlanData = data.data.istformation.istplaninformation;
   fzg1.allFahrzeug.forEach((coach) => {
     if (coach.kategorie == "LOK") {
-      baureihe = "Lok + Wagen"
+      baureihe = "Lok + Wagen";
+    }
+    if (coach.kategorie == "DOPPELSTOCKSTEUERWAGENERSTEZWEITEKLASSE") {
+      baureihe = "IC 2 (KISS)";
     }
     coaches.push(constructcoach(coach));
   });
@@ -99,7 +137,7 @@ export const getTrainOrder = (data) => {
       coachesFzg2.push(constructcoach(coach));
     });
   }
-  if (baureihe !== "Lok + Wagen") {
+  if (isICE) {
     switch (coaches[0].baureihe) {
       case "5401":
         baureihe = "401 (ICE 1)";
@@ -125,7 +163,7 @@ export const getTrainOrder = (data) => {
       case "5415":
         baureihe = "408 (ICE T)";
         break;
-  
+
       case "0812":
       case "5812":
         baureihe = "412.0 (ICE 4 12tlg.)";
@@ -134,7 +172,7 @@ export const getTrainOrder = (data) => {
       case "7812":
         baureihe = "412.2 (ICE 4 7tlg.)";
         break;
-  
+
       default:
         if (coaches[-1].baureihe == "5402") {
           baureihe = "402 (ICE 2)";
@@ -144,7 +182,7 @@ export const getTrainOrder = (data) => {
   }
   return {
     baureihe: baureihe,
-    trainId: trainId,
+    trainId: parseTrainId(trainId),
     firstTrain: coaches,
     doubleTraction: dotra,
     secondTrain: coachesFzg2,

@@ -234,6 +234,9 @@
   .stops {
     padding: 10px;
   }
+  .pageHeader {
+    height: 10vh;
+  }
   .headerIcon {
     margin: 0 1rem 0 1rem;
   }

@@ -5,13 +5,14 @@
     <router-link to="/"><button class="errButton">Zurück</button></router-link>
   </div>
   <div v-if="!error" class="container">
-    <div class="pageHeader">
-      <h1 class="heading"><router-link to="/">{{ station }}</router-link></h1>
+    <div v-if="!loading" class="pageHeader">
+      <h1  class="heading"><router-link to="/">{{ station }}</router-link></h1>
       <div class="headerIcons">
         <font-awesome-icon class="headerIcon settingsIcon" icon="gear" size="lg" @click="showSettings = !showSettings" />
       </div>
     </div>
-    <div class="settingsModal" :class="{ 'show': showModal }" v-if="showSettings">
+    <div v-if="loading" class="progress"></div>
+    <div  class="settingsModal" :class="{ 'show': showModal }" v-if="showSettings">
       <form action="#">
         <div class="settingsHeader">
           <h2>Einstellungen</h2>
@@ -104,6 +105,7 @@ import { defineComponent } from 'vue'
 import type * as Departures from '../types/departures-types'
 import "../assets/monitor.css"
 import "../assets/main.css"
+import "../assets/loading.css"
 import { trainCatColors } from '@/assets/trainCatColors'
 import trainDetailModal from './train-detail-modal.vue'
 import 'vue-virtual-scroller/dist/vue-virtual-scroller.css'
@@ -121,6 +123,7 @@ export default defineComponent({
     this.connection = new WebSocket(`${import.meta.env.DEV ? 'ws://127.0.0.1:8080' : import.meta.env.VITE_BACKENDURI.replace(/https:\/{2}/g, 'wss://')}/wss?station=${ibnr}&refreshRate=${this.refreshRate*1000}`)
 
     this.connection.onmessage = (event: MessageEvent) => {
+      this.loading = false
       if (event.data == 404) {
         this.error = true
         this.errorMsg = this.$route.query.i == '' ? 'Bitte Bahnhof eingeben' : `Für ${station} liegen keine Daten vor `
@@ -137,6 +140,7 @@ export default defineComponent({
   data() {
     return {
       connection: {} as WebSocket,
+      loading: true,
       stops: [] as Departures.Stop[],
       isScrollableArr: [] as Object[],
       station: '',
@@ -274,7 +278,7 @@ export default defineComponent({
     },
     async displayModal(data: Departures.Stop) {
       if (data.hasDeparture) {
-        const wr = await fetch(`${import.meta.env.DEV ? 'http://127.0.0.1:8080' : import.meta.env.VITE_BACKENDURI}/wr/${data.line.fahrtNr}/${data.plannedWhen.split('|')[1]}`)
+        const wr = await fetch(`${import.meta.env.DEV ? 'http://127.0.0.1:8080' : import.meta.env.VITE_BACKENDURI}/wr/${data.line.fahrtNr}/${data.plannedWhen.split('|')[1]}?type=${data.line.productName}`)
 
         if (wr.status !== 204) {
           let resText = await wr.text()

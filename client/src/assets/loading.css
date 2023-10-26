@@ -1,0 +1,51 @@
+.spinner {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: conic-gradient(#0000 10%,#ff7477);
+    -webkit-mask: radial-gradient(farthest-side,#0000 calc(100% - 9px),#000 0);
+    animation: spinner-zp9dbg 1s infinite linear;
+ }
+ 
+ .progress {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 136.4px;
+    height: 24.6px;
+    border-radius: 22.4px;
+    color: #58bdf8;
+    border: 2.2px solid;
+ }
+
+ .progress::before {
+    left: 50%;
+    top: 50%;
+    content: "";
+    position: absolute;
+    margin: 2.2px;
+    inset: 0 100% 0 0;
+    border-radius: inherit;
+    background: currentColor;
+    animation: progress-pf82op 2s infinite;
+ }
+ 
+ @keyframes progress-pf82op {
+    100% {
+       inset: 0;
+    }
+ }
+
+ @keyframes spinner-zp9dbg {
+    to {
+       transform: rotate(1turn);
+    }
+ }
+ @media only screen and (min-width: 300px) and (max-width: 1100px)  {
+    .progress {
+        left: 30vw;
+    }
+ }

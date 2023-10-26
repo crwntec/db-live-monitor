@@ -102,7 +102,12 @@
   border: 1px solid #FFFFFF;
   border-radius: 5em 1em .5em .5em;
 }
+.controlCar.flipped {
+  padding-left: 0;
+  padding-right: 0.5em;
+}
 .flipped {
+  padding-left: 1em;
   border-radius: 1em 5em .5em .5em;
 }
 
@@ -163,7 +168,7 @@
 }
 .section {
   text-align: center;
-  margin-top: 1em;
+  margin-top: 1.5em;
 }
 .br {
   align-items: center;
