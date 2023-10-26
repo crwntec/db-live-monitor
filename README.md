@@ -1,6 +1,6 @@
 ![ghlogo](https://github.com/crwntec/db-live-monitor/assets/77750176/21e6bb43-014b-42f9-880a-8c2a4c1f42db)
 ## Unofficial Live Departure Monitor for German Railway Stations
-[![Node.js](https://img.shields.io/badge/Node.js-18.x-green)](https://nodejs.org/) [![Vue.js](https://img.shields.io/badge/Vue.js-3.x-brightgreen)](https://vuejs.org/) [![IRIS](https://img.shields.io/badge/IRIS-Data%20Source-orange)](https://iris.noncd.db.de/wbt/js/index.html) [![HAFAS](https://img.shields.io/badge/HAFAS-Data%20Source-blue)](https://github.com/public-transport/hafas-client/)
+[![Node.js](https://img.shields.io/badge/Node.js-18.x-green)](https://nodejs.org/) [![Vue.js](https://img.shields.io/badge/Vue.js-3.x-brightgreen)](https://vuejs.org/) [![IRIS](https://img.shields.io/badge/IRIS-Data%20Source-orange)](https://iris.noncd.db.de/wbt/js/index.html) [![HAFAS](https://img.shields.io/badge/HAFAS-Data%20Source-blue)](https://github.com/public-transport/hafas-client/)[![wakatime](https://wakatime.com/badge/user/0dd6c2ab-d4ea-49c4-a2b9-be47b5302c80/project/e65616e1-1813-4db0-ac6f-f4ff9c32d6a6.svg)](https://wakatime.com/badge/user/0dd6c2ab-d4ea-49c4-a2b9-be47b5302c80/project/e65616e1-1813-4db0-ac6f-f4ff9c32d6a6)
 
 ![image](https://github.com/crwntec/db-live-monitor/assets/77750176/513a37c8-9c3f-4d88-9581-2d476beb6325)
 ![image](https://github.com/crwntec/db-live-monitor/assets/77750176/476a2ae5-48ef-437e-a90b-a800ac08d766)
