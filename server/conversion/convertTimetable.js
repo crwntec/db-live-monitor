@@ -190,35 +190,40 @@ export const convertTimetable = (data1, data2, changes, fullChanges) => {
         : [];
       let wing = {};
       if (hasWings) {
-        let wingDef = await getWings(e.attributes.id, wings);
-        wingDef = wingDef.elements[0].elements;
-        const start = wingDef.find((e) => e.name == "start");
-        const end = wingDef.find((e) => e.name == "end");
-        wing = {
-          origin: e.attributes.id,
-          wing: wings,
-          start: {
-            station: start.attributes["st-name"],
-            pt: start.attributes.pt,
-          },
-          end: {
-            station: end.attributes["st-name"],
-            pt: end.attributes.pt,
-          },
-        };
-        let wing2 = {
-          origin: wings,
-          wing: e.attributes.id,
-          start: {
-            station: start.attributes["st-name"],
-            pt: start.attributes.pt,
-          },
-          end: {
-            station: end.attributes["st-name"],
-            pt: end.attributes.pt,
-          },
-        };
-        wingsCache.push(wing2);
+        let _ = await getWings(e.attributes.id, wings);
+        let wingDef = _.elements[0].elements;
+        if (wingDef) {
+          const start = wingDef.find((e) => e.name == "start");
+          const end = wingDef.find((e) => e.name == "end");
+          wing = {
+            origin: e.attributes.id,
+            wing: wings,
+            start: {
+              station: start.attributes["st-name"],
+              pt: start.attributes.pt,
+            },
+            end: {
+              station: end.attributes["st-name"],
+              pt: end.attributes.pt,
+            },
+          };
+          let wing2 = {
+            origin: wings,
+            wing: e.attributes.id,
+            start: {
+              station: start.attributes["st-name"],
+              pt: start.attributes.pt,
+            },
+            end: {
+              station: end.attributes["st-name"],
+              pt: end.attributes.pt,
+            },
+          };
+          wingsCache.push(wing2);
+        } else {
+          hasWings = false
+          console.log("Wingdef error ocurred")
+        }
       } else {
         wing = wingsCache.find((o) => e.attributes.id.includes(o.origin));
         if (wing) {
