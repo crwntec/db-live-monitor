@@ -91,6 +91,10 @@ export default defineComponent({
         default:
           break;
       }
+    },
+    checkIn() {
+      console.log(this.hafasData)
+      this.$router.push(`/trip/${this.hafasData.id}`)
     }
   },
   computed: {
@@ -135,7 +139,7 @@ export default defineComponent({
             :style="{ backgroundColor: $parent?.getColor(data.line.productName) }">{{ data.line.name }}
           </span>{{
             data.line.fahrtNr }}</h1>
-        <h2 class="fromTo"> {{ typeof data.from == 'string' ? data.from : data.from.stop }} -> {{ data.to }}</h2>
+        <h2 class="fromTo"> {{ typeof data.from == 'string' ? data.from : data.from.stop }} 🡒  {{ data.to }}</h2>
         <h2 v-if="data.cancelled" class="cancelledTrain">🚫Fahrt fällt aus</h2>
       </div>
       <div class="genInfo">
@@ -165,6 +169,9 @@ export default defineComponent({
       <span class="loading" v-if="loading">
         <div class="loader"></div>Lade Daten
       </span>
+      <div v-if="hafasData && !loading" class="checkIn">
+          <button @click="checkIn" class="checkInBtn"><font-awesome-icon :icon="['fas', 'train']" /> Check In</button>
+      </div>
       <div v-if="hafasData && !loading">
         <span v-if="hafasData.loadFactor" class="occupancyContainer">Auslastung:
           <svg v-if="hafasData.loadFactor == 'low'" class="occupancy" viewBox="0 0 33 32" fill="none"
@@ -335,7 +342,7 @@ export default defineComponent({
         </div>
       </div>
       <div class="br"> ------------ <div class="brContainer"><span>Baureihe {{ trainOrder.baureihe }}</span><span> ( Tz
-            {{trainOrder.trainId}} )</span></div> ------------></div>
+            {{trainOrder.trainId}} )</span></div> -----------🡒 </div>
     </div>
   </div>
 </div></template>

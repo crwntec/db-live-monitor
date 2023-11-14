@@ -5,10 +5,13 @@ import VueVirtualScroller from 'vue-virtual-scroller'
 import { library } from '@fortawesome/fontawesome-svg-core'
 import { faGear } from '@fortawesome/free-solid-svg-icons'
 import { faXmark } from '@fortawesome/free-solid-svg-icons'
+import { faTrain } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
+import './registerServiceWorker'
 
 library.add(faGear)
 library.add(faXmark)
+library.add(faTrain)
 
 createApp(App)
   .use(router)

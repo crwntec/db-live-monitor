@@ -8,7 +8,7 @@ interface Suggestion {
     value: string
 }
 export default {
-    name: "Home-Component",
+    name: "Home-View",
     data() {
         return {
             input: '',

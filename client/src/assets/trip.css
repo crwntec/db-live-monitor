@@ -1,0 +1,61 @@
+.stopovers {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.stopover {
+  display: grid;
+  grid-template-columns: 0.6fr 0.3fr 2.1fr;
+  grid-template-rows: 0.4fr 1.6fr;
+  gap: 0px 0px;
+  grid-template-areas:
+    'time dot name'
+    '. line .';
+  height: 4.5em;
+}
+.stops {
+  margin-top: 3em;
+}
+.stopName {
+  grid-area: name;
+  margin: auto 0 auto 0;
+}
+.stopDot {
+  padding: 4px;
+  grid-area: dot;
+  margin: auto;
+  z-index: 10;
+}
+.tripView {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.time {
+  display: flex;
+  flex-direction: column;
+  padding: 0.2em;
+  height: 100%;
+  grid-area: time;
+}
+.overlapLine {
+  width: 30%;
+  height: 250%;
+  margin: 0 auto;
+  transform: translateY(-1em);
+  background: #fff;
+  padding: 1px;
+  grid-area: line;
+  border-radius: 0;
+}
+.overlapLine.passed {
+    background-color: #FF5959;
+}
+.overlapLine.base {
+    z-index: 0;
+}
+.lineLg {
+    margin-top: .8em;
+    padding: .5em;
+    font-size: 28px;
+}

@@ -219,6 +219,18 @@
   margin: .25em;
   width: 20px;
 }
+.checkInBtn {
+  background-color: #3498db;
+  border: none;
+  border-radius: .5em;
+  color: white;
+  padding: 5px;
+}
+.checkInBtn:hover {
+  cursor: pointer;
+  color: var(--bg-darker);
+  background-color: var(--accent);
+}
 
 @keyframes spin {
   0% {

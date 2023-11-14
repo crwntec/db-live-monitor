@@ -1,4 +1,4 @@
-import moment from "moment/moment.js";
+import moment from "moment-timezone";
 import fs from "fs";
 import { log } from "console";
 import { makeRequest } from "../request/makeRequest.js";
@@ -23,7 +23,7 @@ function convertISOTime(timestamp) {
 }
 
 const hasLeft = (when, hasDeparture) => {
-  const timestamp = moment(Date.now()).utcOffset(120).format("YYMMDDHHmm");
+  const timestamp = moment().tz("Europe/Berlin").format("YYMMDDHHmm");
   return (parseInt(hasDeparture ? when.split("|")[1] : when.split("|")[0]) -
     parseInt(timestamp) < 0);
 }
@@ -301,7 +301,7 @@ export const convertTimetable = (data1, data2, changes, fullChanges) => {
     const wingCheckPromise = dataTimetable.elements.map(processStop);
     processedStops = await Promise.all(wingCheckPromise);
 
-    const timestamp = moment(Date.now()).utcOffset(120).format("YYMMDDHHmm");
+    const timestamp = moment().tz("Europe/Berlin").format("YYMMDDHHmm");
     newJSON.stops = processedStops.filter(
       (e) =>
         (parseInt(

@@ -1,5 +1,5 @@
 import { WebSocketServer } from "ws";
-import moment from "moment/moment.js";
+import moment from "moment-timezone";
 import axios from "axios";
 import http from "http";
 import express from "express";
@@ -17,28 +17,25 @@ import parsePolyline from "./util/parsePolyline.js";
 import { getCachedDepartures, getCachedArrivals } from "./cache/cache.js";
 import initHafas from "./util/initHafas.js";
 
-
-
 const app = express();
 app.use(cors());
 const server = http.createServer(app);
-const PORT = process.env.PORT || 8080
+const PORT = process.env.PORT || 8080;
 
 server.listen(PORT, () => console.log("running"));
 
 let refreshRate = 15000;
 
-const wss = new WebSocketServer({ server: server, path: "/wss" });
+const wss = new WebSocketServer({ server: server });
 
 const ds100Pattern = /^[abdefhklmnrstuw]{1}[a-z]|[A-Z]{1,4}$/;
 
-const hafas = initHafas()
+const hafas = initHafas();
 
 let fullChanges = {};
 const assignChanges = (changes) => (fullChanges = changes);
 let ibnr;
 const assignIBNR = (x) => (ibnr = x);
-
 
 const stationSearch = (req, res) => {
   stationRequest(req.params.string).then((data) => {
@@ -51,11 +48,11 @@ const stationSearch = (req, res) => {
 app.get("/", (req, res) => {
   res.redirect("/info");
 });
-app.get("/verify/:string", (req,res)=>{
+app.get("/verify/:string", (req, res) => {
   if (ds100Pattern.test(req.params.string)) {
-     res.send((stations.find((s) => s.DS100 == req.params.string))!==undefined);
+    res.send(stations.find((s) => s.DS100 == req.params.string) !== undefined);
   }
-})
+});
 app.get("/search/:string", (req, res) => stationSearch(req, res));
 app.get("/info", (req, res) => {
   res.send(`
@@ -68,7 +65,7 @@ app.get("/info", (req, res) => {
 app.get("/wr/:nr/:ts", async (req, response) => {
   const trainNumber = req.params.nr;
   const timestamp = "20" + req.params.ts;
-  const isICE = req.query.type == 'ICE'
+  const isICE = req.query.type == "ICE";
 
   try {
     const res = await axios.get(
@@ -77,10 +74,10 @@ app.get("/wr/:nr/:ts", async (req, response) => {
     const trainOrderObj = getTrainOrder(res.data, isICE);
     response.send(trainOrderObj);
   } catch (error) {
-    if (error.code='ERR_BAD_REQUEST') {
+    if ((error.code = "ERR_BAD_REQUEST")) {
       response.sendStatus(204);
     } else {
-      response.sendStatus(500)
+      response.sendStatus(500);
     }
   }
 });
@@ -90,7 +87,7 @@ app.get("/details/:fahrtNr", async (req, res) => {
     let possibleTrips;
     if (req.query.isDeparture == "true") {
       possibleTrips = await getCachedDepartures(hafas, ibnr.toString());
-    } else if(req.query.isDeparture == "false") {
+    } else if (req.query.isDeparture == "false") {
       possibleTrips = await getCachedArrivals(hafas, ibnr.toString());
     }
     const trip = possibleTrips.find(
@@ -126,13 +123,25 @@ app.get("/details/:fahrtNr", async (req, res) => {
 });
 
 wss.on("connection", async (socket, req) => {
+  let url = new URL(req.url, `http://${req.headers.host}`);
+  if (url.pathname == "/wss") {
+    let stationStr = url.searchParams.get("station");
+    handleMonitorReq(url, socket, stationStr);
+  } else if (url.pathname == "/trip") {
+    handleTripReq(url, socket);
+  }
+
+  socket.on("message", (message) => {
+    console.log("Received message:", message);
+  });
+});
+
+async function handleMonitorReq(url, socket, stationStr) {
   const getIBNR = (stationStr) =>
     stationRequest(stationStr).then((data) =>
       assignIBNR(parseInt(data.suggestions[0].extId))
     );
 
-  let url = new URL(req.url, `http://${req.headers.host}`);
-  let stationStr = url.searchParams.get("station");
   refreshRate = url.searchParams.get("refreshRate") || 15000;
   if (ds100Pattern.test(stationStr)) {
     var station = stations.find((s) => s.DS100 == stationStr);
@@ -147,10 +156,13 @@ wss.on("connection", async (socket, req) => {
 
   const fetchIRISDepartures = async () => {
     if (ibnr) {
-      const currentDate = moment(Date.now()).utcOffset(120).format("YYMMDD");
-      const currentHour = moment(Date.now()).utcOffset(120).format("HH");
-      const nextDate = moment(Date.now()).utcOffset(180).format("YYMMDD");
-      const nextHour = moment(Date.now()).utcOffset(180).format("HH");
+      const currentDate = moment().tz("Europe/Berlin").format("YYMMDD");
+      const currentHour = moment().tz("Europe/Berlin").format("HH");
+      const nextDate = moment()
+        .tz("Europe/Berlin")
+        .add(1, "hour")
+        .format("YYMMDD");
+      const nextHour = moment().tz("Europe/Berlin").add(1, "hour").format("HH");
       const currentTimetableUrl = `https://iris.noncd.db.de/iris-tts/timetable/plan/${ibnr}/${currentDate}/${currentHour}`;
       const nextTimetableUrl = `https://iris.noncd.db.de/iris-tts/timetable/plan/${ibnr}/${nextDate}/${nextHour}`;
       const fchgUrl = `https://iris.noncd.db.de/iris-tts/timetable/fchg/${ibnr}/`;
@@ -217,13 +229,24 @@ wss.on("connection", async (socket, req) => {
   };
 
   setTimeout(fetchChanges, refreshRate);
-
-  socket.on("message", (message) => {
-    console.log("Received message:", message);
-  });
-
   socket.on("close", () => {
     timetable = {};
     fullChanges = {};
   });
-});
+}
+
+const handleTripReq = async (url, socket) => {
+  const tripId = url.searchParams.get("trip");
+
+  const refresh = async () => {
+    try {
+      const trip = await hafas.trip(tripId);
+      if (!trip) socket.send(404);
+      else socket.send(JSON.stringify(trip));
+    } catch (error) {
+      console.log(error);
+    }
+  };
+  refresh();
+  setTimeout(refresh, 15000);
+};

@@ -1,17 +1,22 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import depsList from "./components/deps-list.vue";
-import Home from "./components/home-component.vue"
+import Monitor from "./views/monitor-view.vue"
+import Home from "./views/home-view.vue"
+import Trip from "./views/trip-view.vue"
 
 export default createRouter({
     history: createWebHistory(),
     routes: [
       {
         path: '/:station',
-        component: depsList,
+        component: Monitor,
       },
       {
         path: '/',
         component: Home
+      },
+      {
+        path: '/trip/:tripId',
+        component: Trip
       }
     ]
   })

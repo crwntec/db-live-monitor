@@ -152,7 +152,7 @@ export interface HafasData {
   stops: Object[]
 }
 
-interface Stopover {
+export interface Stopover {
   stop: {
     type: string
     id: string
