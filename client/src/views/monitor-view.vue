@@ -11,8 +11,10 @@
         <font-awesome-icon class="headerIcon settingsIcon" icon="gear" size="lg" @click="showSettings = !showSettings" />
       </div>
     </div>
-    <div v-if="loading" class="progress"></div>
-    <div  class="settingsModal" :class="{ 'show': showModal }" v-if="showSettings">
+    <div  v-if="loading" class="loadingContainer">
+      <div class="progress"></div>
+    </div>
+    <div class="settingsModal" :class="{ 'show': showModal }" v-if="showSettings">
       <form action="#">
         <div class="settingsHeader">
           <h2>Einstellungen</h2>

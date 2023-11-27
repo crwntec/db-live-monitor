@@ -9,11 +9,16 @@
     -webkit-mask: radial-gradient(farthest-side,#0000 calc(100% - 9px),#000 0);
     animation: spinner-zp9dbg 1s infinite linear;
  }
- 
+.loadingContainer {
+   position: relative;
+   height: 100vh;
+   width: 100%;
+   display: flex;
+   align-items: center;
+   justify-content: center;
+}
  .progress {
-    position: absolute;
-    left: 50%;
-    top: 50%;
+   position: relative;
     width: 136.4px;
     height: 24.6px;
     border-radius: 22.4px;
