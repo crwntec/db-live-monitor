@@ -7,7 +7,6 @@ import { faGear } from '@fortawesome/free-solid-svg-icons'
 import { faXmark } from '@fortawesome/free-solid-svg-icons'
 import { faTrain } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
-import './registerServiceWorker'
 
 library.add(faGear)
 library.add(faXmark)
