@@ -12,9 +12,10 @@ export default {
     data() {
         return {
             input: '',
+            loading: false,
             suggestions: [] as Suggestion[],
             showSuggestions: true,
-            currentSuggestion: {} as Suggestion,
+            currentSuggestion: undefined as Suggestion | undefined,
             hasSelected: false,
             abortController: new AbortController(),
             apiBase: import.meta.env.DEV ? 'http://127.0.0.1:8080': import.meta.env.VITE_BACKENDURI
@@ -23,24 +24,31 @@ export default {
     watch: {
         input(newInput) {
             this.abortController.abort()
-            if(this.input.length==0 && !this.showSuggestions) this.showSuggestions = true
+            if(!this.showSuggestions && this.input.length==0 && !this.currentSuggestion) {
+                this.showSuggestions = true
+                console.log("fired")
+            }
             if(this.input.length==0) this.suggestions=[]
-            this.getStops(newInput)
+            this.getStops(encodeURIComponent(newInput))
         }
     },
     methods: {
         async getStops(inputStr: string) {
+            this.loading = true
             if (inputStr=='' || inputStr.length <= 2) {
-               this.suggestions = []
+                this.suggestions = []
             } else {
                 const res = await axios.get(`${this.apiBase}/search/${inputStr}`)
+                this.showSuggestions = true
                 this.suggestions = res.data
+                this.loading = false
             }
         },
         async openStation(){
             if (this.input) {
+                let parsed = encodeURIComponent(this.input)
                 if (!this.hasSelected) {
-                    const res = await axios.get(`${this.apiBase}/verify/${this.input}`)
+                    const res = await axios.get(`${this.apiBase}/verify/${parsed}`)
                     if (res.data==true) {
                         this.$router.push('/' + this.input)
                     }
@@ -58,18 +66,21 @@ export default {
         <h1 class="title">DB-Live Monitor</h1>
         <div class="input">
             <input class="stationInput" v-model="input" placeholder="Bahnhof suchen">
-            <div v-if="suggestions.length > 0 && showSuggestions" class="suggestions">
-                <div
-                class="suggestion" 
-                @click="()=>{
-                    input = decodeURIComponent(suggestion.value)
-                    showSuggestions = false,
-                    currentSuggestion = suggestion,
-                    hasSelected = true
-                }"
-                v-bind:key="suggestion.extId" 
-                v-for="suggestion in suggestions">
-                    {{decodeURIComponent(suggestion.value)}}
+            <div class="suggestionsContainer">
+                <div v-if="loading" class="suggestionsLoading"><div class="spinner noMargin"></div></div>
+                <div v-if="showSuggestions && !loading && currentSuggestion==undefined " class="suggestions">
+                    <div
+                    class="suggestion"
+                    @click="()=>{
+                        input = decodeURIComponent(suggestion.value)
+                        showSuggestions = false,
+                        currentSuggestion = suggestion,
+                        hasSelected = true
+                    }"
+                    v-bind:key="suggestion.extId"
+                    v-for="suggestion in suggestions">
+                        {{decodeURIComponent(suggestion.value)}}
+                    </div>
                 </div>
             </div>
             <button @click="openStation" role="link" class="stationSubmit">Suchen</button>

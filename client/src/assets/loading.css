@@ -5,9 +5,12 @@
     width: 56px;
     height: 56px;
     border-radius: 50%;
-    background: conic-gradient(#0000 10%,#ff7477);
+    background: conic-gradient(#0000 10%,#58bdf8);
     -webkit-mask: radial-gradient(farthest-side,#0000 calc(100% - 9px),#000 0);
     animation: spinner-zp9dbg 1s infinite linear;
+ }
+ .noMargin {
+   position: inherit
  }
 .loadingContainer {
    position: relative;
