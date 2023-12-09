@@ -139,7 +139,7 @@ export default defineComponent({
             :style="{ backgroundColor: $parent?.getColor(data.line.productName) }">{{ data.line.name }}
           </span>{{
             data.line.fahrtNr }}</h1>
-        <h2 class="fromTo"> {{ typeof data.from == 'string' ? data.from : data.from.stop }} 🡒  {{ data.to }}</h2>
+        <h2 class="fromTo"> {{ typeof data.from == 'string' ? data.from : data.from.stop }} ➡️  {{ data.to }}</h2>
         <h2 v-if="data.cancelled" class="cancelledTrain">🚫Fahrt fällt aus</h2>
       </div>
       <div class="genInfo">
