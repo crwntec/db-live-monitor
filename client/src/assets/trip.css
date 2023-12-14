@@ -5,7 +5,7 @@
 }
 .stopover {
   display: grid;
-  grid-template-columns: 0.6fr 0.3fr 2.1fr;
+  grid-template-columns: 0.3fr .2fr 2fr;
   grid-template-rows: 0.4fr 1.6fr;
   gap: 0px 0px;
   grid-template-areas:
@@ -39,7 +39,7 @@
   grid-area: time;
 }
 .overlapLine {
-  width: 30%;
+  width: 20%;
   height: 250%;
   margin: 0 auto;
   transform: translateY(-1em);
@@ -58,4 +58,10 @@
     margin-top: .8em;
     padding: .5em;
     font-size: 28px;
+}
+
+@media only screen and (min-width: 300px) and (max-width: 800px) {
+  .stopover {
+    grid-template-columns: 0.3fr .9fr 2fr;
+  }
 }

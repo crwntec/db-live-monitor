@@ -100,6 +100,7 @@
   background-color: var(--background);
 }
 .stopRow {
+  cursor: pointer;
   font-size: 0.8vw;
   padding: 10px;
   border-bottom: 1px solid gray;

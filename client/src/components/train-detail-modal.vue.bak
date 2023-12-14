@@ -93,7 +93,6 @@ export default defineComponent({
       }
     },
     checkIn() {
-      console.log(this.hafasData)
       this.$router.push(`/trip/${this.hafasData.id}`)
     }
   },

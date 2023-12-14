@@ -1,4 +1,7 @@
+// util/colorUtils.ts
+import type * as Departures from '../types/departures-types'
 import { trainCatColors } from '../assets/trainCatColors'
+import { calculateDelay } from './date'
 export function getColor(prodName: string): string {
   const p = prodName.toLowerCase()
   switch (true) {
@@ -58,4 +61,31 @@ export function getColor(prodName: string): string {
     default:
       return 'default-color' // Add a default color if none of the cases match
   }
+}
+
+export function getTimeColor(item: Departures.Stop) {
+  const delay = calculateDelay(item.plannedWhen.split('|'), item.when.split('|'), item)
+
+  if (delay < 0) {
+    return 'rgb(66, 217, 255)'
+  }
+  if (delay === 0) {
+    return 'rgb(138, 255, 127)'
+  } else if (delay <= 5) {
+    return 'rgb(235, 200, 7)'
+  } else if (delay <= 10) {
+    return 'rgb(255, 161, 66)'
+  } else if (delay > 10) {
+    return 'rgb(255, 66, 66)'
+  }
+}
+
+export function getDelayMessage(dCauses: Departures.Message[]) {
+  const messages: string[] = []
+  dCauses.forEach((c) => messages.push(c.text))
+  return messages
+}
+
+export function getTripById(stops: Departures.Stop[], id: string) {
+  return stops.find((o) => o.tripId.includes(id)) || null
 }

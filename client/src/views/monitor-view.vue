@@ -58,7 +58,7 @@
       <ul class="stops">
         <DynamicScroller :items="stops" :min-item-size="93" key-field="tripId" class="Scroller">
           <template v-slot="{ item, active }">
-            <DynamicScrollerItem :item="item" :active="active" @click="displayModal(item)">
+            <DynamicScrollerItem :item="item" :active="active" @click="openDetails(item)">
               <div :class="{ stopRow: true, cancelled: item.cancelled, hasLeft: item.hasLeft }">
                 <div class="lineContainer">
                   <span class="line" :style="{ backgroundColor: getColor(item.line.productName) }">{{ item.line.name }}
@@ -108,16 +108,15 @@ import type * as Departures from '../types/departures-types'
 import "../assets/monitor.css"
 import "../assets/main.css"
 import "../assets/loading.css"
-import trainDetailModal from '../components/train-detail-modal.vue'
 import 'vue-virtual-scroller/dist/vue-virtual-scroller.css'
-import { getColor } from "../util/getColor"
+import * as DateUtil from "../util/date"
+import * as ColorUtil from "../util/colors"
 import pjson from "../../package.json"
 
 
 
 export default defineComponent({
   name: 'Monitor-View',
-  components: { trainDetailModal },
   created: function () {
     let ibnr = this.$route.params.station
     const station = this.$route.query.i || this.$route.path.replace('/', '')
@@ -135,7 +134,9 @@ export default defineComponent({
         let departures: Departures.Stop[] = data.stops
 
         this.station = data.station
+        localStorage.setItem('scopedStation', data.station)
         this.stops = departures.sort((a, b) => this.sortStops(a, b))
+        localStorage.setItem('scopedStops', JSON.stringify(this.stops))
       }
     }
   },
@@ -161,62 +162,13 @@ export default defineComponent({
     }
   },
   methods: {
-    convertIRISTime(dateStringArr: string[], item: Departures.Stop, arrival: boolean) {
-      //let dateString = item.hasDeparture ? dateStringArr[1] : dateStringArr[0]
-      let dateString = arrival ? dateStringArr[0] : item.hasDeparture ? dateStringArr[1] : dateStringArr[0]
-      const hour = Number(dateString.slice(6, 8)).toLocaleString('de-DE', {
-        minimumIntegerDigits: 2,
-        useGrouping: false
-      })
-      const minute = Number(dateString.slice(8, 10)).toLocaleString('de-DE', {
-        minimumIntegerDigits: 2,
-        useGrouping: false
-      })
-      return `${hour}:${minute}`
-    },
-    convertTimestamp(ts: string, date: boolean) {
-      if (date) {
-        return `${ts.slice(4, 6)}.${ts.slice(2, 4)}.${ts.slice(0, 2)}`
-      }
-      return `${ts.slice(6, 8)}:${ts.slice(8, 10)}`
-    },
-    calculateDelay(plannedTime: string[], currentTime: string[], item: Departures.Stop) {
-      let [plannedArr, plannedDep] = plannedTime
-      let [currentArr, currentDep] = currentTime
-      const currMins = parseInt((item.hasArrival ? currentArr : currentDep).slice(6, 8)) * 60 + parseInt((item.hasArrival ? currentArr : currentDep).slice(8, 10))
-      const planMins = parseInt((item.hasArrival ? plannedArr : plannedDep).slice(6, 8)) * 60 + parseInt((item.hasArrival ? plannedArr : plannedDep).slice(8, 10))
-
-      const delay = currMins - planMins
-      if (delay < 0) {
-        return delay
-      }
-      return delay
-    },
-    getColor(_: string) { return getColor(_) },
-    getTimeColor(item: Departures.Stop) {
-      const delay = this.calculateDelay(item.plannedWhen.split('|'), item.when.split('|'), item)
-
-      if (delay < 0) {
-        return 'rgb(66, 217, 255)'
-      }
-      if (delay == 0) {
-        return 'rgb(138, 255, 127)'
-      } else if (delay <= 5) {
-        return 'rgb(235, 200, 7)'
-      } else if (delay <= 10) {
-        return 'rgb(255, 161, 66)'
-      } else if (delay > 10) {
-        return 'rgb(255, 66, 66)'
-      }
-    },
-    getDelayMessage(dCauses: Departures.Message[]) {
-      let messages: string[] = []
-      dCauses.forEach((c) => messages.push(c.text))
-      return messages
-    },
-    getTripById(id: string) {
-      return this.stops.find(o => o.tripId.includes(id)) || null
-    },
+    convertIRISTime: DateUtil.convertIRISTime,
+    convertTimestamp: DateUtil.convertTimestamp,
+    calculateDelay: DateUtil.calculateDelay,
+    getColor: ColorUtil.getColor,
+    getTimeColor: ColorUtil.getTimeColor,
+    getDelayMessage: ColorUtil.getDelayMessage,
+    getTripById: ColorUtil.getTripById,
     handleUpdate(newData: Departures.Stop) {
       this.hideModal()
       this.displayModal(newData)
@@ -232,6 +184,12 @@ export default defineComponent({
       }
       this.modalData = data
       this.showModal = true
+    },
+    openDetails(item: Departures.Stop) {
+      localStorage.setItem('scopedItem', JSON.stringify(item))
+      this.$router.push({
+        name: 'details'
+      })
     },
     hideModal() {
       this.modalData = null

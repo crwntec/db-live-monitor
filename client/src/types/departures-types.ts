@@ -83,16 +83,19 @@ export interface Line {
 export interface TrainOrder {
   baureihe: string
   trainId: string
-  firstTrain: Train[]
+  firstTrain: Coach[]
   doubleTraction: boolean
-  secondTrain: Train[]
+  secondTrain: Coach[]
   onlyPlanData: boolean
 }
 
-export interface Train {
+export interface Coach {
+  id: string,
+  kategorie: string,
   typ: string
   isLocomotive: boolean
   isPowercar: boolean
+  isControlcar: boolean
   class: Class
   baureihe: string
   ordnungsNummer?: string
@@ -149,7 +152,8 @@ export interface HafasData {
   remarks: Remark[]
   hints: Hint[]
   polyline: Number[][]
-  stops: Object[]
+  stops: Object[],
+  loadFactor: string
 }
 
 export interface Stopover {
@@ -167,18 +171,18 @@ export interface Stopover {
       [key: string]: boolean
     }
   }
-  arrival: string | null
-  plannedArrival: string | null
-  arrivalDelay: number | null
-  arrivalPlatform: string | null
-  arrivalPrognosisType: string | null
-  plannedArrivalPlatform: string | null
-  departure: string | null
-  plannedDeparture: string | null
-  departureDelay: number | null
-  departurePlatform: string | null
-  departurePrognosisType: string | null
-  plannedDeparturePlatform: string | null
+  arrival: string 
+  plannedArrival: string 
+  arrivalDelay: number 
+  arrivalPlatform: string 
+  arrivalPrognosisType: string 
+  plannedArrivalPlatform: string 
+  departure: string 
+  plannedDeparture: string 
+  departureDelay: number 
+  departurePlatform: string 
+  departurePrognosisType: string 
+  plannedDeparturePlatform: string 
   cancelled?: boolean
   remarks: Remark[]
 }

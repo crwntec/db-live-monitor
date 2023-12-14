@@ -1,38 +1,15 @@
-.modal-overlay {
-  position: fixed;
-  top: 0;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  display: flex;
-  justify-content: center;
-  background-color: #2c2c2cce;
-  z-index: 10;
+.detailsContainer {
+  margin: 1em;
 }
-
-.modal {
-  background-color: var(--bg-darker);
-  height: 70vh;
-  width: 90vw;
-  margin-top: 10%;
-  padding: 60px 0;
-  border-radius: 20px;
-  font-size: 0.8vw;
-  padding: 1em;
-  overflow-y: scroll;
-  overflow-x: hidden;
-}
-
-.modal::-webkit-scrollbar {
-  display: none;
-}
-
 .header {
   text-align: center;
   border-bottom: 2px solid grey;
   display: flex;
   align-items: center;
   flex-direction: column;
+}
+.trip {
+  width: 50%;
 }
 
 .genInfo {
@@ -198,6 +175,8 @@
   transform: rotate(-90deg);
 }
 .loading {
+  margin-top: 25%;
+  margin-left: 50%;
     display: flex;
     align-items: center;
 }
@@ -242,11 +221,9 @@
 }
 
 @media only screen and (min-width: 300px) and (max-width: 1100px) {
-  .modal {
-    font-size: 3vw;
-    width: 95vw;
+  .loading {
+    margin-left: 35vw;
   }
-
   .arr {
     text-align: left;
   }
