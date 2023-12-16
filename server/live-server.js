@@ -66,11 +66,11 @@ app.get("/wr/:nr/:ts", async (req, response) => {
   const trainNumber = req.params.nr;
   const timestamp = "20" + req.params.ts;
   const isICE = req.query.type == "ICE";
-
   try {
     const res = await axios.get(
       `https://ist-wr.noncd.db.de/wagenreihung/1.0/${trainNumber}/${timestamp}`
-    );
+      );
+
     const trainOrderObj = getTrainOrder(res.data, isICE);
     response.send(trainOrderObj);
   } catch (error) {

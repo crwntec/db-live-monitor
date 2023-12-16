@@ -1,6 +1,20 @@
 // util/dateUtils.ts
 import type * as Departures from '../types/departures-types'
 
+export function convertDateToIRIS(dateString: string) {
+  const date = new Date(dateString);
+
+  const year = date.getFullYear().toString().substr(-2); // gets the last two digits of the year
+  const month = ('0' + (date.getMonth() + 1)).slice(-2); // gets the month (0-11, so add 1), pads with 0 if necessary
+  const day = ('0' + date.getDate()).slice(-2); // gets the day of the month, pads with 0 if necessary
+  const hours = ('0' + date.getHours()).slice(-2); // gets the hours, pads with 0 if necessary
+  const minutes = ('0' + date.getMinutes()).slice(-2); // gets the minutes, pads with 0 if necessary
+
+  const formattedDate = year + month + day + hours + minutes;
+
+  return formattedDate;
+}
+
 export function convertIRISTime(dateStringArr: string[], item: Departures.Stop, arrival: boolean) {
   const dateString = arrival
     ? dateStringArr[0]

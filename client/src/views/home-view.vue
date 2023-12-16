@@ -56,6 +56,11 @@ export default {
                     this.$router.push('/' + parseInt(this.currentSuggestion.extId)+'?i='+this.input)
                 }
             }
+        },
+        handleEnterKey(event: KeyboardEvent) {
+            if (event.key === 'Enter') {
+                this.openStation();
+            }
         }
     }
 }
@@ -65,7 +70,7 @@ export default {
     <div class="homeContainer">
         <h1 class="title">DB-Live Monitor</h1>
         <div class="input">
-            <input class="stationInput" v-model="input" placeholder="Bahnhof suchen">
+            <input class="stationInput" v-model="input" placeholder="Bahnhof suchen" @keydown="handleEnterKey">
             <div class="suggestionsContainer">
                 <div v-if="loading" class="suggestionsLoading"><div class="spinner noMargin"></div></div>
                 <div v-if="showSuggestions && !loading && currentSuggestion==undefined " class="suggestions">
@@ -84,7 +89,6 @@ export default {
                 </div>
             </div>
             <button @click="openStation" role="link" class="stationSubmit">Suchen</button>
-            <!-- <router-link :to="{path: '/' + parseInt(this.currentSuggestion.extId), query: {i:this.input}}" custom v-slot="{ navigate }"></router-link> -->
         </div>
     </div>
 </template>

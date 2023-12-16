@@ -5,6 +5,8 @@ import type * as Departures from '../types/departures-types'
 import 'leaflet/dist/leaflet.css'
 import { LMap, LTileLayer, LGeoJson, LPolyline } from '@vue-leaflet/vue-leaflet'
 
+import axios from 'axios'
+
 import '../assets/detail.css'
 import '../assets/main.css'
 import '../assets/trip.css'
@@ -26,7 +28,7 @@ export default defineComponent({
       data: JSON.parse(localStorage.getItem('scopedItem') || '{}'),
       trainOrder: {} as Departures.TrainOrder,
       openRemarks: [] as string[],
-      hafasData: {} as Departures.HafasData,
+      hafasData: null as Departures.HafasData | null,
       loading: false,
       showMap: false,
       zoom: 10,
@@ -38,6 +40,7 @@ export default defineComponent({
   },
   methods: {
     convertIRISTime: DateUtil.convertIRISTime,
+    convertDateToIRIS: DateUtil.convertDateToIRIS,
     convertTimestamp: DateUtil.convertTimestamp,
     calculateDelay: DateUtil.calculateDelay,
     getColor: ColorUtil.getColor,
@@ -57,7 +60,7 @@ export default defineComponent({
     fetchData: async function () {
       try {
         this.loading = true
-        const response = await fetch(
+        const response = await axios.get(
           `${
             import.meta.env.DEV ? 'http://127.0.0.1:8080' : import.meta.env.VITE_BACKENDURI
           }/details/${this.data.line.fahrtNr}?isBus=${this.data.line.productName.includes(
@@ -65,13 +68,27 @@ export default defineComponent({
           )}&line=${this.data.line.name}&isDeparture=${this.data.hasDeparture}`
         )
         if (response.status === 200) {
-          const data = await response.json()
+          const data = response.data
           this.hafasData = data as Departures.HafasData
           this.nextStop = this.getNextStop()
           this.lastStop = this.hafasData.stopovers[this.hafasData.stopovers.length - 1]
           let coords =
-            this.hafasData.stops[(this.hafasData.stops.length / 2) | 0].geometry.coordinates
+          this.hafasData.stops[(this.hafasData.stops.length / 2) | 0].geometry.coordinates
           this.center = [coords[1], coords[0]]
+          if (this.hafasData !== null) {
+            axios
+              .get(
+                `${import.meta.env.DEV ? 'http://127.0.0.1:8080' : import.meta.env.VITE_BACKENDURI}/wr/${this.hafasData.line.fahrtNr}/${this.convertDateToIRIS(this.hafasData.plannedDeparture)}?type=${this.hafasData.line.productName}`
+              )
+              .then((res) => {
+                console.log(res.data)
+                if (res.status !== 204) {
+                  this.trainOrder = res.data
+                } else {
+                  this.trainOrder = null as any
+                }
+              })
+          }
         }
         this.loading = false
       } catch (error) {
@@ -119,7 +136,7 @@ export default defineComponent({
     getNextStop(): Departures.Stopover {
       const now = Date.now()
 
-      if (this.hafasData.stopovers && this.hafasData.stopovers.length > 0) {
+      if (this.hafasData !== null && this.hafasData.stopovers && this.hafasData.stopovers.length > 0) {
         for (let stop of this.hafasData.stopovers) {
           const departureTime = Date.parse(
             stop.departure || stop.arrival || stop.plannedDeparture || stop.plannedArrival
@@ -130,10 +147,10 @@ export default defineComponent({
         }
       }
 
-      return {} as Departures.Stopover
+      return undefined as any
     },
     isPassedStop(stop: Departures.Stopover, isLine: boolean): boolean {
-      if (this.hafasData.stopovers) {
+      if (this.hafasData !== null && this.hafasData.stopovers) {
         const nextStop = this.getNextStop()
         const nextStopInd = this.hafasData.stopovers.findIndex(
           (el) => el.stop.name == nextStop.stop.name
@@ -151,7 +168,7 @@ export default defineComponent({
       return false
     },
     getHeight(currStop: Departures.Stopover, inProg: boolean): number {
-      if (this.hafasData.stopovers) {
+      if (this.hafasData !== null && this.hafasData.stopovers) {
         const nextStop = this.getNextStop()
         const lastStop = currStop
         const nextStopTimeString =
@@ -223,7 +240,7 @@ export default defineComponent({
         >{{ data.line.fahrtNr }}
       </h1>
       <h2 class="fromTo">
-        {{ typeof data.from == 'string' ? data.from : data.from.stop }} 🡒 {{ data.to }}
+        {{ typeof data.from == 'string' ? data.from : data.from.stop }} ➡️ {{ data.to }}
       </h2>
       <h2 v-if="data.cancelled" class="cancelledTrain">🚫Fahrt fällt aus</h2>
     </div>
@@ -350,8 +367,8 @@ export default defineComponent({
       </div>
       <div v-if="data.hasWings && getTripById(stops, data.wing.wing)" class="wings">
                 <span>Fährt von {{ data.wing.start.station }} bis {{ data.wing.end.station }} vereint mit <a class="trainLink"
-                        @click="loadTrain"> {{ getTripById(stops, data.wing.wing).line.name + "(" +
-                            getTripById(stops, data.wing.wing).line.fahrtNr + ")" }}</a></span>
+                        @click="loadTrain"> {{ getTripById(stops, data.wing.wing)?.line?.name + "(" +
+                            getTripById(stops, data.wing.wing)?.line?.fahrtNr + ")" }}</a></span>
             </div>
       <div v-if="hafasData" class="trip">
         <h4>🚉 Fahrtverlauf:</h4>
@@ -439,7 +456,7 @@ export default defineComponent({
           <li :key="hint.id" v-for="hint in hafasData.hints">💡{{ hint.text }}</li>
         </ul>
       </div>
-      <div class="additionalDetails" v-if="trainOrder">
+      <div class="additionalDetails" v-if="trainOrder !== null">
         <div class="trainOrder">
           <div
             :class="[
@@ -592,7 +609,7 @@ export default defineComponent({
               {{ trainOrder.trainId }} )</span
             >
           </div>
-          -----------🡒
+          ---->
         </div>
       </div>
     </div>
