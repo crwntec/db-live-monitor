@@ -2,59 +2,66 @@
 <template>
   <div class="error" v-if="error">
     <h1>{{ errorMsg }}</h1>
-    <router-link to="/"><button class="errButton">Zurück</button></router-link>
+    <router-link to="/"><button class="errButton">{{ $t("monitorView.back") }}</button></router-link>
   </div>
   <div v-if="!error" class="container">
     <div v-if="!loading" class="pageHeader">
-      <h1  class="heading"><router-link to="/">{{ station }}</router-link></h1>
+      <h1 class="heading"><router-link to="/">{{ station }}</router-link></h1>
       <div class="headerIcons">
         <font-awesome-icon class="headerIcon settingsIcon" icon="gear" size="lg" @click="showSettings = !showSettings" />
       </div>
     </div>
-    <div  v-if="loading" class="loadingContainer">
+    <div v-if="loading" class="loadingContainer">
       <div class="progress"></div>
     </div>
     <div class="settingsModal" :class="{ 'show': showModal }" v-if="showSettings">
       <form action="#">
         <div class="settingsHeader">
-          <h2>Einstellungen</h2>
+          <h2>{{ $t("monitorView.settings") }}</h2>
           <font-awesome-icon class="exit" icon="xmark" size="lg" @click="closeSettings" />
         </div>
         <div class="settings-option">
           <label>
-            Zugnummern anzeigen
+            {{ $t("monitorView.showTrainNumbers") }}
             <input type="checkbox" v-model="showLineNumbers" />
           </label>
         </div>
         <div class="settings-option">
           <label>
-            Sortieren nach:
+            {{ $t("monitorView.sortBy") }}
             <select class="selectOption" v-model="sortBy">
-              <option value="departure">Abfahrtszeit</option>
-              <option value="arrival">Ankunftszeit</option>
+              <option value="departure">{{ $t("monitorView.departureTime") }}</option>
+              <option value="arrival">{{ $t("monitorView.arrivalTime") }}</option>
             </select>
             <select class="selectOption" v-model="sortOption">
-              <option value="when">Aktueller {{ sortBy == "departure" ? 'Abfahrtszeit' : 'Ankunftszeit' }}</option>
-              <option value="plannedWhen">Ursprünglicher {{ sortBy == "departure" ? 'Abfahrtszeit' : 'Ankunftszeit' }}
+              <option value="when">{{ $t("monitorView.current") }} {{ sortBy == "departure" ? $t("monitorView.departureTime") :
+                $t("monitorView.arrivalTime")  }}</option>
+              <option value="plannedWhen">{{ $t("monitorView.planned") }} {{ sortBy == "departure" ?  $t("monitorView.departureTime") :
+                 $t("monitorView.arrivalTime") }}
               </option>
             </select>
           </label>
         </div>
         <div class="settings-option">
-          <label >Aktualisierungsrate in Sekunden:
-             <input class="refreshRate" type="nunmber" v-model="refreshRate" min="5" max="30">
+          <label>{{ $t("monitorView.refreshRate") }}
+            <input class="refreshRate" type="number" v-model="refreshRate" min="5" max="30">
           </label>
         </div>
+        <div class="settings-option">
+          <label>{{ $t("monitorView.language") }} <select class="selectOption" v-model="language">
+              <option value="de">Deutsch</option>
+              <option value="en">English</option>
+            </select></label>
+        </div>
         <div class="footer">
-          <p>Aktuelle Version: <a class="link" href="https://github.com/crwntec/db-live-monitor">{{ version }}</a></p>
-          <p>Letzte Datenaktualisierung: {{ lastUpdate.toLocaleTimeString('de-DE') }}</p>
-          <button type="submit" class="save" @click="closeSettings">Einstellungen Übernehmen</button>
+          <p>{{ $t("monitorView.currentVersion") }}: <a class="link" href="https://github.com/crwntec/db-live-monitor">{{
+            version }}</a></p>
+          <p>{{ $t("monitorView.lastDataUpdate") }}: {{ lastUpdate.toLocaleTimeString('de-DE') }}</p>
+          <button type="submit" class="save" @click="closeSettings">{{ $t("monitorView.applySettings") }}</button>
         </div>
       </form>
     </div>
     <div class="stopsContainer">
-      <trainDetailModal v-show="showModal" :show-modal="showModal" :data="modalData" :trainOrder="trainOrder"
-        :station="station" @close-modal="hideModal" @updateModalData="handleUpdate" />
       <ul class="stops">
         <DynamicScroller :items="stops" :min-item-size="93" key-field="tripId" class="Scroller">
           <template v-slot="{ item, active }">
@@ -121,7 +128,7 @@ export default defineComponent({
     let ibnr = this.$route.params.station
     const station = this.$route.query.i || this.$route.path.replace('/', '')
     // eslint-disable-next-line no-undef
-    this.connection = new WebSocket(`${import.meta.env.DEV ? 'ws://127.0.0.1:8080' : import.meta.env.VITE_BACKENDURI.replace(/https:\/{2}/g, 'wss://')}/wss?station=${ibnr}&refreshRate=${this.refreshRate*1000}`)
+    this.connection = new WebSocket(`${import.meta.env.DEV ? 'ws://127.0.0.1:8080' : import.meta.env.VITE_BACKENDURI.replace(/https:\/{2}/g, 'wss://')}/wss?station=${ibnr}&refreshRate=${this.refreshRate * 1000}`)
 
     this.connection.onmessage = (event: MessageEvent) => {
       this.loading = false
@@ -157,6 +164,7 @@ export default defineComponent({
       showLineNumbers: sessionStorage.getItem('showLineNumbers') === "true" || false,
       sortOption: sessionStorage.getItem('sortOption') || "when",
       sortBy: sessionStorage.getItem('sortBy') || "departure",
+      language: sessionStorage.getItem('language') || "de",
       version: pjson.version,
       lastUpdate: new Date(Date.now())
     }
@@ -169,32 +177,11 @@ export default defineComponent({
     getTimeColor: ColorUtil.getTimeColor,
     getDelayMessage: ColorUtil.getDelayMessage,
     getTripById: ColorUtil.getTripById,
-    handleUpdate(newData: Departures.Stop) {
-      this.hideModal()
-      this.displayModal(newData)
-    },
-    async displayModal(data: Departures.Stop) {
-      if (data.hasDeparture) {
-        const wr = await fetch(`${import.meta.env.DEV ? 'http://127.0.0.1:8080' : import.meta.env.VITE_BACKENDURI}/wr/${data.line.fahrtNr}/${data.plannedWhen.split('|')[1]}?type=${data.line.productName}`)
-
-        if (wr.status !== 204) {
-          let resText = await wr.text()
-          this.trainOrder = JSON.parse(resText)
-        }
-      }
-      this.modalData = data
-      this.showModal = true
-    },
     openDetails(item: Departures.Stop) {
       localStorage.setItem('scopedItem', JSON.stringify(item))
       this.$router.push({
         name: 'details'
       })
-    },
-    hideModal() {
-      this.modalData = null
-      this.trainOrder = null
-      this.showModal = false
     },
     closeSettings() {
       this.showSettings = false
@@ -203,6 +190,9 @@ export default defineComponent({
       sessionStorage.setItem('sortBy', this.sortBy)
       sessionStorage.setItem('sortOption', this.sortOption)
       sessionStorage.setItem('refreshRate', this.refreshRate.toString())
+      sessionStorage.setItem('language', this.language)
+      this.$i18n.locale=this.language
+      
     },
     sortStops(a: Departures.Stop, b: Departures.Stop) {
       if (this.sortOption == "when") {

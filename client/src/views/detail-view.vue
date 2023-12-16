@@ -65,7 +65,7 @@ export default defineComponent({
             import.meta.env.DEV ? 'http://127.0.0.1:8080' : import.meta.env.VITE_BACKENDURI
           }/details/${this.data.line.fahrtNr}?isBus=${this.data.line.productName.includes(
             'Bus'
-          )}&line=${this.data.line.name}&isDeparture=${this.data.hasDeparture}`
+          )}&line=${this.data.line.name}&isDeparture=${this.data.hasDeparture}&language=${sessionStorage.getItem("language")}`
         )
         if (response.status === 200) {
           const data = response.data
@@ -81,7 +81,6 @@ export default defineComponent({
                 `${import.meta.env.DEV ? 'http://127.0.0.1:8080' : import.meta.env.VITE_BACKENDURI}/wr/${this.hafasData.line.fahrtNr}/${this.convertDateToIRIS(this.hafasData.plannedDeparture)}?type=${this.hafasData.line.productName}`
               )
               .then((res) => {
-                console.log(res.data)
                 if (res.status !== 204) {
                   this.trainOrder = res.data
                 } else {
@@ -120,17 +119,37 @@ export default defineComponent({
       }
     },
     convertLoadFactor(loadFactor: string) {
-      switch (loadFactor) {
-        case 'low':
-          return 'Niedrig'
-        case 'high':
-          return 'Hoch'
-        case 'very-high':
-          return 'Sehr hoch'
-        case 'full':
-          return 'Zug ausgebucht'
-        default:
-          break
+      const language = sessionStorage.getItem('language')
+      if (language=="de") {
+        switch (loadFactor) {
+          case 'low':
+            return 'Niedrig'
+          case 'high':
+            return 'Hoch'
+          case 'very-high':
+            return 'Sehr hoch'
+          case 'exceptionally-high':
+            return 'Außergewöhnlich hoch'
+          case 'full':
+            return 'Zug ausgebucht'
+          default:
+            break
+        }
+      } else {
+        switch (loadFactor) {
+          case 'low':
+            return 'Low'
+          case 'high':
+            return 'High'
+          case 'very-high':
+            return 'Very high'
+          case 'exceptionally-high':
+            return 'Exceptionally high'
+          case 'full':
+            return 'Train full'
+          default:
+            break
+        }
       }
     },
     getNextStop(): Departures.Stopover {
@@ -230,7 +249,7 @@ export default defineComponent({
 <template>
   <span class="loading" v-if="loading">
     <div class="loader"></div>
-    Lade Daten
+    {{$t('detailView.loadingData')}}
   </span>
   <div class="wrapper" v-if="!loading">
     <div class="header">
@@ -242,7 +261,7 @@ export default defineComponent({
       <h2 class="fromTo">
         {{ typeof data.from == 'string' ? data.from : data.from.stop }} ➡️ {{ data.to }}
       </h2>
-      <h2 v-if="data.cancelled" class="cancelledTrain">🚫Fahrt fällt aus</h2>
+      <h2 v-if="data.cancelled" class="cancelledTrain">{{$t("detailView.cancelledTrain")}}</h2>
     </div>
     <div class="detailsContainer">
       <div class="genInfo">
@@ -281,17 +300,17 @@ export default defineComponent({
         </div>
       </div>
       <div class="" v-if="data.onlyPlanData">
-        <span>📝 Derzeit sind für diese Fahrt nur Plandaten bekannt</span>
+        <span>{{$t('detailView.planData')}}</span>
       </div>
       <div class="" v-if="!hafasData && !loading">
-        <span>🔍 Derzeit sind für diese Fahrt keine HAFAS-Daten bekannt</span>
+        <span>{{$t('detailView.noHafasData')}}</span>
       </div>
 
       <div v-if="hafasData && !loading">
         <span v-if="hafasData.loadFactor" class="occupancyContainer"
-          >Auslastung:
+          >{{$t('detailView.occupancy')}}
           <svg
-            v-if="hafasData.loadFactor == 'low'"
+            v-if="hafasData.loadFactor == 'low' || hafasData.loadFactor == 'low-to-medium'"
             class="occupancy"
             viewBox="0 0 33 32"
             fill="none"
@@ -315,7 +334,7 @@ export default defineComponent({
             <path d="M18 18H15.5L15 10H18.5L18 18Z" fill="#D4E13C" stroke="black" />
           </svg>
           <svg
-            v-if="hafasData.loadFactor == 'very-high'"
+            v-if="hafasData.loadFactor == 'very-high' || hafasData.loadFactor == 'exceptionally-high'"
             class="occupancy"
             viewBox="0 0 33 32"
             fill="none"
@@ -327,7 +346,7 @@ export default defineComponent({
             <path d="M17.5714 17H15.4286L15 10H18L17.5714 17Z" fill="black" />
           </svg>
           <svg
-            v-if="hafasData.loadFactor == 'full'"
+            v-if="hafasData.loadFactor == 'full' "
             class="occupancy"
             viewBox="0 0 33 32"
             fill="none"
@@ -371,7 +390,7 @@ export default defineComponent({
                             getTripById(stops, data.wing.wing)?.line?.fahrtNr + ")" }}</a></span>
             </div>
       <div v-if="hafasData" class="trip">
-        <h4>🚉 Fahrtverlauf:</h4>
+        <h4>{{$t("detailView.stopovers")}}</h4>
         <li  class="stopover" :key="stop.stop.id" v-for="stop in hafasData.stopovers">
           <div class="time">
             <span class="arr">
@@ -428,7 +447,7 @@ export default defineComponent({
       <div class="mapContainer">
         <h4 @click="showMap = !showMap">
           🗺️<i :class="['arrow-icon', { 'arrow-right': !showMap }]">▼</i
-          >{{ !showMap ? 'Karte anzeigen' : 'Karte verstecken' }}
+          >{{ !showMap ? $t("detailView.showMap") : $t("detailView.hideMap") }}
         </h4>
         <div v-if="showMap" class="map">
           <l-map ref="map" :use-global-leaflet="false" v-model:zoom="zoom" :center="center">
@@ -603,7 +622,7 @@ export default defineComponent({
         <div class="br">
           ------------
           <div class="brContainer">
-            <span>Baureihe {{ trainOrder.baureihe }}</span
+            <span>{{ $t("detailView.baureihe") }} {{ trainOrder.baureihe }}</span
             ><span>
               ( Tz
               {{ trainOrder.trainId }} )</span

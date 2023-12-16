@@ -100,7 +100,7 @@ app.get("/details/:fahrtNr", async (req, res) => {
       const tripData = await hafas.trip(hafasRef.tripId, {
         onlyCurrentlyRunning: false,
         polyline: true,
-        language: "de",
+        language: req.query.language || "de",
       });
       stopovers = tripData.trip.stopovers;
       let [hints, remarks] = parseRemarks(tripData.trip.remarks);

@@ -70,7 +70,7 @@ export default {
     <div class="homeContainer">
         <h1 class="title">DB-Live Monitor</h1>
         <div class="input">
-            <input class="stationInput" v-model="input" placeholder="Bahnhof suchen" @keydown="handleEnterKey">
+            <input class="stationInput" v-model="input" :placeholder="$t('homeView.placeholder')" @keydown="handleEnterKey">
             <div class="suggestionsContainer">
                 <div v-if="loading" class="suggestionsLoading"><div class="spinner noMargin"></div></div>
                 <div v-if="showSuggestions && !loading && currentSuggestion==undefined " class="suggestions">
@@ -88,7 +88,7 @@ export default {
                     </div>
                 </div>
             </div>
-            <button @click="openStation" role="link" class="stationSubmit">Suchen</button>
+            <button @click="openStation" role="link" class="stationSubmit">{{$t("homeView.search")}}</button>
         </div>
     </div>
 </template>

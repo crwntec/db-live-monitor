@@ -13,7 +13,7 @@
   ],
   "compilerOptions": {
     "target": "ES6",
-    "module": "CommonJS",
+    "module": "es2020",
     "outDir": "dist",
     "sourceMap": true,
     "ignoreDeprecations": "5.5",
