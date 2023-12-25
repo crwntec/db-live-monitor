@@ -101,10 +101,10 @@ app.get("/details/:fahrtNr", async (req, res) => {
     hafasRef = possibleTrips.trips[0];
     if (hafasRef !== undefined) {
       const tripData = getTrip(hafas, hafasRef.id);
-      let [hints, remarks] = parseRemarks(tripData.trip.remarks);
-      let [polyline, stops] = parsePolyline(tripData.trip.polyline);
+      let [hints, remarks] = parseRemarks(tripData.remarks);
+      let [polyline, stops] = parsePolyline(tripData.polyline);
       const hafasTrip = {
-        ...tripData.trip,
+        ...tripData,
         hints: hints,
         remarks: remarks,
         polyline: polyline,
