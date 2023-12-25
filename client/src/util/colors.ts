@@ -63,21 +63,31 @@ export function getColor(prodName: string): string {
   }
 }
 
-export function getTimeColor(item: Departures.Stop) {
-  const delay = calculateDelay(item.plannedWhen.split('|'), item.when.split('|'), item)
-
+export function getTimeColor(item: Departures.Stop): string;
+export function getTimeColor(delay: number): string;
+export function getTimeColor(arg: Departures.Stop | number): string {
+  let delay: number;
+  if (typeof arg === 'number') {
+    delay = arg;
+  } else if (arg) {
+    delay = calculateDelay(arg.plannedWhen.split('|'), arg.when.split('|'), arg);
+  } else {
+    delay = 0;
+  }
+  console.log(delay)
   if (delay < 0) {
-    return 'rgb(66, 217, 255)'
+    return 'rgb(66, 217, 255)';
   }
   if (delay === 0) {
-    return 'rgb(138, 255, 127)'
+    return 'rgb(138, 255, 127)';
   } else if (delay <= 5) {
-    return 'rgb(235, 200, 7)'
+    return 'rgb(235, 200, 7)';
   } else if (delay <= 10) {
-    return 'rgb(255, 161, 66)'
+    return 'rgb(255, 161, 66)';
   } else if (delay > 10) {
-    return 'rgb(255, 66, 66)'
+    return 'rgb(255, 66, 66)';
   }
+  return "0"
 }
 
 export function getDelayMessage(dCauses: Departures.Message[]) {

@@ -124,6 +124,8 @@ export default defineComponent({
         switch (loadFactor) {
           case 'low':
             return 'Niedrig'
+          case 'low-to-medium':
+            return 'Niedrig bis mittel'
           case 'high':
             return 'Hoch'
           case 'very-high':
@@ -139,6 +141,8 @@ export default defineComponent({
         switch (loadFactor) {
           case 'low':
             return 'Low'
+          case 'low-to-medium':
+            return 'Low to medium'
           case 'high':
             return 'High'
           case 'very-high':
@@ -265,39 +269,7 @@ export default defineComponent({
     </div>
     <div class="detailsContainer">
       <div class="genInfo">
-        <div class="arr">
-          <span v-if="data.hasArrival"
-            >Ankunft:
-            <span :style="{ color: getTimeColor(data) }">{{
-              convertIRISTime(data.when.split('|'), data, true)
-            }}</span></span
-          >
-          <span v-if="data.hasNewArr && data.hasArrival"
-            >Geplant: {{ convertIRISTime(data.plannedWhen.split('|'), data, true) }}</span
-          >
-        </div>
-        <div class="plat">
-          Gleis
-          <span
-            v-if="data.hasNewPlatform"
-            :style="{ 'text-decoration': data.hasNewPlatform ? 'line-through' : '' }"
-            >{{ data.plannedPlatform }}</span
-          >
-          <span :style="{ color: data.hasNewPlatform ? 'red' : 'white' }">{{
-            ' ' + data.platform
-          }}</span>
-        </div>
-        <div class="dep">
-          <span v-if="data.hasDeparture"
-            >Abfahrt:
-            <span :style="{ color: getTimeColor(data) }">
-              {{ convertIRISTime(data.when.split('|'), data, false) }}
-            </span></span
-          >
-          <span v-if="data.hasNewTime && data.hasDeparture"
-            >Geplant: {{ convertIRISTime(data.plannedWhen.split('|'), data, false) }}</span
-          >
-        </div>
+        <span class="nextStop">{{ $t('detailView.nextStop') }}: <b>{{ nextStop?.stop?.name }}</b> {{  $t("detailView.at") }} <span class="nextStopTime" :style="{backgroundColor: getTimeColor(nextStop?.arrivalDelay / 60 || nextStop?.departureDelay / 60)}">{{ getTime(hafasData?.stopovers as Departures.Stopover[] | null, nextStop?.stop?.name) }}</span>({{ (nextStop?.departureDelay || nextStop?.arrivalDelay || 0) < 0 ? "-" : "+" + (nextStop?.departureDelay || nextStop?.arrivalDelay || 0) / 60 }})</span>
       </div>
       <div class="" v-if="data.onlyPlanData">
         <span>{{$t('detailView.planData')}}</span>
@@ -316,7 +288,6 @@ export default defineComponent({
             fill="none"
             xmlns="http://www.w3.org/2000/svg"
           >
-            <text></text>
             <ellipse cx="16.5" cy="16" rx="16.5" ry="16" fill="#62E46F" />
             <line x1="7.32925" y1="17.6237" x2="15.3293" y2="24.6237" stroke="black" />
             <line x1="14.6" y1="24.7" x2="26.6" y2="8.7" stroke="black" />
@@ -393,17 +364,17 @@ export default defineComponent({
         <h4>{{$t("detailView.stopovers")}}</h4>
         <li  class="stopover" :key="stop.stop.id" v-for="stop in hafasData.stopovers">
           <div class="time">
-            <span class="arr">
+            <span class="planned">
               {{
                 new Date(
-                  stop.arrival || stop.departure || stop.plannedArrival || stop.plannedDeparture
+                  stop.plannedDeparture || stop.plannedArrival
                 ).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })
               }}
             </span>
-            <span class="dep">
+            <span class="current">
               {{
                 new Date(
-                  stop.departure || stop.arrival || stop.plannedDeparture || stop.plannedArrival
+                  stop.departure || stop.arrival
                 ).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })
               }}
             </span>
@@ -624,7 +595,7 @@ export default defineComponent({
           <div class="brContainer">
             <span>{{ $t("detailView.baureihe") }} {{ trainOrder.baureihe }}</span
             ><span>
-              ( Tz
+              ( Fzg:
               {{ trainOrder.trainId }} )</span
             >
           </div>

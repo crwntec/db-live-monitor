@@ -132,6 +132,7 @@ export default defineComponent({
 
     this.connection.onmessage = (event: MessageEvent) => {
       this.loading = false
+      this.closeSettings()
       if (event.data == 404) {
         this.error = true
         this.errorMsg = this.$route.query.i == '' ? 'Bitte Bahnhof eingeben' : `Für ${station} liegen keine Daten vor `

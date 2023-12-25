@@ -14,7 +14,7 @@ import { getTrainOrder } from "./conversion/getTrainOrder.js";
 import { makeRequest } from "./request/makeRequest.js";
 import { parseRemarks } from "./util/parseRemarks.js";
 import parsePolyline from "./util/parsePolyline.js";
-import { getCachedDepartures, getCachedArrivals } from "./cache/cache.js";
+import { getTrip } from "./cache/cache.js";
 import initHafas from "./util/initHafas.js";
 
 const app = express();
@@ -81,28 +81,26 @@ app.get("/wr/:nr/:ts", async (req, response) => {
     }
   }
 });
+
 app.get("/details/:fahrtNr", async (req, res) => {
   let hafasRef = null;
   try {
-    let possibleTrips;
-    if (req.query.isDeparture == "true") {
-      possibleTrips = await getCachedDepartures(hafas, ibnr.toString());
-    } else if (req.query.isDeparture == "false") {
-      possibleTrips = await getCachedArrivals(hafas, ibnr.toString());
-    }
-    const trip = possibleTrips.find(
-      (o) =>
-        o.line.name == req.query.line && o.line.fahrtNr == req.params.fahrtNr
-    );
-    if (trip !== undefined) hafasRef = trip;
-    let stopovers = null;
-    if (hafasRef !== null) {
-      const tripData = await hafas.trip(hafasRef.tripId, {
-        onlyCurrentlyRunning: false,
-        polyline: true,
-        language: req.query.language || "de",
-      });
-      stopovers = tripData.trip.stopovers;
+    let possibleTrips = await hafas.tripsByName(req.params.fahrtNr, {
+      results: 1,
+      products: {
+        suburban: true,
+        subway: false,
+        tram: false,
+        bus: req.query.bus || false,
+        ferry: false,
+        regional: true,
+      },
+      language: req.query.language || "de",
+    });
+    //console.log(possibleTrips.trips)
+    hafasRef = possibleTrips.trips[0];
+    if (hafasRef !== undefined) {
+      const tripData = getTrip(hafas, hafasRef.id);
       let [hints, remarks] = parseRemarks(tripData.trip.remarks);
       let [polyline, stops] = parsePolyline(tripData.trip.polyline);
       const hafasTrip = {
@@ -127,9 +125,7 @@ wss.on("connection", async (socket, req) => {
   if (url.pathname == "/wss") {
     let stationStr = url.searchParams.get("station");
     handleMonitorReq(url, socket, stationStr);
-  } else if (url.pathname == "/trip") {
-    handleTripReq(url, socket);
-  }
+  } 
 
   socket.on("message", (message) => {
     console.log("Received message:", message);
@@ -234,19 +230,3 @@ async function handleMonitorReq(url, socket, stationStr) {
     fullChanges = {};
   });
 }
-
-const handleTripReq = async (url, socket) => {
-  const tripId = url.searchParams.get("trip");
-
-  const refresh = async () => {
-    try {
-      const trip = await hafas.trip(tripId);
-      if (!trip) socket.send(404);
-      else socket.send(JSON.stringify(trip));
-    } catch (error) {
-      console.log(error);
-    }
-  };
-  refresh();
-  setTimeout(refresh, 15000);
-};

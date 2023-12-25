@@ -17,22 +17,17 @@
   flex-direction: row;
   align-items: center;
   justify-content: center;
-  padding: 10px;
+  padding: 5px;
   font-size: 1rem;
 }
-
-.arr {
-  display: flex;
-  flex-direction: column;
-  margin: auto;
+.nextStop {
+  font-size: 1.2rem;
 }
-
-.dep {
-  display: flex;
-  flex-direction: column;
-  margin: auto;
+.nextStopTime {
+  padding: .2rem;
+  border-radius: 5px;
+  mix-blend-mode: hard-light;
 }
-
 .fromTo {
   text-align: center;
 }
@@ -45,9 +40,6 @@
   font-weight: bold;
 }
 
-.plat {
-  text-align: center;
-}
 .trainLink {
   color: rgb(66, 165, 245);
   cursor: pointer;

@@ -8,7 +8,8 @@ export default createI18n({
   messages: {
     en: {
       detailView: {
-        platform: 'Platform',
+        nextStp: 'Next stop',
+        at: 'at',
         runs: 'Runs',
         from: 'From',
         to: 'To',
@@ -47,7 +48,8 @@ export default createI18n({
     },
     de: {
       detailView: {
-        platform: 'Gleis',
+        nextStop: 'Nächster Halt',
+        at: 'um',
         runs: 'Fährt',
         from: 'Von',
         to: 'bis',
