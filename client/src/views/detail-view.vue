@@ -24,8 +24,8 @@ export default defineComponent({
   },
   data() {
     return {
-      station: localStorage.getItem('scopedStation'),
-      data: JSON.parse(localStorage.getItem('scopedItem') || '{}'),
+      station: sessionStorage.getItem('scopedStation'),
+      data: JSON.parse(sessionStorage.getItem('scopedItem') || '{}'),
       trainOrder: {} as Departures.TrainOrder,
       openRemarks: [] as string[],
       hafasData: null as Departures.HafasData | null,
@@ -35,7 +35,7 @@ export default defineComponent({
       center: [51, 70],
       nextStop: {} as Departures.Stopover,
       lastStop: {} as Departures.Stopover,
-      stops: JSON.parse(localStorage.getItem('scopedStops') || "{}")
+      stops: JSON.parse(sessionStorage.getItem('scopedStops') || "{}")
     }
   },
   methods: {
@@ -65,7 +65,7 @@ export default defineComponent({
             import.meta.env.DEV ? 'http://127.0.0.1:8080' : import.meta.env.VITE_BACKENDURI
           }/details/${this.data.line.fahrtNr}?isBus=${this.data.line.productName.includes(
             'Bus'
-          )}&line=${this.data.line.name}&ibnr=${localStorage.getItem('scopedStationIBNR')}&isDeparture=${this.data.hasDeparture}&language=${sessionStorage.getItem("language")}`
+          )}&line=${this.data.line.name}&ibnr=${localStorage.getItem('scopedStationIBNR')}&isDeparture=${this.data.hasDeparture}&language=${localStorage.getItem("language")}`
         )
         if (response.status === 200) {
           const data = response.data
@@ -119,7 +119,7 @@ export default defineComponent({
       }
     },
     convertLoadFactor(loadFactor: string) {
-      const language = sessionStorage.getItem('language')
+      const language = localStorage.getItem('language')
       if (language=="de") {
         switch (loadFactor) {
           case 'low':
