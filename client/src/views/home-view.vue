@@ -4,10 +4,12 @@ import "../assets/home.css"
 import "../assets/main.css"
 import axios from "axios"
 import pjson from "../../package.json"
+
 interface Suggestion {
     extId: string,
     value: string
 }
+
 export default {
     name: "Home-View",
     data() {
@@ -20,24 +22,13 @@ export default {
             hasSelected: false,
             abortController: new AbortController(),
             version: pjson.version,
-            apiBase: import.meta.env.DEV ? 'http://127.0.0.1:8080': import.meta.env.VITE_BACKENDURI,
-        }
-    },
-    watch: {
-        input(newInput) {
-            this.abortController.abort()
-            if(!this.showSuggestions && this.input.length==0 && !this.currentSuggestion) {
-                this.showSuggestions = true
-                console.log("fired")
-            }
-            if(this.input.length==0) this.suggestions=[]
-            this.getStops(encodeURIComponent(newInput))
+            apiBase: import.meta.env.DEV ? 'http://127.0.0.1:8080' : import.meta.env.VITE_BACKENDURI,
         }
     },
     methods: {
         async getStops(inputStr: string) {
             this.loading = true
-            if (inputStr=='' || inputStr.length <= 2) {
+            if (inputStr == '' || inputStr.length <= 2) {
                 this.suggestions = []
             } else {
                 const res = await axios.get(`${this.apiBase}/search/${inputStr}`)
@@ -46,16 +37,16 @@ export default {
                 this.loading = false
             }
         },
-        async openStation(){
+        async openStation() {
             if (this.input) {
                 let parsed = encodeURIComponent(this.input)
                 if (!this.hasSelected) {
                     const res = await axios.get(`${this.apiBase}/verify/${parsed}`)
-                    if (res.data==true) {
+                    if (res.data == true) {
                         this.$router.push('/' + this.input)
                     }
                 } else {
-                    this.$router.push('/' + parseInt(this.currentSuggestion.extId)+'?i='+this.input)
+                    this.$router.push('/' + parseInt(this.currentSuggestion.extId) + '?i=' + this.input)
                 }
             }
         },
@@ -63,8 +54,20 @@ export default {
             if (event.key === 'Enter') {
                 this.openStation();
             }
+        },
+        
+    },
+    watch: {
+        input(newInput) {
+            this.abortController.abort()
+            if (!this.showSuggestions && this.input.length == 0 && !this.currentSuggestion) {
+                this.showSuggestions = true
+                console.log("fired")
+            }
+            if (this.input.length == 0) this.suggestions = []
+            this.getStops(encodeURIComponent(newInput))
         }
-    }
+    },
 }
 </script>
 
@@ -74,26 +77,25 @@ export default {
         <div class="input">
             <input class="stationInput" v-model="input" :placeholder="$t('homeView.placeholder')" @keydown="handleEnterKey">
             <div class="suggestionsContainer">
-                <div v-if="loading" class="suggestionsLoading"><div class="spinner noMargin"></div></div>
-                <div v-if="showSuggestions && !loading && currentSuggestion==undefined " class="suggestions">
-                    <div
-                    class="suggestion"
-                    @click="()=>{
+                <div v-if="loading" class="suggestionsLoading">
+                    <div class="spinner noMargin"></div>
+                </div>
+                <div v-if="showSuggestions && !loading && currentSuggestion == undefined" class="suggestions">
+                    <div class="suggestion" @click="() => {
                         input = decodeURIComponent(suggestion.value)
                         showSuggestions = false,
-                        currentSuggestion = suggestion,
-                        hasSelected = true
-                    }"
-                    v-bind:key="suggestion.extId"
-                    v-for="suggestion in suggestions">
-                        {{decodeURIComponent(suggestion.value)}}
+                            currentSuggestion = suggestion,
+                            hasSelected = true
+                    }" v-bind:key="suggestion.extId" v-for="suggestion in suggestions">
+                        {{ decodeURIComponent(suggestion.value) }}
                     </div>
                 </div>
             </div>
-            <button @click="openStation" role="link" class="stationSubmit">{{$t("homeView.search")}}</button>
+            <button @click="openStation" role="link" class="stationSubmit">{{ $t("homeView.search") }}</button>
         </div>
     </div>
-    <div class="footer">
-        {{ $t("monitorView.currentVersion") }}: <a class="link" href="https://github.com/crwntec/db-live-monitor">{{version }}</a>
-    </div>
+    <footer class="footer">
+        {{ $t("monitorView.currentVersion") }}: <a class="link" href="https://github.com/crwntec/db-live-monitor">{{ version
+        }}</a>
+    </footer>
 </template>

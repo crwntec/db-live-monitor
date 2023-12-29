@@ -121,7 +121,7 @@ export default defineComponent({
   name: 'Monitor-View',
   created: function () {
     let ibnr = this.$route.params.station
-    localStorage.setItem('scopedStationIBNR', ibnr || '')
+    sessionStorage.setItem('scopedStationIBNR', ibnr || '')
     const station = this.$route.query.i || this.$route.path.replace('/', '')
     // eslint-disable-next-line no-undef
     this.connection = new WebSocket(`${import.meta.env.DEV ? 'ws://127.0.0.1:8080' : import.meta.env.VITE_BACKENDURI.replace(/https:\/{2}/g, 'wss://')}/wss?station=${ibnr}&refreshRate=${this.refreshRate * 1000}`)
@@ -138,9 +138,9 @@ export default defineComponent({
         let departures: Departures.Stop[] = data.stops
 
         this.station = data.station
-        localStorage.setItem('scopedStation', data.station)
+        sessionStorage.setItem('scopedStation', data.station)
         this.stops = departures.sort((a, b) => this.sortStops(a, b))
-        localStorage.setItem('scopedStops', JSON.stringify(this.stops))
+        sessionStorage.setItem('scopedStops', JSON.stringify(this.stops))
       }
     }
   },
@@ -152,15 +152,15 @@ export default defineComponent({
       station: '',
       error: false,
       errorMsg: '',
-      refreshRate: Number(sessionStorage.getItem('refreshRate')) || 15,
+      refreshRate: Number(localStorage.getItem('refreshRate')) || 15,
       showModal: false,
       modalData: null as unknown,
       trainOrder: null,
       showSettings: false,
-      showLineNumbers: sessionStorage.getItem('showLineNumbers') === "true" || false,
-      sortOption: sessionStorage.getItem('sortOption') || "when",
-      sortBy: sessionStorage.getItem('sortBy') || "departure",
-      language: sessionStorage.getItem('language') || "de",
+      showLineNumbers: localStorage.getItem('showLineNumbers') === "true" || false,
+      sortOption: localStorage.getItem('sortOption') || "when",
+      sortBy: localStorage.getItem('sortBy') || "departure",
+      language: localStorage.getItem('language') || "de",
       version: pjson.version,
       lastUpdate: new Date(Date.now())
     }
@@ -174,7 +174,7 @@ export default defineComponent({
     getDelayMessage: ColorUtil.getDelayMessage,
     getTripById: ColorUtil.getTripById,
     openDetails(item: Departures.Stop) {
-      localStorage.setItem('scopedItem', JSON.stringify(item))
+      sessionStorage.setItem('scopedItem', JSON.stringify(item))
       this.$router.push({
         name: 'details'
       })
@@ -182,11 +182,11 @@ export default defineComponent({
     closeSettings() {
       this.showSettings = false
       this.stops = this.stops.sort((a, b) => this.sortStops(a, b))
-      sessionStorage.setItem('showLineNumbers', this.showLineNumbers.toString())
-      sessionStorage.setItem('sortBy', this.sortBy)
-      sessionStorage.setItem('sortOption', this.sortOption)
-      sessionStorage.setItem('refreshRate', this.refreshRate.toString())
-      sessionStorage.setItem('language', this.language)
+      localStorage.setItem('showLineNumbers', this.showLineNumbers.toString())
+      localStorage.setItem('sortBy', this.sortBy)
+      localStorage.setItem('sortOption', this.sortOption)
+      localStorage.setItem('refreshRate', this.refreshRate.toString())
+      localStorage.setItem('language', this.language)
       this.$i18n.locale=this.language
       
     },
