@@ -26,7 +26,7 @@
 .nextStopTime {
   padding: .2rem;
   border-radius: 5px;
-  mix-blend-mode: hard-light;
+  color: rgb(0, 0, 0);
 }
 .fromTo {
   text-align: center;
@@ -43,6 +43,15 @@
 .trainLink {
   color: rgb(66, 165, 245);
   cursor: pointer;
+}
+.current {
+  padding: 5px;
+  border-radius: 5px;
+  width: min-content;
+  color: rgb(0, 0, 0);
+}
+.planned {
+  padding: 5px;
 }
 
 .map {

@@ -35,11 +35,10 @@ export const convertTimetable = (data1, data2, changes, fullChanges) => {
   return new Promise(async (resolve) => {
     let dataTimetable = {};
     let wingsCache = [];
-    
     if (data2) {
       dataTimetable = {
-        attributes: data1.elements[0].attributes,
-        elements: data1.elements[0].elements,
+        attributes: data1.attributes,
+        elements: data1.elements,
       };
       data2.elements[0].elements.forEach((e) => dataTimetable.elements.push(e));
     } else {
@@ -60,8 +59,8 @@ export const convertTimetable = (data1, data2, changes, fullChanges) => {
       return element !== undefined;
     });
     async function processStop(e) {
-      if (e.attributes == undefined) {
-        log(e);
+      if (e.attributes == undefined || e.elements == undefined) {
+        console.log(e)
       }
       if (fullChanges.elements == undefined) {
         console.log("fChg undefined")
@@ -222,7 +221,6 @@ export const convertTimetable = (data1, data2, changes, fullChanges) => {
           wingsCache.push(wing2);
         } else {
           hasWings = false
-          console.log("Wingdef error ocurred")
         }
       } else {
         wing = wingsCache.find((o) => e.attributes.id.includes(o.origin));
@@ -296,10 +294,21 @@ export const convertTimetable = (data1, data2, changes, fullChanges) => {
       return stopObj;
     }
     const processedStopsPromises = dataTimetable.elements.map(processStop);
-    let processedStops = await Promise.all(processedStopsPromises);
 
-    const wingCheckPromise = dataTimetable.elements.map(processStop);
-    processedStops = await Promise.all(wingCheckPromise);
+    let processedStops = await Promise.all(processedStopsPromises);
+    
+
+    const isDuplicate = (item, index, array) => {
+      const { tripId, line: { fahrtNr } } = item;
+      return (
+        array.findIndex(
+          (el) => el.tripId === tripId || el.line.fahrtNr === fahrtNr
+        ) !== index
+      );
+    };
+
+    const uniqueProcessedStops = processedStops.filter((item, index, array) => !isDuplicate(item, index, array));
+    processedStops = uniqueProcessedStops;
 
     const timestamp = moment().tz("Europe/Berlin").format("YYMMDDHHmm");
     newJSON.stops = processedStops.filter(

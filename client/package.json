@@ -1,6 +1,6 @@
 {
   "name": "db-live-monitor",
-  "version": "4.5.1",
+  "version": "4.6.0",
   "private": true,
   "scripts": {
     "build": "vite build",
@@ -25,12 +25,12 @@
     "register-service-worker": "^1.7.2",
     "vue": "^3.2.47",
     "vue-i18n": "^9.8.0",
-    "vue-router": "^4.0.13",
-    "vue-virtual-scroller": "^2.0.0-beta.8"
+    "vue-router": "^4.0.13"
   },
   "devDependencies": {
     "@rushstack/eslint-patch": "^1.2.0",
     "@types/node": "^18.16.19",
+    "@types/vue": "^2.0.0",
     "@vitejs/plugin-vue": "^4.0.0",
     "@vue-leaflet/vue-leaflet": "^0.10.1",
     "@vue/cli-plugin-pwa": "~5.0.0",

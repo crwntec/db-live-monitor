@@ -98,6 +98,7 @@
 .stops {
   margin: 0;
   background-color: var(--background);
+  list-style: none;
 }
 .stopRow {
   cursor: pointer;

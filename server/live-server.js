@@ -4,6 +4,7 @@ import axios from "axios";
 import http from "http";
 import express from "express";
 import cors from "cors";
+import dotenv from "dotenv";
 
 import stations from "./data/stations.json" assert { type: "json" };
 import pjson from "./package.json" assert { type: "json" };
@@ -14,8 +15,13 @@ import { getTrainOrder } from "./conversion/getTrainOrder.js";
 import { makeRequest } from "./request/makeRequest.js";
 import { parseRemarks } from "./util/parseRemarks.js";
 import parsePolyline from "./util/parsePolyline.js";
-import { getTrip } from "./cache/cache.js";
+import {
+  getTrip,
+  getCachedDepartures,
+  getCachedArrivals,
+} from "./cache/cache.js";
 import initHafas from "./util/initHafas.js";
+import { risApiRequest } from "./request/risApiRequest.js";
 
 const app = express();
 app.use(cors());
@@ -69,7 +75,7 @@ app.get("/wr/:nr/:ts", async (req, response) => {
   try {
     const res = await axios.get(
       `https://ist-wr.noncd.db.de/wagenreihung/1.0/${trainNumber}/${timestamp}`
-      );
+    );
 
     const trainOrderObj = getTrainOrder(res.data, isICE);
     response.send(trainOrderObj);
@@ -84,38 +90,55 @@ app.get("/wr/:nr/:ts", async (req, response) => {
 
 app.get("/details/:fahrtNr", async (req, res) => {
   let hafasRef = null;
-  try {
-    let possibleTrips = await hafas.tripsByName(req.params.fahrtNr, {
-      results: 1,
+  let possibleTrips = await hafas
+    .tripsByName(req.params.fahrtNr, {
+      results: 5,
       products: {
         suburban: true,
         subway: false,
         tram: false,
-        bus: req.query.bus || false,
+        bus: req.query.isBus,
         ferry: false,
         regional: true,
+        taxi: false,
       },
       language: req.query.language || "de",
+    })
+    .catch(() => {
+      return;
     });
-    //console.log(possibleTrips.trips)
-    hafasRef = possibleTrips.trips[0];
-    if (hafasRef !== undefined) {
-      const tripData = await getTrip(hafas, hafasRef.id);
-      let [hints, remarks] = parseRemarks(tripData.remarks);
-      let [polyline, stops] = parsePolyline(tripData.polyline);
-      const hafasTrip = {
-        ...tripData,
-        hints: hints,
-        remarks: remarks,
-        polyline: polyline,
-        stops: stops,
-      };
-      res.send(hafasTrip);
-    } else {
+  possibleTrips =
+    possibleTrips !== undefined
+      ? possibleTrips.trips.filter((t) => t.line.name == req.query.line)
+      : [];
+  if (possibleTrips.length == 0) {
+    let stops = req.query.isDeparture
+      ? await getCachedDepartures(hafas, req.query.ibnr)
+      : await getCachedArrivals(hafas, req.query.ibnr);
+    stops = stops.filter((s) => s.line.fahrtNr == req.params.fahrtNr);
+    if (stops.length == 0) {
       res.sendStatus(204);
+      return;
     }
-  } catch (error) {
-    console.error(error);
+    else {
+      hafasRef = stops[0].tripId;
+    }
+  } else {
+    hafasRef = possibleTrips[0].id;
+  }
+  if (hafasRef !== undefined) {
+    const tripData = await getTrip(hafas, hafasRef);
+    let [hints, remarks] = parseRemarks(tripData.remarks);
+    let [polyline, stops] = parsePolyline(tripData.polyline);
+    const hafasTrip = {
+      ...tripData,
+      hints: hints,
+      remarks: remarks,
+      polyline: polyline,
+      stops: stops,
+    };
+    res.send(hafasTrip);
+  } else {
     res.sendStatus(204);
   }
 });
@@ -125,7 +148,7 @@ wss.on("connection", async (socket, req) => {
   if (url.pathname == "/wss") {
     let stationStr = url.searchParams.get("station");
     handleMonitorReq(url, socket, stationStr);
-  } 
+  }
 
   socket.on("message", (message) => {
     console.log("Received message:", message);
@@ -166,10 +189,73 @@ async function handleMonitorReq(url, socket, stationStr) {
       const parsedNextTimetable = await makeRequest(nextTimetableUrl);
       const parsedFchg = await makeRequest(fchgUrl);
       assignChanges(parsedFchg);
+      // Fetch related ibnrs
+      const relatedIbnrsUrl = `https://apis.deutschebahn.com/db-api-marketplace/apis/ris-stations/v1/stop-places/${ibnr}/groups`;
+      const relatedIbnrsResponse = await risApiRequest(relatedIbnrsUrl, {
+        headers: {
+          "DB-Api-Key": dotenv.config().parsed.DB_API_KEY,
+          "DB-Client-Id": dotenv.config().parsed.DB_CLIENT_ID,
+          accept: "application/vnd.de.db.ris+json",
+        },
+      });
+      const relatedIbnrs = relatedIbnrsResponse.groups[1].members;
+
+      // Fetch timetable, fchg, and rchg for each related ibnr
+      const timetablePromises = relatedIbnrs.map(async (relatedIbnr) => {
+        const relatedCurrentTimetableUrl = `https://iris.noncd.db.de/iris-tts/timetable/plan/${relatedIbnr}/${currentDate}/${currentHour}`;
+        const relatedNextTimetableUrl = `https://iris.noncd.db.de/iris-tts/timetable/plan/${relatedIbnr}/${nextDate}/${nextHour}`;
+        const relatedFchgUrl = `https://iris.noncd.db.de/iris-tts/timetable/fchg/${relatedIbnr}/`;
+        const relatedParsedCurrentTimetable =
+          (await makeRequest(relatedCurrentTimetableUrl)) || null;
+        const relatedParsedNextTimetable =
+          (await makeRequest(relatedNextTimetableUrl)) || null;
+        const relatedParsedFchg = (await makeRequest(relatedFchgUrl)) || null;
+        if (
+          !relatedParsedCurrentTimetable ||
+          !relatedParsedNextTimetable ||
+          !relatedParsedFchg
+        ) {
+          return;
+        }
+        assignChanges(relatedParsedFchg);
+
+        return {
+          currentTimetable: relatedParsedCurrentTimetable,
+          nextTimetable: relatedParsedNextTimetable,
+          fchg: relatedParsedFchg,
+        };
+      });
+
+      let relatedTimetables = await Promise.all(timetablePromises);
+      relatedTimetables = relatedTimetables.filter(
+        (relatedTimetable) => relatedTimetable !== undefined
+      );
+
+      // Combine the parts together
+      let combinedTimetable = {
+        attributes: parsedCurrentTimetable.elements[0].attributes,
+        elements: parsedCurrentTimetable.elements[0].elements,
+      };
+
+      if (relatedTimetables) {
+        relatedTimetables.forEach(({ currentTimetable, nextTimetable }) => {
+          if (currentTimetable && currentTimetable.elements[0].elements) {
+            combinedTimetable.elements.push(
+              ...currentTimetable.elements[0].elements
+            );
+          }
+          if (nextTimetable && nextTimetable.elements[0].elements) {
+            combinedTimetable.elements.push(
+              ...nextTimetable.elements[0].elements
+            );
+          }
+        });
+      }
+
       let hasNextTimetable =
         parsedNextTimetable.elements[0].elements != undefined;
       let converted = await convertTimetable(
-        parsedCurrentTimetable,
+        combinedTimetable,
         hasNextTimetable ? parsedNextTimetable : null,
         parsedFchg,
         fullChanges

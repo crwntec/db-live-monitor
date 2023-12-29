@@ -61,11 +61,9 @@
         </div>
       </form>
     </div>
-    <div class="stopsContainer">
-      <ul class="stops">
-        <DynamicScroller :items="stops" :min-item-size="93" key-field="tripId" class="Scroller">
-          <template v-slot="{ item, active }">
-            <DynamicScrollerItem :item="item" :active="active" @click="openDetails(item)">
+    <div id="scrollArea" class="stopsContainer">
+      <ul id="contentArea" class="stops">
+        <li v-for="item,index in stops" :key="index" @click="openDetails(item)">
               <div :class="{ stopRow: true, cancelled: item.cancelled, hasLeft: item.hasLeft }">
                 <div class="lineContainer">
                   <span class="line" :style="{ backgroundColor: getColor(item.line.productName) }">{{ item.line.name }}
@@ -96,15 +94,13 @@
                 <div class="messages">
                   <span class="delayCause">{{ getDelayMessage(item.causesOfDelay).join('++') }}</span>
                   <span v-if="item.removedStops.length > 0 && !item.onlyPlanData">Ohne Halt in: <span :key="stop.id"
-                      v-for="stop in item.removedStops">{{ stop.stop }}</span></span>
+                      v-for="stop in item.removedStops">{{ stop.newStop }}</span></span>
                   <span v-if="item.additionalStops.length > 0">Hält zusätzlich in: <span :key="stop.id"
                       v-for="stop in item.additionalStops">{{ stop }}</span></span>
                 </div>
                 {{ item.cancelled ? "Fahrt fällt aus!" : "" }}
               </div>
-            </DynamicScrollerItem>
-          </template>
-        </DynamicScroller>
+            </li>
       </ul>
     </div>
   </div>
@@ -126,6 +122,7 @@ export default defineComponent({
   name: 'Monitor-View',
   created: function () {
     let ibnr = this.$route.params.station
+    localStorage.setItem('scopedStationIBNR', ibnr || '')
     const station = this.$route.query.i || this.$route.path.replace('/', '')
     // eslint-disable-next-line no-undef
     this.connection = new WebSocket(`${import.meta.env.DEV ? 'ws://127.0.0.1:8080' : import.meta.env.VITE_BACKENDURI.replace(/https:\/{2}/g, 'wss://')}/wss?station=${ibnr}&refreshRate=${this.refreshRate * 1000}`)
@@ -153,7 +150,6 @@ export default defineComponent({
       connection: {} as WebSocket,
       loading: true,
       stops: [] as Departures.Stop[],
-      isScrollableArr: [] as Object[],
       station: '',
       error: false,
       errorMsg: '',

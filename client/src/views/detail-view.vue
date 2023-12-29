@@ -65,7 +65,7 @@ export default defineComponent({
             import.meta.env.DEV ? 'http://127.0.0.1:8080' : import.meta.env.VITE_BACKENDURI
           }/details/${this.data.line.fahrtNr}?isBus=${this.data.line.productName.includes(
             'Bus'
-          )}&line=${this.data.line.name}&isDeparture=${this.data.hasDeparture}&language=${sessionStorage.getItem("language")}`
+          )}&line=${this.data.line.name}&ibnr=${localStorage.getItem('scopedStationIBNR')}&isDeparture=${this.data.hasDeparture}&language=${sessionStorage.getItem("language")}`
         )
         if (response.status === 200) {
           const data = response.data
@@ -175,36 +175,38 @@ export default defineComponent({
     isPassedStop(stop: Departures.Stopover, isLine: boolean): boolean {
       if (this.hafasData !== null && this.hafasData.stopovers) {
         const nextStop = this.getNextStop()
-        const nextStopInd = this.hafasData.stopovers.findIndex(
-          (el) => el.stop.name == nextStop.stop.name
-        )
-        if (isLine) {
+        if (nextStop) {
+          const nextStopInd = this.hafasData.stopovers.findIndex(
+            (el) => el.stop.name == nextStop.stop.name
+          )
+          if (isLine) {
+            return (
+              this.hafasData.stopovers.findIndex((el) => el.stop.name == stop.stop.name) <
+              nextStopInd - 1
+            )
+          }
           return (
-            this.hafasData.stopovers.findIndex((el) => el.stop.name == stop.stop.name) <
-            nextStopInd - 1
+            this.hafasData.stopovers.findIndex((el) => el.stop.name == stop.stop.name) < nextStopInd
           )
         }
-        return (
-          this.hafasData.stopovers.findIndex((el) => el.stop.name == stop.stop.name) < nextStopInd
-        )
       }
       return false
     },
     getHeight(currStop: Departures.Stopover, inProg: boolean): number {
       if (this.hafasData !== null && this.hafasData.stopovers) {
         const nextStop = this.getNextStop()
-        const lastStop = currStop
-        const nextStopTimeString =
-          nextStop.arrival ||
-          nextStop.departure ||
-          nextStop.plannedArrival ||
-          nextStop.plannedDeparture
-        const stopTimeString =
-          lastStop.arrival ||
-          lastStop.departure ||
-          lastStop.plannedArrival ||
-          lastStop.plannedDeparture
-        if (nextStopTimeString && stopTimeString) {
+        if (nextStop) {
+          const lastStop = currStop
+          const nextStopTimeString =
+            nextStop.arrival ||
+            nextStop.departure ||
+            nextStop.plannedArrival ||
+            nextStop.plannedDeparture
+          const stopTimeString =
+            lastStop.arrival ||
+            lastStop.departure ||
+            lastStop.plannedArrival ||
+            lastStop.plannedDeparture
           const nextStopTime = Date.parse(nextStopTimeString)
           const stopTime = Date.parse(stopTimeString)
 
@@ -214,7 +216,7 @@ export default defineComponent({
             if (inProg) {
               return (timePassed / timeDiff) * 100 + 100
             }
-            return (timePassed / timeDiff) * 100 + 160
+            return (timePassed / timeDiff) * 100 + 360
           } else {
             return 0
           }
@@ -265,11 +267,12 @@ export default defineComponent({
       <h2 class="fromTo">
         {{ typeof data.from == 'string' ? data.from : data.from.stop }} ➡️ {{ data.to }}
       </h2>
+      <h4 class="operator" v-if="!loading && hafasData">{{ hafasData.line.operator.name }}</h4>
       <h2 v-if="data.cancelled" class="cancelledTrain">{{$t("detailView.cancelledTrain")}}</h2>
     </div>
     <div class="detailsContainer">
       <div class="genInfo">
-        <span class="nextStop">{{ $t('detailView.nextStop') }}: <b>{{ nextStop?.stop?.name }}</b> {{  $t("detailView.at") }} <span class="nextStopTime" :style="{backgroundColor: getTimeColor(nextStop?.arrivalDelay / 60 || nextStop?.departureDelay / 60)}">{{ getTime(hafasData?.stopovers as Departures.Stopover[] | null, nextStop?.stop?.name) }}</span>({{ (nextStop?.departureDelay || nextStop?.arrivalDelay || 0) < 0 ? "-" : "+" + (nextStop?.departureDelay || nextStop?.arrivalDelay || 0) / 60 }})</span>
+        <span class="nextStop">{{ $t('detailView.nextStop') }}: <b>{{ nextStop?.stop?.name || "" }}</b> {{  $t("detailView.at") }} <span class="nextStopTime" :style="{backgroundColor: getTimeColor(nextStop?.arrivalDelay / 60 || nextStop?.departureDelay / 60)}">{{ getTime(hafasData?.stopovers as Departures.Stopover[] | null, nextStop?.stop?.name) }}</span>({{ (nextStop?.departureDelay || nextStop?.arrivalDelay || 0) < 0 ? "-" : "+" + (nextStop?.departureDelay || nextStop?.arrivalDelay || 0) / 60 }})</span>
       </div>
       <div class="" v-if="data.onlyPlanData">
         <span>{{$t('detailView.planData')}}</span>
@@ -356,7 +359,7 @@ export default defineComponent({
         </ul>
       </div>
       <div v-if="data.hasWings && getTripById(stops, data.wing.wing)" class="wings">
-                <span>Fährt von {{ data.wing.start.station }} bis {{ data.wing.end.station }} vereint mit <a class="trainLink"
+                <span>{{ $t("detailView.runs") + " " + $t("detailView.from")  + " " +data.wing.start.station + " " + $t("detailView.to") + " " + data.wing.end.station + " " +$t("detailView.togetherWith") }} <a class="trainLink"
                         @click="loadTrain"> {{ getTripById(stops, data.wing.wing)?.line?.name + "(" +
                             getTripById(stops, data.wing.wing)?.line?.fahrtNr + ")" }}</a></span>
             </div>
@@ -371,12 +374,12 @@ export default defineComponent({
                 ).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })
               }}
             </span>
-            <span class="current">
+            <span class="current" :style="{ backgroundColor: getTimeColor((stop.departureDelay || stop.arrivalDelay)/60 || null) }">
               {{
                 new Date(
-                  stop.departure || stop.arrival
+                  stop.departure || stop.arrival || stop.plannedDeparture || stop.plannedArrival
                 ).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })
-              }}
+              }} 
             </span>
           </div>
           <svg

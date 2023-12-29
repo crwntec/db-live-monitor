@@ -3,6 +3,7 @@
 import "../assets/home.css"
 import "../assets/main.css"
 import axios from "axios"
+import pjson from "../../package.json"
 interface Suggestion {
     extId: string,
     value: string
@@ -18,7 +19,8 @@ export default {
             currentSuggestion: undefined as Suggestion | undefined,
             hasSelected: false,
             abortController: new AbortController(),
-            apiBase: import.meta.env.DEV ? 'http://127.0.0.1:8080': import.meta.env.VITE_BACKENDURI
+            version: pjson.version,
+            apiBase: import.meta.env.DEV ? 'http://127.0.0.1:8080': import.meta.env.VITE_BACKENDURI,
         }
     },
     watch: {
@@ -91,7 +93,7 @@ export default {
             <button @click="openStation" role="link" class="stationSubmit">{{$t("homeView.search")}}</button>
         </div>
     </div>
+    <div class="footer">
+        {{ $t("monitorView.currentVersion") }}: <a class="link" href="https://github.com/crwntec/db-live-monitor">{{version }}</a>
+    </div>
 </template>
-
-<style>
-</style>
