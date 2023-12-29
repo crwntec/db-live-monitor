@@ -94,7 +94,7 @@ export default {
             <button @click="openStation" role="link" class="stationSubmit">{{ $t("homeView.search") }}</button>
         </div>
     </div>
-    <footer class="footer">
+    <footer class="homeFooter">
         {{ $t("monitorView.currentVersion") }}: <a class="link" href="https://github.com/crwntec/db-live-monitor">{{ version
         }}</a>
     </footer>
