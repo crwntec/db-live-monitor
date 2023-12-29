@@ -111,7 +111,6 @@ import type * as Departures from '../types/departures-types'
 import "../assets/monitor.css"
 import "../assets/main.css"
 import "../assets/loading.css"
-import 'vue-virtual-scroller/dist/vue-virtual-scroller.css'
 import * as DateUtil from "../util/date"
 import * as ColorUtil from "../util/colors"
 import pjson from "../../package.json"
