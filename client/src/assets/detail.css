@@ -211,7 +211,16 @@
   color: var(--bg-darker);
   background-color: var(--accent);
 }
-
+.ptr--ptr {
+  box-shadow: none !important;
+  border-bottom: 1px solid #3498db !important;
+}
+.ptr--icon {
+  color:#3498db !important;
+}
+.ptr--text {
+  color: white !important;
+}
 @keyframes spin {
   0% {
     transform: rotate(0deg);

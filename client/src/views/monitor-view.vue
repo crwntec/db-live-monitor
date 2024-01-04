@@ -93,10 +93,6 @@
                 </div>
                 <div class="messages">
                   <span class="delayCause">{{ getDelayMessage(item.causesOfDelay).join('++') }}</span>
-                  <span v-if="item.removedStops.length > 0 && !item.onlyPlanData">Ohne Halt in: <span :key="stop.id"
-                      v-for="stop in item.removedStops">{{ stop.newStop }}</span></span>
-                  <span v-if="item.additionalStops.length > 0">Hält zusätzlich in: <span :key="stop.id"
-                      v-for="stop in item.additionalStops">{{ stop }}</span></span>
                 </div>
                 {{ item.cancelled ? "Fahrt fällt aus!" : "" }}
               </div>
@@ -114,12 +110,21 @@ import "../assets/loading.css"
 import * as DateUtil from "../util/date"
 import * as ColorUtil from "../util/colors"
 import pjson from "../../package.json"
+import PullToRefresh from 'pulltorefreshjs';
 
 
 
 export default defineComponent({
   name: 'Monitor-View',
   created: function () {
+
+    PullToRefresh.init({
+      mainElement: 'body',
+      onRefresh() {
+        window.location.reload();
+      }
+    });
+
     let ibnr = this.$route.params.station
     sessionStorage.setItem('scopedStationIBNR', ibnr || '')
     sessionStorage.setItem('scopedItem', '')

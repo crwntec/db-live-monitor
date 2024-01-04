@@ -42,8 +42,8 @@ export default {
                 let parsed = encodeURIComponent(this.input)
                 if (!this.hasSelected) {
                     const res = await axios.get(`${this.apiBase}/verify/${parsed}`)
-                    if (res.data == true) {
-                        this.$router.push('/' + this.input)
+                    if (res.data !== undefined) {
+                        this.$router.push('/' + res.data.EVA_NR + '?i=' + res.data.NAME)
                     }
                 } else {
                     this.$router.push('/' + parseInt(this.currentSuggestion.extId) + '?i=' + this.input)

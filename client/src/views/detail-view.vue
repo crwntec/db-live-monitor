@@ -6,6 +6,7 @@ import 'leaflet/dist/leaflet.css'
 import { LMap, LTileLayer, LGeoJson, LPolyline } from '@vue-leaflet/vue-leaflet'
 
 import axios from 'axios'
+import PullToRefresh from 'pulltorefreshjs';
 
 import '../assets/detail.css'
 import '../assets/main.css'
@@ -65,7 +66,7 @@ export default defineComponent({
             import.meta.env.DEV ? 'http://127.0.0.1:8080' : import.meta.env.VITE_BACKENDURI
           }/details/${this.data.line.fahrtNr}?isBus=${this.data.line.productName.includes(
             'Bus'
-          )}&line=${this.data.line.name}&ibnr=${localStorage.getItem('scopedStationIBNR')}&isDeparture=${this.data.hasDeparture}&language=${localStorage.getItem("language")}`
+          )}&line=${this.data.line.productName + " " + this.data.line.fahrtNr}&ibnr=${sessionStorage.getItem('scopedStationIBNR')}&isDeparture=${this.data.hasDeparture}&language=${localStorage.getItem("language")}`
         )
         if (response.status === 200) {
           const data = response.data
@@ -214,9 +215,9 @@ export default defineComponent({
             const timeDiff = nextStopTime - stopTime
             const timePassed = Date.now() - stopTime
             if (inProg) {
-              return (timePassed / timeDiff) * 100 + 100
+              return (timePassed / timeDiff) * 500
             }
-            return (timePassed / timeDiff) * 100 + 360
+            return (timePassed / timeDiff) * 100 + 500
           } else {
             return 0
           }
@@ -245,10 +246,24 @@ export default defineComponent({
       return (feature, layer) => {
         layer.bindTooltip('<div>' + feature.properties.name + '</div>')
       }
+    },
+    additionalStops() {
+      if (this.hafasData !== null && this.hafasData.stopovers) {
+        return this.hafasData.stopovers.filter(
+          (stop, index) => !this.data.plannedPath.includes(stop.stop.name) && !this.data.arrivalPath.includes(stop.stop.name) && stop.stop.name !== sessionStorage.getItem('scopedStation') && index !== 0
+        )
+      }
+      return []
     }
   },
   mounted() {
     this.fetchData()
+    PullToRefresh.init({
+      mainElement: 'body',
+      onRefresh: () => {
+        this.fetchData()
+      }
+    })
   }
 })
 </script>
@@ -365,7 +380,11 @@ export default defineComponent({
             </div>
       <div v-if="hafasData" class="trip">
         <h4>{{$t("detailView.stopovers")}}</h4>
-        <li  class="stopover" :key="stop.stop.id" v-for="stop in hafasData.stopovers">
+        <p v-if="additionalStops.length > 0">
+          Zusätzlicher Halt in:
+                {{ additionalStops.map(stop => stop.stop.name).join(", ")}}
+        </p>
+        <li  class="stopover" :key="stop.stop.id" v-for="(stop, index) in hafasData.stopovers">
           <div class="time">
             <span class="planned">
               {{
@@ -406,7 +425,7 @@ export default defineComponent({
               stroke-width="3"
             />
           </svg>
-          <span class="stopName">{{ stop.stop.name }}</span>
+            <span class="stopName" :style="{ color: !this.data.plannedPath.includes(stop.stop.name) && !this.data.arrivalPath.includes(stop.stop.name) && stop.stop.name !== station && index !== 0 ? 'rgb(138, 255, 127)' : 'white' }">{{ stop.stop.name }} </span>
           <div class="overlapLine base" v-if="stop.stop.name !== lastStop.stop.name" />
           <div
             v-if="stop.stop.name !== lastStop.stop.name"

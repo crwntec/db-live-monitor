@@ -56,7 +56,7 @@ app.get("/", (req, res) => {
 });
 app.get("/verify/:string", (req, res) => {
   if (ds100Pattern.test(req.params.string)) {
-    res.send(stations.find((s) => s.DS100 == req.params.string) !== undefined);
+    res.send(stations.find((s) => s.DS100 == req.params.string));
   }
 });
 app.get("/search/:string", (req, res) => stationSearch(req, res));
@@ -107,10 +107,10 @@ app.get("/details/:fahrtNr", async (req, res) => {
     .catch(() => {
       return;
     });
-  possibleTrips =
+    possibleTrips =
     possibleTrips !== undefined
-      ? possibleTrips.trips.filter((t) => t.line.name == req.query.line)
-      : [];
+    ? possibleTrips.trips.filter((t) => t.line.name == req.query.line)
+    : [];
   if (possibleTrips.length == 0) {
     let stops = req.query.isDeparture
       ? await getCachedDepartures(hafas, req.query.ibnr)
@@ -128,6 +128,7 @@ app.get("/details/:fahrtNr", async (req, res) => {
   }
   if (hafasRef !== undefined) {
     const tripData = await getTrip(hafas, hafasRef);
+    if (!tripData) return res.sendStatus(204);
     let [hints, remarks] = parseRemarks(tripData.remarks);
     let [polyline, stops] = parsePolyline(tripData.polyline);
     const hafasTrip = {

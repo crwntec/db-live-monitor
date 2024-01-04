@@ -163,22 +163,6 @@ export const convertTimetable = (data1, data2, changes, fullChanges) => {
           : [];
       const onlyPlanData = irisDpPath.length == 0 && hasDeparture;
 
-      const removedStops = onlyPlanData
-        ? []
-        : plannedPath.filter(
-            (plannedStop) =>
-              irisDpPath.some(
-                (currentStop) => currentStop.stop === plannedStop
-              )
-          );
-      const additionalStops = onlyPlanData
-        ? []
-        : irisDpPath.filter(
-            (currentStop) =>
-              plannedPath.some(
-                (plannedStop) => plannedStop === currentStop.stop
-              )
-          );
       let hasWings = hasArrival
         ? arrival.attributes.wings !== undefined
         : departure.attributes.wings !== undefined;
@@ -273,8 +257,6 @@ export const convertTimetable = (data1, data2, changes, fullChanges) => {
         arrivalPath: hasArrival ? irisArPath : [],
         plannedPath: plannedPath,
         currentPath: irisDpPath,
-        removedStops: removedStops,
-        additionalStops: additionalStops,
         hasWings: hasWings,
         wing: wing,
         from: hasArrival
