@@ -193,8 +193,8 @@ async function handleMonitorReq(url, socket, stationStr) {
       const relatedIbnrsUrl = `https://apis.deutschebahn.com/db-api-marketplace/apis/ris-stations/v1/stop-places/${ibnr}/groups`;
       const relatedIbnrsResponse = await risApiRequest(relatedIbnrsUrl, {
         headers: {
-          "DB-Api-Key": dotenv.config().parsed.DB_API_KEY,
-          "DB-Client-Id": dotenv.config().parsed.DB_CLIENT_ID,
+          "DB-Api-Key": process.env.NODE_ENV == "production" ? process.env.DB_API_KEY : dotenv.config().parsed.DB_API_KEY,
+          "DB-Client-Id": process.env.NODE_ENV == "production" ? process.env.DB_CLIENT_ID : dotenv.config().parsed.DB_CLIENT_ID,
           accept: "application/vnd.de.db.ris+json",
         },
       });
