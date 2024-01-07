@@ -61,11 +61,9 @@
         </div>
       </form>
     </div>
-    <div class="stopsContainer">
-      <ul class="stops">
-        <DynamicScroller :items="stops" :min-item-size="93" key-field="tripId" class="Scroller">
-          <template v-slot="{ item, active }">
-            <DynamicScrollerItem :item="item" :active="active" @click="openDetails(item)">
+    <div id="scrollArea" class="stopsContainer">
+      <ul id="contentArea" class="stops">
+        <li v-for="item,index in stops" :key="index" @click="openDetails(item)">
               <div :class="{ stopRow: true, cancelled: item.cancelled, hasLeft: item.hasLeft }">
                 <div class="lineContainer">
                   <span class="line" :style="{ backgroundColor: getColor(item.line.productName) }">{{ item.line.name }}
@@ -95,16 +93,10 @@
                 </div>
                 <div class="messages">
                   <span class="delayCause">{{ getDelayMessage(item.causesOfDelay).join('++') }}</span>
-                  <span v-if="item.removedStops.length > 0 && !item.onlyPlanData">Ohne Halt in: <span :key="stop.id"
-                      v-for="stop in item.removedStops">{{ stop.stop }}</span></span>
-                  <span v-if="item.additionalStops.length > 0">Hält zusätzlich in: <span :key="stop.id"
-                      v-for="stop in item.additionalStops">{{ stop }}</span></span>
                 </div>
                 {{ item.cancelled ? "Fahrt fällt aus!" : "" }}
               </div>
-            </DynamicScrollerItem>
-          </template>
-        </DynamicScroller>
+            </li>
       </ul>
     </div>
   </div>
@@ -115,17 +107,27 @@ import type * as Departures from '../types/departures-types'
 import "../assets/monitor.css"
 import "../assets/main.css"
 import "../assets/loading.css"
-import 'vue-virtual-scroller/dist/vue-virtual-scroller.css'
 import * as DateUtil from "../util/date"
 import * as ColorUtil from "../util/colors"
 import pjson from "../../package.json"
+import PullToRefresh from 'pulltorefreshjs';
 
 
 
 export default defineComponent({
   name: 'Monitor-View',
   created: function () {
+
+    PullToRefresh.init({
+      mainElement: 'body',
+      onRefresh() {
+        window.location.reload();
+      }
+    });
+
     let ibnr = this.$route.params.station
+    sessionStorage.setItem('scopedStationIBNR', ibnr || '')
+    sessionStorage.setItem('scopedItem', '')
     const station = this.$route.query.i || this.$route.path.replace('/', '')
     // eslint-disable-next-line no-undef
     this.connection = new WebSocket(`${import.meta.env.DEV ? 'ws://127.0.0.1:8080' : import.meta.env.VITE_BACKENDURI.replace(/https:\/{2}/g, 'wss://')}/wss?station=${ibnr}&refreshRate=${this.refreshRate * 1000}`)
@@ -142,9 +144,9 @@ export default defineComponent({
         let departures: Departures.Stop[] = data.stops
 
         this.station = data.station
-        localStorage.setItem('scopedStation', data.station)
+        sessionStorage.setItem('scopedStation', data.station)
         this.stops = departures.sort((a, b) => this.sortStops(a, b))
-        localStorage.setItem('scopedStops', JSON.stringify(this.stops))
+        sessionStorage.setItem('scopedStops', JSON.stringify(this.stops))
       }
     }
   },
@@ -153,19 +155,18 @@ export default defineComponent({
       connection: {} as WebSocket,
       loading: true,
       stops: [] as Departures.Stop[],
-      isScrollableArr: [] as Object[],
       station: '',
       error: false,
       errorMsg: '',
-      refreshRate: Number(sessionStorage.getItem('refreshRate')) || 15,
+      refreshRate: Number(localStorage.getItem('refreshRate')) || 15,
       showModal: false,
       modalData: null as unknown,
       trainOrder: null,
       showSettings: false,
-      showLineNumbers: sessionStorage.getItem('showLineNumbers') === "true" || false,
-      sortOption: sessionStorage.getItem('sortOption') || "when",
-      sortBy: sessionStorage.getItem('sortBy') || "departure",
-      language: sessionStorage.getItem('language') || "de",
+      showLineNumbers: localStorage.getItem('showLineNumbers') === "true" || false,
+      sortOption: localStorage.getItem('sortOption') || "when",
+      sortBy: localStorage.getItem('sortBy') || "departure",
+      language: localStorage.getItem('language') || "de",
       version: pjson.version,
       lastUpdate: new Date(Date.now())
     }
@@ -179,7 +180,7 @@ export default defineComponent({
     getDelayMessage: ColorUtil.getDelayMessage,
     getTripById: ColorUtil.getTripById,
     openDetails(item: Departures.Stop) {
-      localStorage.setItem('scopedItem', JSON.stringify(item))
+      sessionStorage.setItem('scopedItem', JSON.stringify(item))
       this.$router.push({
         name: 'details'
       })
@@ -187,11 +188,11 @@ export default defineComponent({
     closeSettings() {
       this.showSettings = false
       this.stops = this.stops.sort((a, b) => this.sortStops(a, b))
-      sessionStorage.setItem('showLineNumbers', this.showLineNumbers.toString())
-      sessionStorage.setItem('sortBy', this.sortBy)
-      sessionStorage.setItem('sortOption', this.sortOption)
-      sessionStorage.setItem('refreshRate', this.refreshRate.toString())
-      sessionStorage.setItem('language', this.language)
+      localStorage.setItem('showLineNumbers', this.showLineNumbers.toString())
+      localStorage.setItem('sortBy', this.sortBy)
+      localStorage.setItem('sortOption', this.sortOption)
+      localStorage.setItem('refreshRate', this.refreshRate.toString())
+      localStorage.setItem('language', this.language)
       this.$i18n.locale=this.language
       
     },
