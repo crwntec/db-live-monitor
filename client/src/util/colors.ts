@@ -64,9 +64,10 @@ export function getColor(prodName: string): string {
 }
 
 export function getTimeColor(item: Departures.Stop): string;
-export function getTimeColor(delay: number): string;
+export function getTimeColor(delay: number | null): string;
 export function getTimeColor(arg: Departures.Stop | number): string {
   let delay: number;
+  if (delay === null) return 'rgb(107, 107, 107)'
   if (typeof arg === 'number') {
     delay = arg;
   } else if (arg) {
@@ -74,11 +75,10 @@ export function getTimeColor(arg: Departures.Stop | number): string {
   } else {
     delay = 0;
   }
-  console.log(delay)
   if (delay < 0) {
     return 'rgb(66, 217, 255)';
   }
-  if (delay === 0) {
+  if (delay == 0) {
     return 'rgb(138, 255, 127)';
   } else if (delay <= 5) {
     return 'rgb(235, 200, 7)';

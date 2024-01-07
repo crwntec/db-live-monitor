@@ -1,16 +1,12 @@
 import axios from "axios";
 import { xml2json } from 'xml-js'
 
-export async function makeRequest(url) {
-    try {
-      const response = await axios.get(url);
-      if (response.status >= 200 && response.status < 400) {
+export async function makeRequest(url, options = {}) {
+      // console.log(url)
+      const response = await axios.get(url, options).catch((error) => { return null})
+      if (response) {
         return JSON.parse(xml2json(response.data.toString()));
       } else {
-        throw new Error(`HTTP request failed with status ${response.status}`);
+       return null;
       }
-    } catch (error) {
-      console.error('Error fetching data:', error);
-      throw error;
-    }
   }

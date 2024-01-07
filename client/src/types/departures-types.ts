@@ -32,7 +32,7 @@ export interface Stop {
   to: string
   isEnding: boolean
   line: Line
-  shouldScroll: boolean
+  hasLeft: boolean
 }
 
 export interface Wing {
