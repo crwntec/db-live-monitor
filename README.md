@@ -2,7 +2,7 @@
 ## Unofficial Live Departure Monitor for German Railway Stations
 [![Node.js](https://img.shields.io/badge/Node.js-18.x-green)](https://nodejs.org/) [![Vue.js](https://img.shields.io/badge/Vue.js-3.x-brightgreen)](https://vuejs.org/) [![IRIS](https://img.shields.io/badge/IRIS-Data%20Source-orange)](https://iris.noncd.db.de/wbt/js/index.html) [![HAFAS](https://img.shields.io/badge/HAFAS-Data%20Source-blue)](https://github.com/public-transport/hafas-client/) [![wakatime](https://wakatime.com/badge/user/0dd6c2ab-d4ea-49c4-a2b9-be47b5302c80/project/e65616e1-1813-4db0-ac6f-f4ff9c32d6a6.svg)](https://wakatime.com/badge/user/0dd6c2ab-d4ea-49c4-a2b9-be47b5302c80/project/e65616e1-1813-4db0-ac6f-f4ff9c32d6a6)
 
-![image](https://github.com/crwntec/db-live-monitor/assets/77750176/513a37c8-9c3f-4d88-9581-2d476beb6325)
+![grafik](https://github.com/crwntec/db-live-monitor/assets/77750176/4230d1ab-6d76-4534-b248-1205b7420baa)
 ![image](https://github.com/crwntec/db-live-monitor/assets/77750176/a75d29d7-836d-46d3-a6dd-6e3a4fd62bf6)
 
 
