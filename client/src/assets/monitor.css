@@ -101,22 +101,28 @@
   list-style: none;
 }
 .stopRow {
-  cursor: pointer;
   font-size: 0.8vw;
   padding: 10px;
   border-bottom: 1px solid gray;
-  display: grid;
   height: 12vh;
-  align-items: center;
-  overflow-y: hidden;
+}
+.contentWrapper {
+  display: grid;
   grid-template-columns: 1fr 1.8fr 0.6fr 0.4fr;
   grid-template-rows: 0.4fr auto;
   gap: 0px 3vw;
   grid-template-areas:
     '. messages . .'
     'line direction info platform';
+  align-items: center;
+  cursor: pointer;
+  overflow-y: hidden;
+  height: 100%;
 }
-
+.stopRow:hover {
+  background-color: rgb(59, 57, 72);
+  transition: background-color 0.1s ease 0s;
+}
 .line {
   border-radius: 7px;
   padding: 10px;
@@ -179,6 +185,23 @@
 }
 .hasLeft {
     background-color: rgba(184, 175, 175, 0.199);
+}
+.displayStop {
+  animation-name: fadeIn;
+  animation-duration: .5s;
+  animation-fill-mode: forwards;
+  animation-timing-function: ease-in-out;
+}
+
+@keyframes fadeIn {
+  0% {
+    opacity: 0;
+    transform: translateX(-25%);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0%);
+  }
 }
 
 @keyframes scroll {

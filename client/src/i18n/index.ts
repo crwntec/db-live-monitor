@@ -8,10 +8,10 @@ export default createI18n({
   messages: {
     en: {
       detailView: {
-        nextStp: 'Next stop',
+        nextStop: 'Next stop',
         at: 'at',
         runs: 'Runs',
-        from: 'From',
+        from: 'from ',
         to: 'To',
         togetherWith: 'together with',
         loadingData: 'Loading data',
@@ -30,7 +30,7 @@ export default createI18n({
       },
       monitorView: {
         back: 'Back',
-        from: 'From',
+        from: 'from ',
         settings: 'Settings',
         showTrainNumbers: 'Show train numbers',
         sortBy: 'Sort by',
@@ -51,7 +51,7 @@ export default createI18n({
         nextStop: 'Nächster Halt',
         at: 'um',
         runs: 'Fährt',
-        from: 'Von',
+        from: 'von ',
         to: 'bis',
         togetherWith: 'vereint mit',
         loadingData: 'Lade Daten',
@@ -70,7 +70,7 @@ export default createI18n({
       },
       monitorView: {
         back: 'Zurück',
-        from: 'Von',
+        from: 'von ',
         settings: 'Einstellungen',
         showTrainNumbers: 'Zugnummern anzeigen',
         sortBy: 'Sortieren nach',

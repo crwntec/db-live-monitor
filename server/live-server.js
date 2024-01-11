@@ -91,8 +91,9 @@ app.get("/wr/:nr/:ts", async (req, response) => {
 app.get("/details/:fahrtNr", async (req, res) => {
   let hafasRef = null;
   let possibleTrips = await hafas
-    .tripsByName(req.params.fahrtNr, {
-      results: 5,
+    .tripsByName(req.query.line, {
+      fromWhen: new Date().setHours(0,0,0,0),   //get todays date at midnight
+      untilWhen: new Date(new Date().setDate(new Date().getDate() + 1)), //and tomorrows date to limit results to today
       products: {
         suburban: true,
         subway: false,
@@ -102,15 +103,23 @@ app.get("/details/:fahrtNr", async (req, res) => {
         regional: true,
         taxi: false,
       },
+      onlyCurrentlyRunning: false,
       language: req.query.language || "de",
     })
-    .catch(() => {
+    .catch((err) => {
       return;
     });
-    possibleTrips =
-    possibleTrips !== undefined
-    ? possibleTrips.trips.filter((t) => t.line.name == req.query.line)
-    : [];
+    // console.log(possibleTrips.trips)
+    if (req.query.isBus == "false") {
+      possibleTrips =
+      possibleTrips !== undefined
+      ? possibleTrips.trips.filter((t) => t.line.name == req.query.line)
+      : [];
+    } else {
+      possibleTrips = possibleTrips.trips.filter(
+        (t) => t.line.productName == "Bus"
+      );
+    }
   if (possibleTrips.length == 0) {
     let stops = req.query.isDeparture
       ? await getCachedDepartures(hafas, req.query.ibnr)

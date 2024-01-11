@@ -1,6 +1,6 @@
 {
   "name": "db-live-monitor",
-  "version": "4.7.0",
+  "version": "5.0.0",
   "private": true,
   "scripts": {
     "build": "vite build",
@@ -25,6 +25,7 @@
     "register-service-worker": "^1.7.2",
     "uuid": "^9.0.1",
     "vue": "^3.2.47",
+    "vue-content-loader": "^2.0.1",
     "vue-gtag": "^2.0.1",
     "vue-i18n": "^9.8.0",
     "vue-router": "^4.0.13"

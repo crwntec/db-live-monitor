@@ -59,3 +59,20 @@ export function calculateDelay(
   }
   return delay
 }
+
+export function convertUnixTimestamp(unixTimestamp) {
+  // Create a new Date object using the Unix timestamp
+  const date = new Date(unixTimestamp * 1000);
+
+  // Get hours, minutes, day, month, and year
+  const hours = ('0' + date.getHours()).slice(-2);
+  const minutes = ('0' + date.getMinutes()).slice(-2);
+  const day = ('0' + date.getDate()).slice(-2);
+  const month = ('0' + (date.getMonth() + 1)).slice(-2);
+  const year = date.getFullYear();
+
+  // Format the result as hh:mm ddmmyyyy
+  const formattedDate = `${hours}:${minutes} ${day}${month}${year}`;
+
+  return formattedDate;
+}

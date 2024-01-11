@@ -36,11 +36,13 @@ export default defineComponent({
       center: [51, 70],
       nextStop: {} as Departures.Stopover,
       lastStop: {} as Departures.Stopover,
-      stops: JSON.parse(sessionStorage.getItem('scopedStops') || "{}")
+      stops: JSON.parse(sessionStorage.getItem('scopedStops') || "{}"),
+      hasFinished: false
     }
   },
   methods: {
     convertIRISTime: DateUtil.convertIRISTime,
+    convertUnixTimestamp: DateUtil.convertUnixTimestamp,
     convertDateToIRIS: DateUtil.convertDateToIRIS,
     convertTimestamp: DateUtil.convertTimestamp,
     calculateDelay: DateUtil.calculateDelay,
@@ -158,20 +160,25 @@ export default defineComponent({
       }
     },
     getNextStop(): Departures.Stopover {
-      const now = Date.now()
+      const now = new Date()
 
       if (this.hafasData !== null && this.hafasData.stopovers && this.hafasData.stopovers.length > 0) {
         for (let stop of this.hafasData.stopovers) {
-          const departureTime = Date.parse(
-            stop.departure || stop.arrival || stop.plannedDeparture || stop.plannedArrival
-          )
-          if (departureTime > now) {
+          const departureTime = new Date(
+            stop.departure || stop.plannedDeparture || stop.arrival || stop.plannedArrival
+            )
+          if (stop == this.hafasData.stopovers[this.hafasData.stopovers.length - 1]) {
+            this.hasFinished = true
             return stop
           }
+          if (departureTime > now) {
+            return stop
+            }
+          
         }
+        console.log("no stop found")
       }
-
-      return undefined as any
+      return null as Departures.Stopover
     },
     isPassedStop(stop: Departures.Stopover, isLine: boolean): boolean {
       if (this.hafasData !== null && this.hafasData.stopovers) {
@@ -215,9 +222,9 @@ export default defineComponent({
             const timeDiff = nextStopTime - stopTime
             const timePassed = Date.now() - stopTime
             if (inProg) {
-              return (timePassed / timeDiff) * 500
+              return Math.min((timePassed / timeDiff) * 500, 600)
             }
-            return (timePassed / timeDiff) * 100 + 500
+            return Math.min((timePassed / timeDiff) * 100 + 500, 600);
           } else {
             return 0
           }
@@ -225,7 +232,6 @@ export default defineComponent({
           return 0
         }
       }
-      console.log('err')
       return 0
     }
   },
@@ -249,8 +255,8 @@ export default defineComponent({
     },
     additionalStops() {
       if (this.hafasData !== null && this.hafasData.stopovers) {
-        return this.hafasData.stopovers.filter(
-          (stop, index) => !this.data.plannedPath.includes(stop.stop.name) && !this.data.arrivalPath.includes(stop.stop.name) && stop.stop.name !== sessionStorage.getItem('scopedStation') && index !== 0
+         return this.hafasData.stopovers.filter(
+          (stop, index) => !this.data.plannedPath.includes(stop.stop.name) && !this.data.arrivalPath.includes(stop.stop.name) && !stop.stop.name.includes(sessionStorage.getItem('scopedStation')) && index !== 0
         )
       }
       return []
@@ -413,14 +419,14 @@ export default defineComponent({
               cx="12.5"
               cy="12.5"
               r="12"
-              :fill="isPassedStop(stop, false) ? '#FF5959' : 'white'"
+              :fill="isPassedStop(stop, false) || hasFinished ? '#FF5959' : 'white'"
               stroke="#1C1B22"
             />
             <circle
               cx="12.5"
               cy="12.5"
               r="8"
-              :fill="isPassedStop(stop, false) ? '#FF5959' : 'white'"
+              :fill="isPassedStop(stop, false) || hasFinished ? '#FF5959' : 'white'"
               stroke="#1C1B22"
               stroke-width="3"
             />
