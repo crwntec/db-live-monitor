@@ -17,7 +17,7 @@ export default {
             input: '',
             loading: false,
             suggestions: [] as Suggestion[],
-            showSuggestions: true,
+            showSuggestions: false, // Set initial value to false
             currentSuggestion: undefined as Suggestion | undefined,
             hasSelected: false,
             abortController: new AbortController(),
@@ -31,10 +31,20 @@ export default {
             if (inputStr == '' || inputStr.length <= 2) {
                 this.suggestions = []
             } else {
-                const res = await axios.get(`${this.apiBase}/search/${inputStr}`)
-                this.showSuggestions = true
-                this.suggestions = res.data
-                this.loading = false
+                // Abort previous request
+                this.abortController.abort()
+                this.abortController = new AbortController()
+
+                axios.get(`${this.apiBase}/search/${inputStr}`, { signal: this.abortController.signal }).then(res => {
+                    this.showSuggestions = true
+                    this.suggestions = res.data
+                    this.loading = false
+                })
+                    .catch(err => {
+                        if (!axios.isCancel(err)) {
+                            console.error(err)
+                        }
+                    })
             }
         },
         async openStation() {
@@ -55,16 +65,16 @@ export default {
                 this.openStation();
             }
         },
-        
+
     },
     watch: {
         input(newInput) {
-            this.abortController.abort()
-            if (!this.showSuggestions && this.input.length == 0 && !this.currentSuggestion) {
+            if (newInput) {
                 this.showSuggestions = true
-                console.log("fired")
+            } else {
+                this.showSuggestions = false
+                this.loading = false
             }
-            if (this.input.length == 0) this.suggestions = []
             this.getStops(encodeURIComponent(newInput))
         }
     },
@@ -76,11 +86,11 @@ export default {
         <h1 class="title">DB-Live Monitor</h1>
         <div class="input">
             <input class="stationInput" v-model="input" :placeholder="$t('homeView.placeholder')" @keydown="handleEnterKey">
-            <div class="suggestionsContainer">
+            <div v-if="showSuggestions" class="suggestionsContainer">
                 <div v-if="loading" class="suggestionsLoading">
                     <div class="spinner noMargin"></div>
                 </div>
-                <div v-if="showSuggestions && !loading && currentSuggestion == undefined" class="suggestions">
+                <div v-if="!loading && currentSuggestion == undefined" class="suggestions">
                     <div class="suggestion" @click="() => {
                         input = decodeURIComponent(suggestion.value)
                         showSuggestions = false,
@@ -99,3 +109,4 @@ export default {
         }}</a>
     </footer>
 </template>
+           
