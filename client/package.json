@@ -28,7 +28,7 @@
     "vue-content-loader": "^2.0.1",
     "vue-gtag": "^2.0.1",
     "vue-i18n": "^9.9.1",
-    "vue-router": "^4.3.0"
+    "vue-router": "^4.4.0"
   },
   "devDependencies": {
     "@rushstack/eslint-patch": "^1.2.0",
