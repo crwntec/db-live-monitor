@@ -1,5 +1,5 @@
-import {readStations} from 'db-stations';
-import {autocomplete} from 'db-stations-autocomplete'
+import { readStations, findStationByEvaId } from '@/../lib/stations';
+import autocomplete from 'db-hafas-stations-autocomplete';
 
 export const getIBNRFromDS100 = async (input) => {
     const ds100Pattern = /^[abdefhklmnrstuw]{1}[a-z]|[A-Z]{1,4}$/;
@@ -14,6 +14,17 @@ export const getIBNRFromDS100 = async (input) => {
     }
 };
 
+
 export const autoCompleteStation = async (input) => {
-    return autocomplete(input);
+    const results = await autocomplete(input, 6);
+    const mappedResults = [];
+    
+    for (const result of results) {
+        const station = await findStationByEvaId(result.id);
+        if (station) {
+            mappedResults.push(station);
+        }
+    }
+    
+    return mappedResults;
 }

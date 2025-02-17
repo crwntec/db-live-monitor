@@ -127,11 +127,22 @@ let parsedCats = [
   { cat: 99, text: "Verzögerungen im Betriebsablauf" },
 ];
 
+/**
+ * Fetches wing information for a specific trip
+ * @param {string} tripId - The ID of the trip
+ * @param {string} wings - Wing information string
+ * @returns {Promise<Object>} Wing definition data from IRIS API
+ */
 const getWings = (tripId, wings) =>
   makeRequest(
     `https://iris.noncd.db.de/iris-tts/timetable/wingdef/${tripId}/${wings}`
   );
 
+/**
+ * Converts IRIS timestamp format to JavaScript Date object
+ * @param {string} timestamp - Timestamp in IRIS format (YYMMDDHHMI)
+ * @returns {Date} JavaScript Date object
+ */
 const convertIRISTime = (timestamp) => {
   // Fix year handling by adding 2000
   const year = `20${timestamp.substring(0, 2)}`;
@@ -143,9 +154,40 @@ const convertIRISTime = (timestamp) => {
   return new Date(`${year}-${month}-${day}T${hour}:${minute}`);
 };
 
-
+/**
+ * Looks up a message category in the parsedCats array
+ * @param {number} cat - Category ID to look up
+ * @returns {Object|undefined} Matching category object or undefined if not found
+ */
 const messageLookup = (cat) => parsedCats.find((e) => e.cat == cat);
 
+/**
+ * Converts IRIS timetable data into a normalized format
+ * @param {Object} data1 - Primary timetable data
+ * @param {Object} data2 - Secondary timetable data (optional)
+ * @param {Object} changes - Changes/updates to the timetable
+ * @returns {Promise<Object>} Normalized timetable data with the following structure:
+ * {
+ *   station: string,
+ *   stops: Array<{
+ *     tripId: string,
+ *     hasArrival: boolean,
+ *     hasDeparture: boolean,
+ *     when: {arrival: Date|string, departure: Date|string},
+ *     plannedWhen: {arrival: Date|string, departure: Date|string},
+ *     canceled: boolean,
+ *     delayMessages: Array<{cat: number, text: string, timestamp: Date, id: string}>,
+ *     onlyPlanData: boolean,
+ *     platform: string,
+ *     plannedPlatform: string,
+ *     hasWings: boolean,
+ *     wing: Object|null,
+ *     from: string,
+ *     to: string,
+ *     line: {fahrtNr: string, name: string, productName: string, operator: string}
+ *   }>
+ * }
+ */
 export const convertTimetable = (data1, data2, changes) => {
   return new Promise(async (resolve) => {
     let dataTimetable = data2
@@ -176,17 +218,48 @@ export const convertTimetable = (data1, data2, changes) => {
         );
 
       let delayMessages = [];
+      let qualityChanges = [];
 
       const newArr = foundChanges?.elements.find((o) => o.name == "ar");
       const newDep = foundChanges?.elements.find((o) => o.name == "dp");
-      
-      newArr?.elements?.filter((e) => e !== undefined).forEach((element) => {
-        const category = messageLookup(element.attributes.c);
-        if (category && e.attributes.d) {
-          delayMessages.push({ ...category, timestamp: convertIRISTime(e.attributes.ts) });
-        }
-      });
-      if (delayMessages.length > 0) console.log(delayMessages);
+
+      newArr?.elements
+        ?.filter((e) => e !== undefined)
+        .forEach((element) => {
+          const category = messageLookup(element.attributes.c);
+          const timestamp = convertIRISTime(element.attributes.ts);
+
+          if (category && element.attributes.t == "d") {
+            if (
+              !delayMessages.some(
+                (msg) =>
+                  msg.text === category.text &&
+                  msg.timestamp.getTime() === timestamp.getTime()
+              )
+            ) {
+              delayMessages.push({
+                ...category,
+                timestamp,
+                id: `${element.attributes.ts}-${category.cat}-${element.attributes.t}`,
+              });
+            }
+          }
+          if (category && element.attributes.t == "q") {
+            if (
+              !qualityChanges.some(
+                (msg) =>
+                  msg.text === category.text &&
+                  msg.timestamp.getTime() === timestamp.getTime()
+              )
+            ) {
+              qualityChanges.push({
+                ...category,
+                timestamp,
+                id: `${element.attributes.ts}-${category.cat}-${element.attributes.t}`,
+              });
+            }
+          }
+        });
 
       const line = e.elements.find((o) => o.name == "tl");
       const arrival = e.elements.find((o) => o.name == "ar");
@@ -207,11 +280,11 @@ export const convertTimetable = (data1, data2, changes) => {
       const hasWings =
         (hasArrival
           ? hasDeparture
-            ? arrival.attributes.wings || departure.attributes.wings
-            : arrival.attributes.wings
-          : departure.attributes.wings) !== undefined;
+            ? arrival?.attributes?.wings || departure?.attributes?.wings
+            : arrival?.attributes?.wings
+          : departure?.attributes?.wings) !== undefined;
       const wings = hasWings
-        ? arrival.attributes.wings || departure.attributes.wings
+        ? arrival?.attributes?.wings || departure?.attributes?.wings
         : [];
 
       let wing = null;

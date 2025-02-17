@@ -1,10 +1,15 @@
 import { getJourney } from "@/api/journey";
+import { Suspense } from "react";
+import Journey from "./Journey";
+
 export default async function Page({params}) {
     const {slug} = await params;
-    const data = await getJourney(slug);
+    const dataPromise = getJourney(slug);
     return (
         <div>
-            <h1>{data.name}</h1>
+            <Suspense fallback={<div>Loading...</div>}>
+                <Journey dataPromise={dataPromise} />
+            </Suspense>
         </div>
     );
 }
