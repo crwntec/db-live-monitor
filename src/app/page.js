@@ -33,13 +33,13 @@ export default function Home() {
   };
 
   const handleStationSelect = (station) => {
-    router.push(`/board/${station.eva}?related=${station.meta_evas.join(',')}`);
+    router.push(`/board/${station.eva}`);
   };
 
   return (
-    <main className="min-h-screen p-8 dark:bg-gray-900">
+    <main className="min-h-screen p-8">
       <div className="max-w-2xl mx-auto">
-        <h1 className="text-3xl font-bold mb-8 text-center dark:text-white">
+        <h1 className="text-3xl font-bold mb-8 text-center ">
           DB-Live-Monitor
         </h1>
         <div className="relative">
@@ -48,7 +48,7 @@ export default function Home() {
             value={searchQuery}
             onChange={handleInputChange}
             placeholder="Enter station name..."
-            className="w-full p-4 border rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800 dark:border-gray-700 dark:text-white dark:placeholder-gray-400"
+            className="w-full p-4 border rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-black text-white"
           />
 
           {isLoading && (

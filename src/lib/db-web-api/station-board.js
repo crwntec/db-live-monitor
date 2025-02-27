@@ -1,8 +1,8 @@
 import axios from "axios"
 import config from "./base.json"
 
-export const departures = (stationIBNR, timeFrame) => {
-    return axios.get(config["base-url"] + "board/departure/" + stationIBNR, {
+export const departures = (stationEva, timeFrame) => {
+    return axios.get(config["base-url"] + "board/departure/" + stationEva, {
         params: {
             modeOfTransport: "HIGH_SPEED_TRAIN,REGIONAL_TRAIN,CITY_TRAIN,INTER_REGIONAL_TRAIN,INTERCITY_TRAIN",
             occupancy: true,
@@ -13,8 +13,8 @@ export const departures = (stationIBNR, timeFrame) => {
     }).then((response) => response.data);
 }
 
-export const arrivals = (stationIBNR, timeFrame) => {
-    return axios.get(config["base-url"] + "board/arrival/" + stationIBNR, {
+export const arrivals = (stationEva, timeFrame) => {
+    return axios.get(config["base-url"] + "board/arrival/" + stationEva, {
         params: {
             modeOfTransport: "HIGH_SPEED_TRAIN,REGIONAL_TRAIN,CITY_TRAIN,INTER_REGIONAL_TRAIN,INTERCITY_TRAIN",
             occupancy: true,

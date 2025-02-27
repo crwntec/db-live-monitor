@@ -2,7 +2,7 @@ import moment from "moment-timezone";
 import { makeRequest } from "@/util/request/makeRequest";
 import { convertTimetable } from "@/util/iris/convertTimetable";
 import { stationBoard } from "../../lib/db-web-api";
-import { performance } from 'perf_hooks';
+import { performance } from "perf_hooks";
 
 // Add caching for IRIS data with a short TTL (e.g., 30 seconds)
 const IRIS_CACHE = new Map();
@@ -20,17 +20,16 @@ const cachedFetch = async (key, fetchFn) => {
   const data = await fetchFn();
   API_CACHE.set(key, {
     timestamp: Date.now(),
-    data
+    data,
   });
   return data;
 };
 
-const fetchIrisDepartures = async (ibnr) => {
+const fetchIrisDepartures = async (eva) => {
   const startTime = performance.now();
-  const cacheKey = `iris_${ibnr}`;
+  const cacheKey = `iris_${eva}`;
   const cached = IRIS_CACHE.get(cacheKey);
   if (cached && Date.now() - cached.timestamp < IRIS_CACHE_TTL) {
-    console.log('IRIS cache hit!');
     return cached.data;
   }
 
@@ -42,9 +41,9 @@ const fetchIrisDepartures = async (ibnr) => {
   const nextHour = now.format("HH");
 
   const urls = {
-    currentTimetable: `https://iris.noncd.db.de/iris-tts/timetable/plan/${ibnr}/${currentDate}/${currentHour}`,
-    nextTimetable: `https://iris.noncd.db.de/iris-tts/timetable/plan/${ibnr}/${nextDate}/${nextHour}`,
-    fchg: `https://iris.noncd.db.de/iris-tts/timetable/fchg/${ibnr}/`,
+    currentTimetable: `https://iris.noncd.db.de/iris-tts/timetable/plan/${eva}/${currentDate}/${currentHour}`,
+    nextTimetable: `https://iris.noncd.db.de/iris-tts/timetable/plan/${eva}/${nextDate}/${nextHour}`,
+    fchg: `https://iris.noncd.db.de/iris-tts/timetable/fchg/${eva}/`,
   };
 
   const [parsedCurrentTimetable, parsedNextTimetable, parsedFchg] =
@@ -54,8 +53,7 @@ const fetchIrisDepartures = async (ibnr) => {
       makeRequest(urls.fchg),
     ]);
   const requestEnd = performance.now();
-
-  if (!parsedCurrentTimetable) return null;
+  if (!parsedCurrentTimetable.elements[0].elements) return null;
 
   const convertStart = performance.now();
   const combinedTimetable = {
@@ -74,26 +72,26 @@ const fetchIrisDepartures = async (ibnr) => {
 
   IRIS_CACHE.set(cacheKey, {
     timestamp: Date.now(),
-    data: converted
+    data: converted,
   });
-  
+
   const endTime = performance.now();
-  console.log({
-    totalIrisTime: `${endTime - startTime}ms`,
-    requestTime: `${requestEnd - requestStart}ms`,
-    convertTime: `${convertEnd - convertStart}ms`,
-    cacheStatus: 'miss'
-  });
+  // console.log({
+  //   totalIrisTime: `${endTime - startTime}ms`,
+  //   requestTime: `${requestEnd - requestStart}ms`,
+  //   convertTime: `${convertEnd - convertStart}ms`,
+  //   cacheStatus: "miss",
+  // });
   return converted;
 };
 
 const mergeStationData = (arrivals, departures, irisData) => {
   const startTime = performance.now();
   if (!arrivals || !departures || !irisData) return null;
-  
+
   const indexStart = performance.now();
   const irisStopsIndex = new Map(
-    irisData.stops.map(stop => [stop.line.fahrtNr, stop])
+    irisData.stops.map((stop) => [stop.line.fahrtNr, stop])
   );
   const indexEnd = performance.now();
 
@@ -101,7 +99,7 @@ const mergeStationData = (arrivals, departures, irisData) => {
   const now = moment().tz("Europe/Berlin");
   const nowTimestamp = now.valueOf();
   const cutoffTimestamp = now.subtract(10, "minutes").valueOf();
-  
+
   function calculateDelay(timeString, plannedTimestring) {
     const time = moment(timeString);
     const plannedTime = moment(plannedTimestring);
@@ -119,9 +117,10 @@ const mergeStationData = (arrivals, departures, irisData) => {
 
   function processItems(items, isArrival) {
     for (const item of items) {
-      const key = `${item.train.category + " " + item.train.lineName}-${item.train.no}`;
+      const key = `${item.train.category + " " + item.train.lineName}-${
+        item.train.no
+      }`;
       const irisItem = irisStopsIndex.get(item.train.no);
-      
 
       if (isArrival) {
         processedItems.set(key, {
@@ -136,7 +135,7 @@ const mergeStationData = (arrivals, departures, irisData) => {
       } else {
         const existing = processedItems.get(key);
         if (existing) {
-          processedItems.set(key, {...existing, departure: item});
+          processedItems.set(key, { ...existing, departure: item });
         } else {
           processedItems.set(key, {
             irisOverride: false,
@@ -151,14 +150,11 @@ const mergeStationData = (arrivals, departures, irisData) => {
       }
     }
   }
-  
+
   processItems(arrivals.items, true);
   processItems(departures.items, false);
-  const processEnd = performance.now();
-
-  const irisProcessStart = performance.now();
   // Process IRIS data
-  irisData.stops.forEach(irisItem => {
+  irisData.stops.forEach((irisItem) => {
     const key = irisItem.line.name + "-" + irisItem.line.fahrtNr;
     const existing = processedItems.get(key);
     if (existing) {
@@ -166,46 +162,20 @@ const mergeStationData = (arrivals, departures, irisData) => {
       processedItems.set(key, {
         ...existing,
         delayMessages: irisItem.delayMessages,
+        qualityChanges: irisItem.qualityChanges,
         wing: irisItem.wing,
-        // Only override canceled status if it's true
+        irisId: irisItem.tripId,
         canceled: irisItem.canceled || existing.canceled,
-        // Keep existing arrival/departure data
-        arrival: existing.arrival || (irisItem.hasArrival ? {
-          time: irisItem.plannedWhen.arrival,
-          timePredicted: irisItem.when.arrival,
-          diff: calculateDelay(
-            irisItem.when.arrival,
-            irisItem.plannedWhen.arrival
-          ),
-          timeType: "IRIS_" + irisItem.onlyPlanData ? "PLANNED" : "PREDICTED",
-          platform: irisItem.plannedPlatform,
-          platformPredicted: irisItem.platform,
-          administration: {
-            operator: irisItem.line.operator,
-          },
-          origin: {
-            name: irisItem.from,
-          },
-        } : null),
-        departure: existing.departure || (irisItem.hasDeparture ? {
-          time: irisItem.plannedWhen.departure,
-          timePredicted: irisItem.when.departure,
-          diff: calculateDelay(
-            irisItem.when.departure,
-            irisItem.plannedWhen.departure
-          ),
-          timeType: "IRIS_" + irisItem.onlyPlanData ? "PLANNED" : "PREDICTED",
-          platform: irisItem.plannedPlatform,
-          platformPredicted: irisItem.platform,
-          administration: {
-            operator: irisItem.line.operator,
-          },
-          destination: {
-            name: irisItem.to,
-          },
-        } : null),
+        arrival: {
+          ...existing.arrival,
+          path: irisItem.arrivalPath.length > 0 ? irisItem.arrivalPath : null
+        },
+        departure: {
+          ...existing.departure,
+          path: irisItem.departurePath.length > 0 ? irisItem.departurePath : null
+        }
       });
-    } else {
+    } else if (cutoffTimestamp < irisItem.when.arrival ) {
       // If no existing data, create new entry with IRIS data
       processedItems.set(key, {
         irisOverride: true,
@@ -221,131 +191,101 @@ const mergeStationData = (arrivals, departures, irisData) => {
         wing: irisItem.wing,
         delayMessages: irisItem.delayMessages,
         canceled: irisItem.canceled,
-        arrival: irisItem.hasArrival ? {
-          time: irisItem.plannedWhen.arrival,
-          timePredicted: irisItem.when.arrival,
-          diff: calculateDelay(
-            irisItem.when.arrival,
-            irisItem.plannedWhen.arrival
-          ),
-          timeType: "IRIS_" + irisItem.onlyPlanData ? "PLANNED" : "PREDICTED",
-          platform: irisItem.plannedPlatform,
-          platformPredicted: irisItem.platform,
-          administration: {
-            operator: irisItem.line.operator,
-          },
-          origin: {
-            name: irisItem.from,
-          },
-        } : null,
-        departure: irisItem.hasDeparture ? {
-          time: irisItem.plannedWhen.departure,
-          timePredicted: irisItem.when.departure,
-          diff: calculateDelay(
-            irisItem.when.departure,
-            irisItem.plannedWhen.departure
-          ),
-          timeType: "IRIS_" + irisItem.onlyPlanData ? "PLANNED" : "PREDICTED",
-          platform: irisItem.plannedPlatform,
-          platformPredicted: irisItem.platform,
-          administration: {
-            operator: irisItem.line.operator,
-          },
-          destination: {
-            name: irisItem.to,
-          },
-        } : null,
+        arrival: irisItem.hasArrival
+          ? {
+              time: irisItem.plannedWhen.arrival,
+              timePredicted: irisItem.when.arrival,
+              diff: calculateDelay(
+                irisItem.when.arrival,
+                irisItem.plannedWhen.arrival
+              ),
+              timeType:
+                "IRIS_" + irisItem.onlyPlanData ? "PLANNED" : "PREDICTED",
+              platform: irisItem.plannedPlatform,
+              platformPredicted: irisItem.platform,
+              administration: {
+                operator: irisItem.line.operator,
+              },
+              origin: {
+                name: irisItem.from,
+              },
+            }
+          : null,
+        departure: irisItem.hasDeparture
+          ? {
+              time: irisItem.plannedWhen.departure,
+              timePredicted: irisItem.when.departure,
+              diff: calculateDelay(
+                irisItem.when.departure,
+                irisItem.plannedWhen.departure
+              ),
+              timeType:
+                "IRIS_" + irisItem.onlyPlanData ? "PLANNED" : "PREDICTED",
+              platform: irisItem.plannedPlatform,
+              platformPredicted: irisItem.platform,
+              administration: {
+                operator: irisItem.line.operator,
+              },
+              destination: {
+                name: irisItem.to,
+              },
+            }
+          : null,
       });
     }
   });
-  const irisProcessEnd = performance.now();
+  const wingGroups = new Map();
 
-  // Create index for wing lookups
-  const wingProcessStart = performance.now();
-  const wingIndex = new Map();
-  
-  // First pass: build wing index
+  function extractId(idString) {
+    const parts = idString.split("-");
+    return parts[0] === "" ? `-${parts[1]}` : parts[0];
+  }
+
   for (const [key, value] of processedItems.entries()) {
-    if (value.wing?.wing) {
-      wingIndex.set(value.wing.wing, value.train.journeyId);
+    let groupId;
+    if (value.wing?.wing && typeof value.wing.wing === 'string') {
+      groupId = extractId(value.wing.wing);
+    } else if (value.irisId) {
+      groupId = extractId(value.irisId);
+    }
+    if (!groupId) continue;
+    if (!wingGroups.has(groupId)) {
+      wingGroups.set(groupId, [value]);
+    } else {
+      wingGroups.get(groupId).push(value);
     }
   }
-  
-  // Second pass: update wings using index
-  for (const [key, value] of processedItems.entries()) {
-    if (value.wing) {
-      value.wing.origin = value.train.journeyId;
-      value.wing.wing = wingIndex.get(value.wing.wing) || "";
-      value.wing.isLeading = !!value.wing.wing;
-      
-      // Update follower directly from index
-      if (value.wing.isLeading) {
-        const followerKey = `${value.train.category + value.train.lineName}-${value.train.no}`;
-        const follower = processedItems.get(followerKey);
-        if (follower) {
-          processedItems.set(followerKey, {
-            ...follower,
-            wing: {
-              origin: value.wing.origin,
-              wing: value.wing.wing,
-              isLeading: false,
-            },
-          });
-        }
-      }
-    }
-  }
-  const wingProcessEnd = performance.now();
-
-  const sortStart = performance.now();
-
-  // Convert Map to array and add timestamps for sorting
-  mergedData.items = Array.from(processedItems.values()).map(item => {
-    const timestamp = item.departure?.timePredicted || item.arrival?.timePredicted;
-    return {
-      ...item,
-      _sortTimestamp: moment(timestamp).valueOf()
-    };
-  });
-
-  // Sort using cached timestamps
-  mergedData.items.sort((a, b) => {
-    // Optimize wing check
-    const aIsLeader = a.wing?.isLeading;
-    const bIsLeader = b.wing?.isLeading;
+  mergedData.items = Array.from(wingGroups.values()).map(group => {
+    const departureTime = group[0].departure?.time;
+    const arrivalTime = group[0].arrival?.time;
+    const timestampStr = departureTime || arrivalTime;
     
-    if (aIsLeader || bIsLeader) {
-      if (aIsLeader && b.wing?.origin === a.train.journeyId && !b.wing?.isLeading) return -1;
-      if (bIsLeader && a.wing?.origin === b.train.journeyId && !a.wing?.isLeading) return 1;
-    }
+    // Parse the timestamp string into a Unix timestamp
+    const timestampMoment = moment(timestampStr);
+    const unixTimestamp = timestampMoment.isValid() ? timestampMoment.valueOf() : 0;
+    
+    return [...group, { _sortTimestamp: unixTimestamp }];
+  });
+  
+  // Sort using numeric timestamps
+  mergedData.items.sort((a, b) => {
+    const aDepartureTime = a[0].departure?.time ? moment(a[0].departure.time) : moment(a[0].arrival.time);
+    const bDepartureTime = b[0].departure?.time ? moment(b[0].departure.time) : moment(b[0].arrival.time);
+    const now = moment();
+    const aHasLeft = aDepartureTime && aDepartureTime.isBefore(now.subtract(10, 'minutes'));
+    const bHasLeft = bDepartureTime && bDepartureTime.isBefore(now.subtract(10, 'minutes'));
 
-    return a._sortTimestamp - b._sortTimestamp;
+    if (aHasLeft && bHasLeft) {
+      return aDepartureTime - bDepartureTime;
+    }
+    if (aHasLeft) return -1;
+    if (bHasLeft) return 1;
+    
+    return aDepartureTime - bDepartureTime;
   });
 
   // Clean up in same pass as final filtering
-  mergedData.items = mergedData.items.map(({ _sortTimestamp, ...item }) => item);
-
-  const sortEnd = performance.now();
-
-  const filterStart = performance.now();
-  const filterEnd = performance.now();
-
-  const endTime = performance.now();
-  console.log({
-    totalMergeTime: `${endTime - startTime}ms`,
-    indexingTime: `${indexEnd - indexStart}ms`,
-    processingTime: `${processEnd - processStart}ms`,
-    irisProcessingTime: `${irisProcessEnd - irisProcessStart}ms`,
-    wingProcessingTime: `${wingProcessEnd - wingProcessStart}ms`,
-    sortingTime: `${sortEnd - sortStart}ms`,
-    filteringTime: `${filterEnd - filterStart}ms`,
-    itemCount: mergedData.items.length,
-    irisStopsCount: irisData.stops.length,
-    arrivalsCount: arrivals.items.length,
-    departuresCount: departures.items.length
-  });
-  
-
+  mergedData.items = mergedData.items.map(group => group.slice(0, -1));
   return mergedData;
 };
 
@@ -356,12 +296,16 @@ const memoizedGetTrainType = (() => {
     if (cache.has(cat)) return cache.get(cat);
     const result = (() => {
       switch (cat) {
-        case "S": return "CITY_TRAIN";
+        case "S":
+          return "CITY_TRAIN";
         case "RB":
-        case "RE": return "REGIONAL_TRAIN";
+        case "RE":
+          return "REGIONAL_TRAIN";
         case "ICE":
-        case "IC": return "LONG_DISTANCE_TRAIN";
-        default: return "UNKNOWN";
+        case "IC":
+          return "LONG_DISTANCE_TRAIN";
+        default:
+          return "UNKNOWN";
       }
     })();
     cache.set(cat, result);
@@ -369,32 +313,67 @@ const memoizedGetTrainType = (() => {
   };
 })();
 
-export const getTimetableForStation = async (ibnr) => {
-  const startTime = performance.now();
-  if (!ibnr) return null;
+export const getTimetableForStation = async (evaIds) => {
+  // Handle multiple evaIds
+  const results = {};
+  const allStops = []; // Array to hold all stops
+  
+  // Check if there are any EVA IDs provided
+  if (!evaIds || evaIds.length === 0) return null;
+
+  // Cache the time frame calculations
   const timeFrame = {
     start: moment().tz("Europe/Berlin").subtract(10, "minutes").toISOString(),
     end: moment().tz("Europe/Berlin").add(2, "hour").toISOString(),
   };
 
-  const fetchStart = performance.now();
-  const [arrivals, departures, irisData] = await Promise.all([
-    cachedFetch(`arrivals-${ibnr}`, () => stationBoard.arrivals(ibnr, timeFrame)),
-    cachedFetch(`departures-${ibnr}`, () => stationBoard.departures(ibnr, timeFrame)),
-    fetchIrisDepartures(ibnr)
-  ]);
-  const fetchEnd = performance.now();
-
-  const mergeStart = performance.now();
-  const result = mergeStationData(arrivals, departures, irisData);
-  const mergeEnd = performance.now();
-  
-  const endTime = performance.now();
-  console.log({
-    totalTime: `${endTime - startTime}ms`,
-    fetchTime: `${fetchEnd - fetchStart}ms`,
-    mergeTime: `${mergeEnd - mergeStart}ms`,
-    success: result !== null
+  // Create an array of fetch promises for arrivals and departures
+  const fetchPromises = evaIds.map(eva => {
+    
+    return Promise.allSettled([
+      cachedFetch(`arrivals-${eva}`, () => stationBoard.arrivals(eva, timeFrame)),
+      cachedFetch(`departures-${eva}`, () => stationBoard.departures(eva, timeFrame)),
+      fetchIrisDepartures(eva),
+    ]).then(([arrivalsResult, departuresResult, irisData]) => {
+      return {
+        eva,
+        arrivals: arrivalsResult.status === 'fulfilled' ? arrivalsResult.value : null,
+        departures: departuresResult.status === 'fulfilled' ? departuresResult.value : null,
+        irisData: irisData.value, // Assuming fetchIrisDepartures is already handled
+      };
+    });
   });
-  return result;
+
+  // Wait for all fetch promises to settle
+  const fetchResults = await Promise.all(fetchPromises);
+
+  // Merge results into a single object
+  for (const { eva, arrivals, departures, irisData } of fetchResults) {
+    // Check if irisData is valid before merging
+    if (!irisData) {
+      continue; // Skip this iteration if irisData is invalid
+    }
+
+    const mergeStart = performance.now();
+    const result = mergeStationData(arrivals, departures, irisData);
+    const mergeEnd = performance.now();
+
+    // Store the result in the results object using eva as the key
+    results[eva] = {
+      result,
+      mergeTime: `${mergeEnd - mergeStart}ms`,
+    };
+
+    // If the result is valid, add the stops to the allStops array
+    if (result && result.items) {
+      allStops.push(...result.items); // Merge all stops into a single array
+    }
+  }
+
+
+  return {
+    stationName: results[evaIds[0]].result.stationName,
+    stationNames: Object.keys(results).map(eva => results[eva].result.stationName), // Assuming you want to list the evas as station names
+    items: allStops,
+  };
 };

@@ -1,22 +1,27 @@
-import { readStations, findStationByEvaId } from '@/../lib/stations';
+import { findStationByEvaId, findStationByDS100 } from '@/../lib/stations';
 import autocomplete from 'db-hafas-stations-autocomplete';
 
-export const getIBNRFromDS100 = async (input) => {
+export const getEVAFromDS100 = async (input) => {
     const ds100Pattern = /^[abdefhklmnrstuw]{1}[a-z]|[A-Z]{1,4}$/;
 
     if (ds100Pattern.test(input)) {
-        for await (const station of readStations()) {
-            if (station.ril100 === input) return station.id;
+        try {
+            const station = await findStationByDS100(input);
+            return station ? [ station.eva, ...station.meta_evas] : null;
+        } catch (error) {
+            console.error('Error reading stations:', error);
+            return input;
         }
-        return null;
     } else {
-        return input;
+        const station = await findStationByEvaId(input);
+        return station ? [station.eva, ...station.meta_evas] : null;
     }
 };
 
 
 export const autoCompleteStation = async (input) => {
     const results = await autocomplete(input, 6);
+    console.log(results);
     const mappedResults = [];
     
     for (const result of results) {

@@ -1,7 +1,9 @@
+import stationsData from '@/assets/data/stations.json'; // Import the JSON data
+
 let stationsCache = null;
 
 /**
- * Reads and returns station data from /public/stations.json with caching
+ * Reads and returns station data from the imported JSON data with caching
  * @returns {Promise<Array>} Promise that resolves to array of station objects
  */
 export async function readStations() {
@@ -10,15 +12,11 @@ export async function readStations() {
     }
 
     try {
-        const response = await fetch('/data/stations.json');
-        if (!response.ok) {
-            throw new Error(`Failed to fetch stations: ${response.status}`);
-        }
-        
-        stationsCache = await response.json();
+        // Use the imported data directly
+        stationsCache = stationsData;
         return stationsCache;
     } catch (error) {
-        console.error('Error reading stations:', error);
+        console.error("Error reading stations:", error);
         return [];
     }
 }
@@ -30,7 +28,15 @@ export async function readStations() {
  */
 export async function findStationByEvaId(evaId) {
     const stations = await readStations();
-    return stations.find(station => station.eva == evaId) || null;
+    return stations.find((station) => station.eva == evaId) || null;
 }
 
+export async function findStationByDS100(ds100) {
+    const stations = await readStations();
+    return stations.find((station) => station.ds100 == ds100) || null;
+}
 
+export async function getStationRelevance(name) {
+    const stations = await readStations();
+    return stations.find((station)=>station.name==name)?.number_of_events || 0
+}

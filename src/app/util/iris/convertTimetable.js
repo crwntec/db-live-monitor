@@ -1,3 +1,4 @@
+import { getStationRelevance } from "../../../lib/stations/index.js";
 import { makeRequest } from "../request/makeRequest.js";
 
 let parsedCats = [
@@ -233,8 +234,8 @@ export const convertTimetable = (data1, data2, changes) => {
             if (
               !delayMessages.some(
                 (msg) =>
-                  msg.text === category.text &&
-                  msg.timestamp.getTime() === timestamp.getTime()
+                  msg.text == category.text ||
+                  msg.timestamp.getTime() == timestamp.getTime()
               )
             ) {
               delayMessages.push({
@@ -271,12 +272,22 @@ export const convertTimetable = (data1, data2, changes) => {
       const arrString = hasArrival ? arrival.attributes.pt : "-";
       const depString = hasDeparture ? departure.attributes.pt : "-";
 
-      const irisArPath = hasArrival ? arrival.attributes.ppth.split("|") : [];
-      const plannedPath = hasDeparture
-        ? departure.attributes.ppth.split("|")
-        : [];
-      const irisDpPath = newDep?.attributes?.ppth?.split("|") || [];
-
+      const irisArPath = await Promise.all(
+        (hasArrival ? arrival.attributes.ppth.split("|") : []).map(async (item) => ({
+          name: item,
+          relevance: await getStationRelevance(item),
+        }))
+      );
+      
+      const plannedPath = hasDeparture ? departure.attributes.ppth.split("|") : [];
+      
+      const irisDpPath = await Promise.all(
+        (newDep?.attributes?.ppth?.split("|") || plannedPath || []).map(async (item) => ({
+          name: item,
+          relevance: await getStationRelevance(item),
+        }))
+      );
+      
       const hasWings =
         (hasArrival
           ? hasDeparture
@@ -329,6 +340,7 @@ export const convertTimetable = (data1, data2, changes) => {
         },
         canceled: newArr?.attributes?.cs == "c",
         delayMessages: delayMessages,
+        qualityChanges: qualityChanges,
         onlyPlanData: irisDpPath.length == 0 && hasDeparture,
         platform: hasArrival
           ? newArr?.attributes?.cp || arrival.attributes.pp
@@ -338,10 +350,12 @@ export const convertTimetable = (data1, data2, changes) => {
           : departure.attributes.pp,
         hasWings,
         wing,
-        from: hasArrival ? irisArPath[0] : dataTimetable.attributes.station,
+        from: hasArrival ? irisArPath[0].name : dataTimetable.attributes.station,
         to: hasDeparture
           ? plannedPath[plannedPath.length - 1]
           : dataTimetable.attributes.station,
+        arrivalPath: irisArPath,
+        departurePath: irisDpPath,
         line: {
           fahrtNr: line.attributes.n,
           name: `${line.attributes.c} ${lineString}`,
