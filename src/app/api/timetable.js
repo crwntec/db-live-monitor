@@ -354,15 +354,10 @@ export const getTimetableForStation = async (evaIds) => {
       continue; // Skip this iteration if irisData is invalid
     }
 
-    const mergeStart = performance.now();
     const result = mergeStationData(arrivals, departures, irisData);
-    const mergeEnd = performance.now();
 
     // Store the result in the results object using eva as the key
-    results[eva] = {
-      result,
-      mergeTime: `${mergeEnd - mergeStart}ms`,
-    };
+    results[eva] = result;
 
     // If the result is valid, add the stops to the allStops array
     if (result && result.items) {
@@ -372,8 +367,8 @@ export const getTimetableForStation = async (evaIds) => {
 
 
   return {
-    stationName: results[evaIds[0]] || results[Object.keys(results)[0]].result.stationName,
-    stationNames: Object.keys(results).map(eva => results[eva].result.stationName), // Assuming you want to list the evas as station names
+    stationName: (results[evaIds[0]] || results[Object.keys(results)[0]]).stationName,
+    stationNames: Object.keys(results).map(eva => results[eva].stationName), // Assuming you want to list the evas as station names
     items: allStops,
   };
 };
