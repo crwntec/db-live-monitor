@@ -4,8 +4,7 @@ import Navbar from "@/components/board/Navbar";
 
 export default async function Board({ dataPromise }) {
   const data = await dataPromise;
-  console.log(data.items.find(item=>item[0].train.no==858))
-  if (!data) return <div>Fehler beim Laden der Daten</div>;
+  if (!data?.items || !data) return <div>Fehler beim Laden der Daten</div>;
 
   return (
     <div>

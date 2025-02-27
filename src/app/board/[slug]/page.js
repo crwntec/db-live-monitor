@@ -1,5 +1,4 @@
 import Board from "./board";
-import { Suspense } from "react";
 import { getEVAFromDS100 } from "@/api/station";
 import { getTimetableForStation } from "@/api/timetable";
 

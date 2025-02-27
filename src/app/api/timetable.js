@@ -372,7 +372,7 @@ export const getTimetableForStation = async (evaIds) => {
 
 
   return {
-    stationName: results[evaIds[0]].result.stationName,
+    stationName: results[evaIds[0]] || results[Object.keys(results)[0]].result.stationName,
     stationNames: Object.keys(results).map(eva => results[eva].result.stationName), // Assuming you want to list the evas as station names
     items: allStops,
   };
