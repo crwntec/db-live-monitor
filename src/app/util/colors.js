@@ -46,6 +46,8 @@ export function getColor(prodName) {
         return trainCatColors.WFB
       case p.includes('neg'):
         return trainCatColors.NEG
+      case p.includes('est'):
+        return trainCatColors.EST
       case p.includes('re'):
       case p.includes('rb'):
         return trainCatColors.REGIONAL

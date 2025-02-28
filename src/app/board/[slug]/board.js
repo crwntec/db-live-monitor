@@ -1,6 +1,6 @@
 import { hasLeft } from "@/util";
 import StopGroup from "@/components/board/StopGroup";
-import Navbar from "@/components/board/Navbar";
+import Navbar from "@/components/Navbar";
 
 export default async function Board({ dataPromise }) {
   const data = await dataPromise;
@@ -8,7 +8,7 @@ export default async function Board({ dataPromise }) {
 
   return (
     <div>
-      <Navbar stationName={data.stationName} stationNames={data.stationNames} />
+      <Navbar title={data.stationName} />
       <ul>
         {data.items.map((stopGroup, index) =>
           !hasLeft(stopGroup[0], 10) && (

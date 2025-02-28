@@ -22,5 +22,6 @@ export const trainCatColors = {
     RTB: 'rgb(190, 192, 222)',
     SBB: 'rgb(237, 20, 31)',
     WFB: 'rgb(0, 164, 227)',
-    NEG: '#b92037'
+    NEG: '#b92037',
+    EST: '#0f6efe'
 }

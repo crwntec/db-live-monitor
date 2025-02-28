@@ -7,5 +7,5 @@ export default function PathContainer({ path }) {
     .map(stop => stop.name) // Extract only names
     .join(" • "); // Join names with " • "
 
-  return <div>{relevantStops}</div>;
+  return <div className="text-xs">{relevantStops}</div>;
 }

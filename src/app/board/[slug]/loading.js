@@ -1,4 +1,4 @@
-import Navbar from "@/components/board/Navbar";
+import Navbar from "@/components/Navbar";
 import Skeleton from "@/components/board/Skeleton";
 export default function Loading() {
   return (

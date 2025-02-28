@@ -42,9 +42,9 @@ export default function StopBase({ stop, stopGroup, hasLeft, index }) {
               time={stop.departure && stop.departure.destination ? stop.departure : stop.arrival}
               canceled={stop.canceled}
             />
-            <div className="flex justify-end gap-1 sm:w-16 w-full">
+            <div className="flex justify-end gap-1 w-14">
               <span className={`${stop.arrival.platform === stop.arrival.platformPredicted ? "text-green-500" : "line-through text-red-500"}`}>
-                {stop.arrival.platform}
+                {stop.arrival.platform || stop.departure.platform}
               </span>
               <span className="">
                 {stop.arrival.platform === stop.arrival.platformPredicted ? "" : stop.arrival.platformPredicted}

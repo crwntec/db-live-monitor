@@ -48,30 +48,30 @@ export default function Home() {
             value={searchQuery}
             onChange={handleInputChange}
             placeholder="Enter station name..."
-            className="w-full p-4 border rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-black text-white"
+            className="w-full p-4 border rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-gray-300 dark:bg-gray-800 "
           />
 
-              {isLoading && (
-                <div className="mt-4 text-center text-gray-500 dark:text-gray-400">
-                  Loading...
-                </div>
-              )}
-
-              {stations.length > 0 && (
-                <div className="mt-2 border rounded-lg shadow-lg dark:bg-gray-800 dark:border-gray-700">
-                  {stations.map((station) => (
-                    <button
-                      key={station.eva}
-                      onClick={() => handleStationSelect(station)}
-                      className="w-full p-4 text-left hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors border-b last:border-b-0 dark:border-gray-700 dark:text-white"
-                    >
-                      {station.name}
-                    </button>
-                  ))}
-                </div>
-              )}
+          {isLoading && (
+            <div className="mt-4 text-center text-gray-500 dark:text-gray-400">
+              Loading...
             </div>
-          </div>
-        </main>
+          )}
+
+          {stations.length > 0 && (
+            <div className="mt-2 border rounded-lg shadow-lg dark:bg-gray-800 dark:border-gray-700">
+              {stations.map((station) => (
+                <button
+                  key={station.eva}
+                  onClick={() => handleStationSelect(station)}
+                  className="w-full p-4 text-left hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors border-b last:border-b-0 dark:border-gray-700 dark:text-white"
+                >
+                  {station.name}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+    </main>
   );
 }
