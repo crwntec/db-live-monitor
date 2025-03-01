@@ -5,7 +5,7 @@
 🚧 **Heavy Development & Beta Status!** 🚧  
 This project is undergoing **major development** and is currently in **beta**. Expect frequent updates, breaking changes, and occasional downtime. Your feedback is highly appreciated!  
 
-Available at **[https://db-live-view.onrender.com](https://db-live-view.onrender.com)**. Let me know what you think!  
+Available at **[https://db-live-monitor.vercel.app](https://db-live-monitor.vercel.app)**. Let me know what you think!  
 
 ## 🚨 Disclaimer  
 This project is a passion-driven effort and is still evolving. While I strive for accuracy, I can't guarantee the data is always 100% reliable.  
