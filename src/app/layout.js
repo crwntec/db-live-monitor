@@ -1,5 +1,4 @@
 import { Geist, Geist_Mono } from "next/font/google";
-import Providers from '@/components/ProgressBarProvider';
 import "./globals.css";
 
 const geistSans = Geist({
@@ -21,9 +20,9 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en"> 
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased overflow-x-hidden`}
       >
-        <Providers>{children}</Providers>
+        {children}
       </body>
     </html>
   );

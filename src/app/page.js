@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { autoCompleteStation } from "@/api/station";
+import Link from "next/link";
 export default function Home() {
   const [searchQuery, setSearchQuery] = useState("");
   const [stations, setStations] = useState([]);
@@ -32,9 +33,6 @@ export default function Home() {
     handleSearch(query);
   };
 
-  const handleStationSelect = (station) => {
-    router.push(`/board/${station.eva}`);
-  };
 
   return (
     <main className="min-h-screen p-8">
@@ -58,15 +56,15 @@ export default function Home() {
           )}
 
           {stations.length > 0 && (
-            <div className="mt-2 border rounded-lg shadow-lg dark:bg-gray-800 dark:border-gray-700">
+            <div className="mt-2 border rounded-lg shadow-lg dark:bg-gray-800 dark:border-gray-700 flex flex-col">
               {stations.map((station) => (
-                <button
+                <Link
                   key={station.eva}
-                  onClick={() => handleStationSelect(station)}
+                  href={`/board/${station.eva}`}
                   className="w-full p-4 text-left hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors border-b last:border-b-0 dark:border-gray-700 dark:text-white"
                 >
                   {station.name}
-                </button>
+                </Link>
               ))}
             </div>
           )}
