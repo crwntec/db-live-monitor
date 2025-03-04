@@ -177,6 +177,7 @@ const mergeStationData = (arrivals, departures, irisData) => {
       });
     } else if (cutoffTimestamp < irisItem.when.arrival ) {
       // If no existing data, create new entry with IRIS data
+      console.log("Triggered edge case trap with line: " + key +", " + existing + "| Object: " + irisItem)
       processedItems.set(key, {
         irisOverride: true,
         train: {
