@@ -78,6 +78,7 @@ export function getDelayColor(delay) {
         //TODO: add a different color for delays over 30 minutes
         return ' text-red-500';
     } else {
+      console.log(delay)
         return 'text-gray-500';
     }
 }

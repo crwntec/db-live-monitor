@@ -1,6 +1,12 @@
 "use client";
 import { useSearchParams } from "next/navigation";
-import { Building2, TrainFront, List, Route } from "lucide-react";
+import {
+  Building2,
+  TrainFront,
+  List,
+  Route,
+  TriangleAlert,
+} from "lucide-react";
 
 export default function TrainInfo({ train }) {
   const searchParams = useSearchParams();
@@ -9,8 +15,7 @@ export default function TrainInfo({ train }) {
   const wingDest = searchParams.get("wingDest");
   const wingName = searchParams.get("wingName");
 
-  
-  const constructName = (train) => `${train.name}(${train.no})`
+  const constructName = (train) => `${train.name}(${train.no})`;
 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 p-4 border rounded-lg shadow-md">
@@ -41,23 +46,39 @@ export default function TrainInfo({ train }) {
 
       {/* Train Messages */}
       {train.hims.length > 0 && (
-        <div className="col-span-1 sm:col-span-2 border-t pt-3 mt-3">
+        <div className="col-span-1 sm:col-span-2 border-t pt-3 mt-3 w-full">
           {train.hims.map((him) => (
-            <div className="w-full min-w-0 mb-2" key={him.id}>
-              <h3 className="text-sm font-bold sm:block hidden break-words whitespace-normal">
-                {him.caption}
-              </h3>
-              <p className="text-sm sm:hidden break-words whitespace-normal">
-                {him.shortText}
-              </p>
+            <div
+              className="mb-2 flex items-start sm:items-center space-x-2 w-full"
+              key={him.id}
+            >
+              <TriangleAlert size={15} />
+              <div className="flex-1">
+                <h3 className="text-sm font-bold break-words whitespace-normal sm:block hidden">
+                  {him.caption}
+                </h3>
+                <p className="text-sm break-words whitespace-normal sm:hidden">
+                  {him.shortText}
+                </p>
+              </div>
             </div>
           ))}
         </div>
       )}
+
       {wingId && (
         <div className="border-t col-span-1 sm:col-span-2 pt-3 mt-3 w-full min-w-0 whitespace-normal break-words">
           Fährt von {wingStart} bis {wingDest} vereeint mit{" "}
-          <a className="text-blue-500" href={`/journey/${wingId}?wingId=${train.journeyId}&wingStart=${wingStart}&wingDest=${wingDest}&wingName=${constructName(train)}`}>{wingName}</a>
+          <a
+            className="text-blue-500"
+            href={`/journey/${wingId}?wingId=${
+              train.journeyId
+            }&wingStart=${wingStart}&wingDest=${wingDest}&wingName=${constructName(
+              train
+            )}`}
+          >
+            {wingName}
+          </a>
         </div>
       )}
     </div>

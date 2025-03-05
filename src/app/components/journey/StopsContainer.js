@@ -6,7 +6,7 @@ import { getDelayColor } from "@/util/colors";
 
 export default function StopsContainer({ stops }) {
   //TODO: Add live progress
-
+  // console.log(stops)
   let seenMessages = new Map();
   return (
     <div className="space-y-2">
@@ -26,7 +26,7 @@ export default function StopsContainer({ stops }) {
                   </p>
                   <p
                     className={`whitespace-nowrap ${getDelayColor(
-                      stop.departureTime?.diff || stop.arrivalTime?.diff
+                      stop.departureTime ? stop.departureTime.diff : stop.arrivalTime.diff
                     )}`}
                   >
                     {moment(

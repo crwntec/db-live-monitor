@@ -51,14 +51,14 @@ export default function Loading() {
                   </div>
                   <div className="flex items-center">
                     <div className="flex flex-col min-w-[60px]">
-                      <p className="flex items-center">
+                      <div className="flex items-center">
                         <span className="mr-2">
                           <Skeleton className="w-[40px] max-w-full" />
                         </span>
-                      </p>
-                      <p className="text-yellow-500">
+                      </div>
+                      <div className="text-yellow-500">
                         <Skeleton className="w-[40px] max-w-full" />
-                      </p>
+                      </div>
                     </div>
                     <div className="flex justify-between w-full items-center">
                       <div className="flex flex-col">
@@ -68,15 +68,15 @@ export default function Loading() {
                             <Skeleton className="w-[224px] max-w-full" />
                           </span>
                         </span>
-                        <p>
+                        <div>
                           <Skeleton className="w-[88px] max-w-full" />
-                        </p>
+                        </div>
                       </div>
-                      <p>
+                      <div>
                         <strong>
                           <Skeleton className="w-[16px] max-w-full" />
                         </strong>
-                      </p>
+                      </div>
                     </div>
                   </div>
                 </li>))}

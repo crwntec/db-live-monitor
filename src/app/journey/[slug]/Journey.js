@@ -1,13 +1,12 @@
-import moment from "moment";
 import Navbar from "@/components/Navbar";
 import TrainInfo from "@/components/journey/TrainInfo";
 import StopsContainer from "@/components/journey/StopsContainer";
 import CarriageSequence from "@/components/journey/CarriageSequence";
-export default async function Journey({ dataPromise }) {
+export default async function Journey({ dataPromise, referringEva }) {
   const data = await dataPromise;
   return (
     <div className="">
-      <Navbar title={data.name} />
+      <Navbar title={data.name} referring={`/board/${referringEva}`}/>
       <section className="mb-8 p-4">
         <TrainInfo train={data} />
       </section>

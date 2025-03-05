@@ -8,7 +8,7 @@ export default async function Board({ dataPromise }) {
 
   return (
     <div>
-      <Navbar title={data.stationName} />
+      <Navbar title={data.stationName} referring={'/'} />
       <ul>
         {data.items.map((stopGroup, index) =>
           !hasLeft(stopGroup[0], 10) && (

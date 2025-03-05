@@ -7,9 +7,13 @@ import PathContainer from "./PathContainer";
 import WingIndicator from "./WingIndicator";
 import Link from "next/link";
 
+import { usePathname } from 'next/navigation'
+
 export default function StopBase({ stop, stopGroup, hasLeft, index }) {
   const isWinged = stopGroup.length > 1;
   const hasWingInfo = stop.wing != null;
+  
+  const pathname = usePathname();
 
   // Only assign wing if stopGroup has more than one item
   const wing = stopGroup.length > 1 ? stopGroup[index == 0 ? 1 : 0] : null;
@@ -31,7 +35,7 @@ export default function StopBase({ stop, stopGroup, hasLeft, index }) {
       <Link
         href={
           stop.train.journeyId
-            ? `/journey/${stop.train.journeyId}?wingId=${
+            ? `/journey/${stop.train.journeyId}?referringEva=${pathname.split('/')[2]}&wingId=${
                 wing ? wing.train.journeyId : ""
               }${
                 isWinged
@@ -46,7 +50,7 @@ export default function StopBase({ stop, stopGroup, hasLeft, index }) {
                     }`
                   : ""
               }&wingName=${wing ? constructName(wing.train) : ''}`
-            : "{}"
+            : "#"
         }
         className={`hover:cursor-pointer flex items-center justify-between`}
       >
