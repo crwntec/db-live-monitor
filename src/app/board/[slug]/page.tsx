@@ -1,11 +1,8 @@
 import Board from "./board";
 import { getEVAFromDS100 } from "@/app/api/station";
 import { getTimetableForStation } from "@/app/api/timetable";
-import { PageParams } from "@/types/next";
 
-async function fetchTimetable(params: PageParams) {
-    //simulate loading
-    await new Promise(resolve => setTimeout(resolve, 1000));
+async function fetchTimetable(params: Promise<{ slug: string }>) {
     try {
         const slug = (await params).slug;
         const evaIds = await getEVAFromDS100(slug);
@@ -21,7 +18,7 @@ async function fetchTimetable(params: PageParams) {
 
 
 
-export default async function Page({ params }: { params: PageParams }) {
+export default async function Page({ params }: { params: Promise<{ slug: string }> }) {
     const data = fetchTimetable(params);
 
     return (
