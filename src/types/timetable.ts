@@ -64,6 +64,7 @@ export interface Stop {
     wing: IrisWing | null
     arrival: WebAPIStop & {path: IrisPathItem[], origin: { name: string }} | null
     departure: WebAPIStop & {path: IrisPathItem[], destination: { name: string }} | null
+    isEarlyTerminated: boolean
     delayMessages: IrisMessage[]
     qualityChanges: IrisMessage[]
     canceled: boolean

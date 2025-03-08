@@ -115,8 +115,6 @@ const mergeStationData = (
   // Process all items in a single iteration
   const processedItems = new Map<string, Stop>();
 
-  // console.log(irisStopsIndex.get('77022'))
-
   function processItems(items: WebAPIStop[], isArrival: boolean) {
     for (const item of items) {
       const key = `${item.train.category + " " + item.train.lineName}-${
@@ -124,8 +122,6 @@ const mergeStationData = (
       }`;
       const irisItem = irisStopsIndex.get(item.train.no);
       const existing = processedItems.get(key);
-
-      // if(irisItem?.wing) console.log(irisItem)
 
       if (isArrival) {
         if (existing) {
@@ -149,6 +145,7 @@ const mergeStationData = (
               origin: item.origin || { name: "" },
             },
             departure: null,
+            isEarlyTerminated:(irisItem?.departurePath && irisItem?.departurePath.length > 0) || false,
             delayMessages: irisItem?.delayMessages || [],
             qualityChanges: irisItem?.qualityChanges || [],
             canceled: irisItem?.canceled || item.canceled,
@@ -163,6 +160,7 @@ const mergeStationData = (
               path: irisItem?.departurePath || [],
               destination: item.destination || { name: "" },
             },
+            isEarlyTerminated: (irisItem && irisItem.departurePath[irisItem?.departurePath.length - 1].name !== item.destination?.name )|| false,
           });
         } else {
           processedItems.set(key, {
@@ -176,6 +174,7 @@ const mergeStationData = (
               path: irisItem?.departurePath || [],
               destination: item.destination || { name: "" },
             },
+            isEarlyTerminated: (irisItem && irisItem.departurePath[irisItem?.departurePath.length - 1].name !== item.destination?.name )|| false,
             delayMessages: irisItem?.delayMessages || [],
             qualityChanges: irisItem?.qualityChanges || [],
             canceled: irisItem?.canceled || item.canceled,
@@ -276,6 +275,7 @@ const mergeStationData = (
             path: irisItem.departurePath || [],
           }
           : null,
+          isEarlyTerminated: false,
         qualityChanges: irisItem.qualityChanges
       });
     }

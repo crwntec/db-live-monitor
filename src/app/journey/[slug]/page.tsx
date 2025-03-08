@@ -8,7 +8,7 @@ export default async function Page({ params, searchParams } : { params: { slug: 
 
   return (
     <div>
-      <Journey dataPromise={dataPromise} referringEva={searchParams['referringEva']} />
+      <Journey dataPromise={dataPromise} referringEva={(await searchParams)['referringEva']} />
     </div>
   );
 }

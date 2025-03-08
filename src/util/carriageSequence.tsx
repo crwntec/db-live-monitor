@@ -71,7 +71,6 @@ export function formatUIC(identifier: string) {
 
 export function getLongNameForClassNumber(classNumber: string)  {
   const _classNumber = parseInt(classNumber.substring(1));
-  console.log(classNumber)
   switch (_classNumber) {
     case 147:
     case 146:

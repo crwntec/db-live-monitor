@@ -72,7 +72,7 @@ export default function StopBase({
             className={` ${hasLeft ? "line-through" : ""} ${
               stop.canceled ? "line-through text-red-800" : ""
             } ${
-              stop.departure?.path && !stop.departure?.destination
+              (stop.departure?.path && !stop.departure?.destination) || stop.isEarlyTerminated
                 ? "text-red-500"
                 : ""
             }`}
