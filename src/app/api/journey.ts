@@ -1,9 +1,8 @@
 import { getJourneyInfo } from "../../lib/db-web-api";
 import { getCarriageSequence } from "@/util/request/carriageSequenceRequest";
-import { formatCarriageSequence } from "@/util/carriageSequence";
 import moment from "moment";
 
-export const getJourney = async (journeyID) => {
+export const getJourney = async (journeyID: string) => {
     const journey = await getJourneyInfo(journeyID);
     if (!journey) return null;
     

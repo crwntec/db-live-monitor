@@ -1,7 +1,7 @@
-import { findStationByEvaId, findStationByDS100 } from '@/../lib/stations';
+import { findStationByEvaId, findStationByDS100 } from '@/lib/stations';
 import autocomplete from 'db-hafas-stations-autocomplete';
 
-export const getEVAFromDS100 = async (input) => {
+export const getEVAFromDS100 = async (input: string) => {
     const ds100Pattern = /^[abdefhklmnrstuw]{1}[a-z]|[A-Z]{1,4}$/;
 
     if (ds100Pattern.test(input)) {
@@ -19,7 +19,7 @@ export const getEVAFromDS100 = async (input) => {
 };
 
 
-export const autoCompleteStation = async (input) => {
+export const autoCompleteStation = async (input: string) => {
     const results = await autocomplete(input, 6);
     console.log(results);
     const mappedResults = [];
