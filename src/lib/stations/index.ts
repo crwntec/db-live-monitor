@@ -10,7 +10,7 @@ let stationsCache: Station[] = [];
  * @returns {Promise<Station[]>} Promise that resolves to an array of station objects
  */
 export async function readStations() : Promise<Station[]> {
-    if (stationsCache) {
+    if (stationsCache.length > 0) {
         return stationsCache;
     }
 
@@ -30,7 +30,8 @@ export async function readStations() : Promise<Station[]> {
  */
 export async function findStationByEvaId(evaId:string|number) : Promise<Station | null>{
     const stations = await readStations();
-    return stations.find((station) => station.eva === Number(evaId)) || null;
+    const station = stations.find((station) => station.eva == Number(evaId));
+    return station || null;
 }
 
 /**

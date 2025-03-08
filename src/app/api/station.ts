@@ -21,7 +21,6 @@ export const getEVAFromDS100 = async (input: string) => {
 
 export const autoCompleteStation = async (input: string) => {
     const results = await autocomplete(input, 6);
-    console.log(results);
     const mappedResults = [];
     
     for (const result of results) {
@@ -30,6 +29,5 @@ export const autoCompleteStation = async (input: string) => {
             mappedResults.push(station);
         }
     }
-    
     return mappedResults;
 }

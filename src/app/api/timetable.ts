@@ -91,10 +91,10 @@ const mergeStationData = (
     };
   }
 
-  const irisStopsIndex = new Map<string, IrisStop>(
+  const irisStopsIndex = new Map<number, IrisStop>(
     irisData.stops
-      .map((stop) => [stop.line.fahrtNr, stop] as [string, IrisStop])
-      .filter(([fahrtNr]) => fahrtNr !== undefined)
+      .map((stop) => [parseInt(stop.line.fahrtNr), stop] as [number, IrisStop])
+      .filter(([fahrtNr]) => !isNaN(fahrtNr))
   );
 
   const now = moment().tz("Europe/Berlin");
@@ -115,6 +115,8 @@ const mergeStationData = (
   // Process all items in a single iteration
   const processedItems = new Map<string, Stop>();
 
+  // console.log(irisStopsIndex.get('77022'))
+
   function processItems(items: WebAPIStop[], isArrival: boolean) {
     for (const item of items) {
       const key = `${item.train.category + " " + item.train.lineName}-${
@@ -122,6 +124,8 @@ const mergeStationData = (
       }`;
       const irisItem = irisStopsIndex.get(item.train.no);
       const existing = processedItems.get(key);
+
+      // if(irisItem?.wing) console.log(irisItem)
 
       if (isArrival) {
         if (existing) {
@@ -133,22 +137,23 @@ const mergeStationData = (
               origin: item.origin || { name: "" },
             },
           });
+        } else {
+          processedItems.set(key, {
+            irisOverride: false,
+            train: { ...item.train, id: key },
+            irisId: irisItem ? irisItem.tripId : "",
+            wing: irisItem && irisItem.wing ? irisItem.wing : null,
+            arrival: {
+              ...item,
+              path: irisItem?.arrivalPath || [],
+              origin: item.origin || { name: "" },
+            },
+            departure: null,
+            delayMessages: irisItem?.delayMessages || [],
+            qualityChanges: irisItem?.qualityChanges || [],
+            canceled: irisItem?.canceled || item.canceled,
+          });
         }
-        processedItems.set(key, {
-          irisOverride: false,
-          train: { ...item.train, id: key },
-          irisId: irisItem ? irisItem.tripId : "",
-          wing: irisItem && irisItem.wing ? irisItem.wing : null,
-          arrival: {
-            ...item,
-            path: irisItem?.arrivalPath || [],
-            origin: item.origin || { name: "" },
-          },
-          departure: null,
-          delayMessages: irisItem?.delayMessages || [],
-          qualityChanges: irisItem?.qualityChanges || [],
-          canceled: irisItem?.canceled || item.canceled,
-        });
       } else {
         if (existing) {
           processedItems.set(key, {
@@ -164,7 +169,7 @@ const mergeStationData = (
             irisOverride: false,
             train: { ...item.train, id: key },
             irisId: irisItem ? irisItem.tripId : "",
-            wing: null,
+            wing: irisItem && irisItem.wing ? irisItem.wing : null,
             arrival: null,
             departure: {
               ...item,
@@ -191,15 +196,6 @@ const mergeStationData = (
       cutoffTimestamp < moment(irisItem.when.arrival).valueOf()
     ) {
       // If no existing data, create new entry with IRIS data
-      if (!irisItem.canceled)
-        console.log(
-          "Triggered edge case trap with line: " +
-            key +
-            ", " +
-            existing +
-            "| Object: ",
-          irisItem
-        );
       processedItems.set(key, {
         irisOverride: true,
         train: {
@@ -207,7 +203,7 @@ const mergeStationData = (
           journeyId: null,
           category: irisItem.line.productName || "",
           type: memoizedGetTrainType(irisItem.line.productName || ""),
-          no: irisItem.line.fahrtNr || "",
+          no: parseInt(irisItem.line.fahrtNr),
           lineName: irisItem.line.name.split(" ")[1],
         },
         irisId: irisItem.tripId,
@@ -220,7 +216,7 @@ const mergeStationData = (
               journeyId: null,
               category: irisItem.line.productName || "",
               type: memoizedGetTrainType(irisItem.line.productName || ""),
-              no: irisItem.line.fahrtNr || "",
+              no: parseInt(irisItem.line.fahrtNr),
               lineName: irisItem.line.name.split(" ")[1],
             },
             category: irisItem.line.productName || "",
@@ -253,7 +249,7 @@ const mergeStationData = (
               journeyId: null,
               category: irisItem.line.productName || "",
               type: memoizedGetTrainType(irisItem.line.productName || ""),
-              no: irisItem.line.fahrtNr || "",
+              no: parseInt(irisItem.line.fahrtNr),
               lineName: irisItem.line.name.split(" ")[1],
             },
             category: irisItem.line.productName || "",
@@ -293,7 +289,7 @@ const mergeStationData = (
 
   for (const [key, value] of processedItems.entries()) {
     let groupId;
-    if (typeof value.wing?.wing === "string" && value.wing?.wing) {
+    if (value.wing?.wing) {
       groupId = extractId(value.wing?.wing);
     } else if (value.irisId) {
       groupId = extractId(value.irisId);

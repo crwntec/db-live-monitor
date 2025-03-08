@@ -34,7 +34,7 @@ export interface WebAPITrain {
   journeyId: string | null;
   category: string;
   type: string;
-  no: string;
+  no: number;
   lineName: string;
 }
 

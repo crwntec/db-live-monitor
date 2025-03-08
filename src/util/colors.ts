@@ -64,7 +64,7 @@ export function getColor(prodName: string) {
   }
 
 export function getDelayColor(delay: number | null) {
-    if (!delay) return ' text-gray-500';
+    if (delay == null) return ' text-gray-500';
     if (delay < 0) {
         return ' text-cyan-500';
     } else if (delay === 0) {

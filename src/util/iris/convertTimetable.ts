@@ -1,6 +1,6 @@
 import { IrisFchg, IrisTimetable, IrisWingdef, TimetableElementDetail, IrisResult } from "@/types/iris.ts";
 import { getStationRelevance } from "@/lib/stations/index.ts";
-import { makeRequest } from "../request/makeRequest.js";
+import { makeRequest } from "@/util/request/makeRequest";
 
 let parsedCats = [
   { cat: 0, text: "Unbekannt" },

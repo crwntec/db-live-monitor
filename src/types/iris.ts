@@ -122,10 +122,10 @@ export interface IrisStop {
   arrivalPath: IrisPathItem[];
   departurePath: IrisPathItem[];
   line: {
-    fahrtNr?: string;
+    fahrtNr: string;
     name: string;
-    productName?: string;
-    operator?: string;
+    productName: string;
+    operator: string;
   };
 }
 
