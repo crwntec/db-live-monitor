@@ -1,6 +1,6 @@
 {
   "name": "dbm",
-  "version": "6.2.1",
+  "version": "7.2.1",
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",
@@ -24,7 +24,11 @@
     "xml-js": "^1.6.11"
   },
   "devDependencies": {
+    "@types/db-hafas-stations-autocomplete": "^2.0.2",
+    "@types/node": "22.13.9",
+    "@types/react": "19.0.10",
     "postcss": "^8",
-    "tailwindcss": "^3.4.1"
+    "tailwindcss": "^3.4.1",
+    "typescript": "^5.8.2"
   }
 }
