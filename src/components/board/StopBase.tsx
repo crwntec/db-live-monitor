@@ -5,9 +5,8 @@ import LineContainer from "./LineContainer";
 import TimeContainer from "./TimeContainer";
 import PathContainer from "./PathContainer";
 import WingIndicator from "./WingIndicator";
-import Link from "next/link";
 
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { Stop, StopTime, WebAPITrain } from "@/types/timetable";
 
 export default function StopBase({
@@ -29,8 +28,30 @@ export default function StopBase({
   // Only assign wing if stopGroup has more than one item
   const wing = stopGroup.length > 1 ? stopGroup[index == 0 ? 1 : 0] : null;
 
+  const router = useRouter();
+
   const constructName = (train: WebAPITrain & { id: string }) =>
     train ? `${train.category + " " + train.lineName}(${train.no})` : "";
+
+  const handleStopSelect = () => {
+    router.push(stop.train.journeyId
+      ? `/journey/${stop.train.journeyId}?referringEva=${
+          pathname.split("/")[2]
+        }&wingId=${wing ? wing.train.journeyId : ""}${
+          isWinged
+            ? `&wingStart=${
+                hasWingInfo
+                  ? stop.wing?.start.station
+                  : wing?.wing?.start.station
+              }&wingDest=${
+                hasWingInfo
+                  ? stop.wing?.end.station
+                  : wing?.wing?.end.station
+              }`
+            : ""
+        }&wingName=${wing ? constructName(wing.train) : ""}`
+      : "#")
+  };
 
   return (
     <div
@@ -43,26 +64,8 @@ export default function StopBase({
         />
       )}
       <MessageContainer stop={stop} />
-      <Link
-        href={
-          stop.train.journeyId
-            ? `/journey/${stop.train.journeyId}?referringEva=${
-                pathname.split("/")[2]
-              }&wingId=${wing ? wing.train.journeyId : ""}${
-                isWinged
-                  ? `&wingStart=${
-                      hasWingInfo
-                        ? stop.wing?.start.station
-                        : wing?.wing?.start.station
-                    }&wingDest=${
-                      hasWingInfo
-                        ? stop.wing?.end.station
-                        : wing?.wing?.end.station
-                    }`
-                  : ""
-              }&wingName=${wing ? constructName(wing.train) : ""}`
-            : "#"
-        }
+      <button
+        onClick={handleStopSelect}
         className={`hover:cursor-pointer flex items-center justify-between`}
       >
         <div className="flex items-center gap-2">
@@ -111,7 +114,7 @@ export default function StopBase({
             </div>
           </div>
         </div>
-      </Link>
+      </button>
     </div>
   );
 }
