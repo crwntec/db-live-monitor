@@ -44,11 +44,9 @@ export type TimeType = "REAL" | "PREVIEW";
 
 export interface Message {
     code:      string;
-    text:      Text;
-    textShort: Text;
+    text:      string;
+    textShort: string;
 }
-
-export type Text = "Verspätung eines vorausfahrenden Zuges";
 
 export interface Station {
     evaNo:    string;
