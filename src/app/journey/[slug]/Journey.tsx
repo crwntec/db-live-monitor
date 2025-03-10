@@ -10,7 +10,7 @@ export default async function Journey({ dataPromise, referringEva }: { dataPromi
     <div className="">
       <Navbar title={data.name} referring={`/board/${referringEva}`}/>
       <section className="mb-8 p-4">
-        <TrainInfo train={data} />
+        <TrainInfo train={data} referringEva={referringEva} />
       </section>
 
       {/* Stops */}
@@ -20,10 +20,10 @@ export default async function Journey({ dataPromise, referringEva }: { dataPromi
       </section>
 
       {/* Carriage Sequence */}
-      <section className="mb-8 p-4">
+      {data.carriageSequence && <section className="mb-8 p-4">
         <h2 className="text-xl font-semibold mb-3">Wagenreihung</h2>
         <CarriageSequence carriageSequence={data.carriageSequence || null} />
-      </section>
+      </section>}
     </div>
   );
 }

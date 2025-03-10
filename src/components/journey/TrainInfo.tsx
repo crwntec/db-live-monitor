@@ -9,7 +9,7 @@ import {
 } from "lucide-react";
 import { JourneyT } from "@/types/journey";
 
-export default function TrainInfo({ train }: { train: JourneyT}) {
+export default function TrainInfo({ train, referringEva }: { train: JourneyT, referringEva: string}) {
   const searchParams = useSearchParams();
   const wingId = searchParams.get("wingId");
   const wingStart = searchParams.get("wingStart");
@@ -72,7 +72,7 @@ export default function TrainInfo({ train }: { train: JourneyT}) {
           Fährt von {wingStart} bis {wingDest} vereeint mit{" "}
           <a
             className="text-blue-500"
-            href={`/journey/${wingId}?wingId=${
+            href={`/journey/${wingId}?referringEva=${referringEva}&wingId=${
               train.journeyId
             }&wingStart=${wingStart}&wingDest=${wingDest}&wingName=${constructName(
               train

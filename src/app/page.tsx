@@ -1,63 +1,74 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useTransition, useEffect } from "react";
 import { autoCompleteStation } from "@/app/api/station";
 import { Station } from "@/types/stations";
 import { useRouter } from "next/navigation";
+import { Spinner } from "flowbite-react";
+
 export default function Home() {
   const [searchQuery, setSearchQuery] = useState("");
   const [stations, setStations] = useState<Station[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isPending, startTransition] = useTransition();
+  const [inputLoading, setInputLoading] = useState(false);
 
   const router = useRouter();
 
-  const handleSearch = async (query: string) => {
-    if (query.length < 2) {
+  useEffect(() => {
+    if (searchQuery.length < 2) {
       setStations([]);
       return;
     }
 
-    setIsLoading(true);
-    try {
-      const response = await autoCompleteStation(query);
-      setStations(response);
-    } catch (error) {
-      console.error("Error fetching stations:", error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+    setInputLoading(true);
+    const delayDebounce = setTimeout(async () => {
+      try {
+        const response = await autoCompleteStation(searchQuery);
+        setStations(response);
+      } catch (error) {
+        console.error("Error fetching stations:", error);
+      } finally {
+        setInputLoading(false);
+      }
+    }, 300); // Debounce delay
+
+    return () => clearTimeout(delayDebounce);
+  }, [searchQuery]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const query = e.target.value;
-    setSearchQuery(query);
-    handleSearch(query);
-  };
-  const handleStationClick = (eva: number) => {
-    router.push(`/board/${eva}`);
+    setSearchQuery(e.target.value);
   };
 
+  const handleStationClick = (eva: number) => {
+    startTransition(() => router.push(`/board/${eva}`));
+  };
 
   return (
-    <main className="min-h-screen p-8">
-      <div className="max-w-2xl mx-auto">
-        <h1 className="text-3xl font-bold mb-8 text-center ">
-          DB-Live-Monitor
-        </h1>
-        <div className="relative">
-          <input
-            type="text"
-            value={searchQuery}
-            onChange={handleInputChange}
-            placeholder="Enter station name..."
-            className="w-full p-4 border rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-gray-300 dark:bg-gray-800 "
-          />
+    <main className="min-h-screen p-8 relative">
+      {/* Global loading overlay */}
+      {isPending && (
+        <div className="absolute inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50 z-50">
+          <Spinner size="lg" />
+        </div>
+      )}
 
-          {isLoading && (
-            <div className="mt-4 text-center text-gray-500 dark:text-gray-400">
-              Loading...
-            </div>
-          )}
+      <div className="max-w-2xl mx-auto">
+        <h1 className="text-3xl font-bold mb-8 text-center">DB-Live-Monitor</h1>
+        <div className="relative">
+          <div className="relative w-full">
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={handleInputChange}
+              placeholder="Enter station name..."
+              className="w-full p-4 border rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-gray-300 dark:bg-gray-800 pr-12 flex items-center"
+            />
+            {inputLoading && (
+              <div className="absolute inset-y-0 right-3 flex items-center">
+                <Spinner size="sm" />
+              </div>
+            )}
+          </div>
 
           {stations.length > 0 && (
             <div className="mt-2 border rounded-lg shadow-lg dark:bg-gray-800 dark:border-gray-700 flex flex-col">
