@@ -1,6 +1,6 @@
 {
   "name": "dbm",
-  "version": "7.3.0",
+  "version": "7.4.1",
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",
@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "axios": "^1.8.2",
+    "clsx": "^2.1.1",
     "db-hafas-stations-autocomplete": "^2.0.0",
     "db-stations": "^5.0.2",
     "db-vendo-client": "^6.3.4",

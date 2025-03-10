@@ -35,8 +35,6 @@ export interface Time {
     target:            Date;
     predicted:         Date;
     diff:              number;
-    targetTimeInMs:    number;
-    predictedTimeInMs: number;
     timeType:          TimeType;
 }
 
