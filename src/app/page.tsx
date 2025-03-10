@@ -5,6 +5,7 @@ import { autoCompleteStation } from "@/app/api/station";
 import { Station } from "@/types/stations";
 import { useRouter } from "next/navigation";
 import { Spinner } from "flowbite-react";
+import Footer from "@/components/Footer";
 
 export default function Home() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -44,7 +45,7 @@ export default function Home() {
   };
 
   return (
-    <main className="min-h-screen p-8 relative">
+    <main className="min-h-screen p-8 flex flex-col justify-between items-center">
       {/* Global loading overlay */}
       {isPending && (
         <div className="absolute inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50 z-50">
@@ -52,7 +53,7 @@ export default function Home() {
         </div>
       )}
 
-      <div className="max-w-2xl mx-auto">
+      <div className="max-w-2xl w-full">
         <h1 className="text-3xl font-bold mb-8 text-center">DB-Live-Monitor</h1>
         <div className="relative">
           <div className="relative w-full">
@@ -85,6 +86,7 @@ export default function Home() {
           )}
         </div>
       </div>
+      <Footer />
     </main>
   );
 }
