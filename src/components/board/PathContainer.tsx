@@ -9,5 +9,5 @@ export default function PathContainer({ path }: { path: IrisPathItem[] }) {
     .map(stop => stop.name) // Extract only names
     .join(" • "); // Join names with " • "
 
-  return <div className="text-xs">{relevantStops}</div>;
+  return <div className="text-xs sm:text-md text-gray-400">{relevantStops}</div>;
 }

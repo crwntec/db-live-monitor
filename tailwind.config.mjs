@@ -7,7 +7,7 @@ export default {
     "./src/**/*.{js,ts,jsx,tsx,mdx}",
     flowbite.content(),
   ],
-  safelist: ["dark"],
+  safelist: ["dark", "sm", "md", "lg"],
   theme: {
     extend: {
       colors: {
