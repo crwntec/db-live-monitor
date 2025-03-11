@@ -6,7 +6,7 @@ import { StationData } from "@/types/timetable";
 export default async function Board({ dataPromise }: { dataPromise: Promise<StationData | null> }) {
   const data = await dataPromise;
   if (!data || !data?.stopGroups) return <div>Fehler beim Laden der Daten</div>;
-  console.log(data)
+  console.log(JSON.stringify(data))
   return (
     <div>
       <Navbar title={data.stationName} referring={'/'} />
