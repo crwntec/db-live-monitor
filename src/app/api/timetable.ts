@@ -194,6 +194,7 @@ const mergeStationData = (
       !existing &&
       cutoffTimestamp < moment(irisItem.when.arrival).valueOf()
     ) {
+      console.log("IRIS Override: creating entry for ", key);
       // If no existing data, create new entry with IRIS data
       processedItems.set(key, {
         irisOverride: true,
