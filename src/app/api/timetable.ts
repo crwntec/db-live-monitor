@@ -94,7 +94,6 @@ const mergeStationData = (
   const irisStopsIndex = new Map<number, IrisStop>(
     irisData.stops
       .map((stop) => [parseInt(stop.line.fahrtNr), stop] as [number, IrisStop])
-      .filter(([fahrtNr]) => !isNaN(fahrtNr))
   );
 
   const now = moment().tz("Europe/Berlin");
@@ -194,7 +193,7 @@ const mergeStationData = (
       !existing &&
       cutoffTimestamp < moment(irisItem.when.arrival).valueOf()
     ) {
-      console.log("IRIS Override: creating entry for ", key);
+      console.log("IRIS Override: creating entry for ", key, existing, processedItems.values());
       // If no existing data, create new entry with IRIS data
       processedItems.set(key, {
         irisOverride: true,
