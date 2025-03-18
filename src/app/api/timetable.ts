@@ -33,7 +33,7 @@ const fetchIrisDepartures = async (eva: string) => {
     return cached.data;
   }
 
-  const now = moment();
+  const now = moment().tz("Europe/Berlin");
   const currentDate = now.format("YYMMDD");
   const currentHour = now.format("HH");
   const nextDate = now.add(1, "hour").format("YYMMDD");
@@ -90,11 +90,11 @@ const mergeStationData = (
       stopGroups: [],
     };
   }
+  console.log("before merge", arrivals.items, departures.items, irisData.stops);
 
   const irisStopsIndex = new Map<number, IrisStop>(
     irisData.stops
       .map((stop) => [parseInt(stop.line.fahrtNr), stop] as [number, IrisStop])
-      .filter(([fahrtNr]) => !isNaN(fahrtNr))
   );
 
   const now = moment().tz("Europe/Berlin");
@@ -194,6 +194,7 @@ const mergeStationData = (
       !existing &&
       cutoffTimestamp < moment(irisItem.when.arrival).valueOf()
     ) {
+      console.log("IRIS Override: creating entry for ", key, existing, processedItems.size);
       // If no existing data, create new entry with IRIS data
       processedItems.set(key, {
         irisOverride: true,
@@ -313,13 +314,13 @@ const mergeStationData = (
         ? moment(a[0].departure.time)
         : a[0].arrival && a[0].arrival.time
         ? moment(a[0].arrival.time)
-        : moment();
+        : moment().tz("Europe/Berlin");
     const bDepartureTime = b[0].departure
       ? moment(b[0].departure.time)
       : b[0].arrival && b[0].arrival.time
       ? moment(b[0].arrival.time)
-      : moment();
-    const now = moment();
+      : moment().tz("Europe/Berlin");
+    const now = moment().tz("Europe/Berlin");
     const aHasLeft =
       aDepartureTime && aDepartureTime.isBefore(now.subtract(10, "minutes"));
     const bHasLeft =
@@ -420,6 +421,7 @@ export const getTimetableForStation = async (
       allStopGroups.push(...result.stopGroups); // Merge all stops into a single array
     }
   }
+  console.log("after merge:", allStopGroups);
 
   return {
     evaNo: evaIds[0],
