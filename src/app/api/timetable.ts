@@ -33,7 +33,7 @@ const fetchIrisDepartures = async (eva: string) => {
   //   return cached.data;
   // }
 
-  const now = moment();
+  const now = moment().tz("Europe/Berlin");
   const currentDate = now.format("YYMMDD");
   const currentHour = now.format("HH");
   const nextDate = now.add(1, "hour").format("YYMMDD");
@@ -314,13 +314,13 @@ const mergeStationData = (
         ? moment(a[0].departure.time)
         : a[0].arrival && a[0].arrival.time
         ? moment(a[0].arrival.time)
-        : moment();
+        : moment().tz("Europe/Berlin");
     const bDepartureTime = b[0].departure
       ? moment(b[0].departure.time)
       : b[0].arrival && b[0].arrival.time
       ? moment(b[0].arrival.time)
-      : moment();
-    const now = moment();
+      : moment().tz("Europe/Berlin");
+    const now = moment().tz("Europe/Berlin");
     const aHasLeft =
       aDepartureTime && aDepartureTime.isBefore(now.subtract(10, "minutes"));
     const bHasLeft =

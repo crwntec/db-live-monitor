@@ -8,7 +8,7 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 export function hasLeft(item: Stop, lookBack = 10) {
-    const nowTimestamp = moment().valueOf();
+    const nowTimestamp = moment().tz("Europe/Berlin").valueOf();
     const time = moment(
       item.arrival ? item.arrival.timePredicted : item.departure?.timePredicted
     );
