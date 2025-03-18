@@ -5,33 +5,33 @@ import { stationBoard } from "../../lib/db-web-api";
 import { IrisFchg, IrisResult, IrisStop, IrisTimetable } from "@/types/iris";
 import { WebAPIResult, WebAPIStop, StationData, Stop } from "@/types/timetable";
 
-// Add caching for IRIS data with a short TTL (e.g., 30 seconds)
-const IRIS_CACHE = new Map();
-const IRIS_CACHE_TTL = 30000; // 30 seconds
+// // Add caching for IRIS data with a short TTL (e.g., 30 seconds)
+// const IRIS_CACHE = new Map();
+// const IRIS_CACHE_TTL = 30000; // 30 seconds
 
-// Add caching for all API responses, not just IRIS
-const API_CACHE = new Map();
-const API_CACHE_TTL = 30000; // 30 seconds
+// // Add caching for all API responses, not just IRIS
+// const API_CACHE = new Map();
+// const API_CACHE_TTL = 30000; // 30 seconds
 
 const cachedFetch = async (key: string, fetchFn: CallableFunction) => {
-  const cached = API_CACHE.get(key);
-  if (cached && Date.now() - cached.timestamp < API_CACHE_TTL) {
-    return cached.data;
-  }
+  // const cached = API_CACHE.get(key);
+  // if (cached && Date.now() - cached.timestamp < API_CACHE_TTL) {
+  //   return cached.data;
+  // }
   const data = await fetchFn();
-  API_CACHE.set(key, {
-    timestamp: Date.now(),
-    data,
-  });
+  // API_CACHE.set(key, {
+  //   timestamp: Date.now(),
+  //   data,
+  // });
   return data;
 };
 
 const fetchIrisDepartures = async (eva: string) => {
-  const cacheKey = `iris_${eva}`;
-  const cached = IRIS_CACHE.get(cacheKey);
-  if (cached && Date.now() - cached.timestamp < IRIS_CACHE_TTL) {
-    return cached.data;
-  }
+  // const cacheKey = `iris_${eva}`;
+  // const cached = IRIS_CACHE.get(cacheKey);
+  // if (cached && Date.now() - cached.timestamp < IRIS_CACHE_TTL) {
+  //   return cached.data;
+  // }
 
   const now = moment();
   const currentDate = now.format("YYMMDD");
@@ -69,10 +69,10 @@ const fetchIrisDepartures = async (eva: string) => {
     parsedFchg
   );
 
-  IRIS_CACHE.set(cacheKey, {
-    timestamp: Date.now(),
-    data: converted,
-  });
+  // IRIS_CACHE.set(cacheKey, {
+  //   timestamp: Date.now(),
+  //   data: converted,
+  // });
 
   return converted;
 };
