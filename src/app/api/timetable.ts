@@ -90,6 +90,7 @@ const mergeStationData = (
       stopGroups: [],
     };
   }
+  console.log("before merge", arrivals.items, departures.items);
 
   const irisStopsIndex = new Map<number, IrisStop>(
     irisData.stops
@@ -193,7 +194,7 @@ const mergeStationData = (
       !existing &&
       cutoffTimestamp < moment(irisItem.when.arrival).valueOf()
     ) {
-      console.log("IRIS Override: creating entry for ", key, existing, processedItems.values());
+      console.log("IRIS Override: creating entry for ", key, existing, processedItems.size);
       // If no existing data, create new entry with IRIS data
       processedItems.set(key, {
         irisOverride: true,
@@ -420,6 +421,7 @@ export const getTimetableForStation = async (
       allStopGroups.push(...result.stopGroups); // Merge all stops into a single array
     }
   }
+  console.log("after merge:", allStopGroups);
 
   return {
     evaNo: evaIds[0],
