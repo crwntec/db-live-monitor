@@ -90,7 +90,7 @@ const mergeStationData = (
       stopGroups: [],
     };
   }
-  console.log("before merge", arrivals.items, departures.items);
+  console.log("before merge", arrivals.items, departures.items, irisData.stops);
 
   const irisStopsIndex = new Map<number, IrisStop>(
     irisData.stops
