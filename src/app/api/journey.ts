@@ -13,6 +13,7 @@ export const getJourney = async (journeyID: string) => {
         number: journey.no,
         time: journey.date
     });
+    // console.log(carriageSequence)
     
 
     return {

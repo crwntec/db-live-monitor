@@ -52,6 +52,7 @@ export function parseUICIdentifier(identifier: string) {
   const classNumber = identifier.substring(4, 8);
   const vehicleNumber = identifier.substring(8, 11);
 
+
   return { exchangeCode, countryCode, classNumber, vehicleNumber };
 }
 export function parseCountrycode(code: string) {
@@ -71,9 +72,11 @@ export function formatUIC(identifier: string) {
 
 export function getLongNameForClassNumber(classNumber: string)  {
   const _classNumber = parseInt(classNumber.substring(1));
+  // console.log(_classNumber)
   switch (_classNumber) {
     case 147:
     case 146:
+    case 681:
       return "IC2 Dosto";
     case 10:
     case 110:

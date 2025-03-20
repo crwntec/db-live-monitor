@@ -139,7 +139,7 @@ export default function StopsContainer({ stops }: { stops: Stop[] }) {
                     isCompleted
                       ? "bg-blue-500 border-blue-500"
                       : "bg-background border-gray-500",
-                    isCurrent ? "ring-2 ring-blue-500 ring-offset-1" : "",
+                    isCurrent ? "ring-2 ring-purple-600 ring-offset-1" : "",
                     isCanceled ? "bg-red-500 border-red-500" : ""
                   )}
                 />

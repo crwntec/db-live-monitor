@@ -73,7 +73,7 @@ export default function CarriageSequence({ carriageSequence }:{ carriageSequence
                       {parseCategory(vehicle.type.category)} (
                       {vehicle.type.constructionType ||
                         parseClassNumber(
-                          parseUICIdentifier(group.vehicles[0].vehicleID)
+                          parseUICIdentifier(vehicle.vehicleID)
                             .classNumber
                         )}
                       )
