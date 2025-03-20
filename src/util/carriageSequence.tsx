@@ -52,7 +52,6 @@ export function parseUICIdentifier(identifier: string) {
   const classNumber = identifier.substring(4, 8);
   const vehicleNumber = identifier.substring(8, 11);
 
-  console.log(identifier, exchangeCode, countryCode, classNumber, vehicleNumber);
 
   return { exchangeCode, countryCode, classNumber, vehicleNumber };
 }
