@@ -3,7 +3,13 @@ import { makeRequest } from "@/util/request/makeRequest";
 import { convertTimetable } from "@/util/iris/convertTimetable";
 import { stationBoard } from "../../lib/db-web-api";
 import { IrisFchg, IrisResult, IrisStop, IrisTimetable } from "@/types/iris";
-import { WebAPIResult, WebAPIStop, StationData, Stop } from "@/types/timetable";
+import {
+  WebAPIResult,
+  WebAPIStop,
+  StationData,
+  Stop,
+  StopTime,
+} from "@/types/timetable";
 
 // Add caching for IRIS data with a short TTL (e.g., 30 seconds)
 const IRIS_CACHE = new Map();
@@ -77,6 +83,19 @@ const fetchIrisDepartures = async (eva: string) => {
   return converted;
 };
 
+const getTime = (stop: Stop, usePredicted = false) => {
+  const departureTime = usePredicted
+    ? stop.departure?.timePredicted
+    : stop.departure?.time;
+  const arrivalTime = usePredicted
+    ? stop.arrival?.timePredicted
+    : stop.arrival?.time;
+  return (
+    departureTime || arrivalTime || moment().tz("Europe/Berlin").toISOString()
+  );
+};
+const hasLeft = (stop: Stop) => moment(getTime(stop, true)).isBefore(moment())
+
 const mergeStationData = (
   arrivals: WebAPIResult,
   departures: WebAPIResult,
@@ -91,8 +110,9 @@ const mergeStationData = (
     };
   }
   const irisStopsIndex = new Map<number, IrisStop>(
-    irisData.stops
-      .map((stop) => [parseInt(stop.line.fahrtNr), stop] as [number, IrisStop])
+    irisData.stops.map(
+      (stop) => [parseInt(stop.line.fahrtNr), stop] as [number, IrisStop]
+    )
   );
 
   const now = moment().tz("Europe/Berlin");
@@ -143,7 +163,9 @@ const mergeStationData = (
               origin: item.origin || { name: "" },
             },
             departure: null,
-            isEarlyTerminated:(irisItem?.departurePath && irisItem?.departurePath.length > 0) || false,
+            isEarlyTerminated:
+              (irisItem?.departurePath && irisItem?.departurePath.length > 0) ||
+              false,
             delayMessages: irisItem?.delayMessages || [],
             qualityChanges: irisItem?.qualityChanges || [],
             canceled: irisItem?.canceled || item.canceled,
@@ -158,7 +180,11 @@ const mergeStationData = (
               path: irisItem?.departurePath || [],
               destination: item.destination || { name: "" },
             },
-            isEarlyTerminated: (irisItem && irisItem.departurePath[irisItem?.departurePath.length - 1].name !== item.destination?.name )|| false,
+            isEarlyTerminated:
+              (irisItem &&
+                irisItem.departurePath[irisItem?.departurePath.length - 1]
+                  .name !== item.destination?.name) ||
+              false,
           });
         } else {
           processedItems.set(key, {
@@ -172,7 +198,11 @@ const mergeStationData = (
               path: irisItem?.departurePath || [],
               destination: item.destination || { name: "" },
             },
-            isEarlyTerminated: (irisItem && irisItem.departurePath[irisItem?.departurePath.length - 1].name !== item.destination?.name )|| false,
+            isEarlyTerminated:
+              (irisItem &&
+                irisItem.departurePath[irisItem?.departurePath.length - 1]
+                  .name !== item.destination?.name) ||
+              false,
             delayMessages: irisItem?.delayMessages || [],
             qualityChanges: irisItem?.qualityChanges || [],
             canceled: irisItem?.canceled || item.canceled,
@@ -209,72 +239,72 @@ const mergeStationData = (
         canceled: irisItem.canceled,
         arrival: irisItem.hasArrival
           ? {
-            train: {
-              journeyId: null,
+              train: {
+                journeyId: null,
+                category: irisItem.line.productName || "",
+                type: memoizedGetTrainType(irisItem.line.productName || ""),
+                no: parseInt(irisItem.line.fahrtNr),
+                lineName: irisItem.line.name.split(" ")[1],
+              },
               category: irisItem.line.productName || "",
-              type: memoizedGetTrainType(irisItem.line.productName || ""),
-              no: parseInt(irisItem.line.fahrtNr),
-              lineName: irisItem.line.name.split(" ")[1],
-            },
-            category: irisItem.line.productName || "",
-            canceled: irisItem.canceled,
-            time: irisItem.plannedWhen.arrival,
-            timePredicted: irisItem.when.arrival,
-            diff: calculateDelay(
-              irisItem.when.arrival,
-              irisItem.plannedWhen.arrival
-            ),
-            timeType: irisItem.onlyPlanData
-              ? "IRIS_PLANNED"
-              : "IRIS_PREDICTED",
-            platform: irisItem.plannedPlatform || "",
-            platformPredicted: irisItem.platform || "",
-            administration: {
-              id: "", // Add appropriate value
-              operatorCode: "", // Add appropriate value
-              operatorName: irisItem.line.operator || "",
-            },
-            origin: {
-              name: irisItem.from,
-            },
-            path: irisItem.arrivalPath || [], // Add the missing path property
-          }
+              canceled: irisItem.canceled,
+              time: irisItem.plannedWhen.arrival,
+              timePredicted: irisItem.when.arrival,
+              diff: calculateDelay(
+                irisItem.when.arrival,
+                irisItem.plannedWhen.arrival
+              ),
+              timeType: irisItem.onlyPlanData
+                ? "IRIS_PLANNED"
+                : "IRIS_PREDICTED",
+              platform: irisItem.plannedPlatform || "",
+              platformPredicted: irisItem.platform || "",
+              administration: {
+                id: "", // Add appropriate value
+                operatorCode: "", // Add appropriate value
+                operatorName: irisItem.line.operator || "",
+              },
+              origin: {
+                name: irisItem.from,
+              },
+              path: irisItem.arrivalPath || [], // Add the missing path property
+            }
           : null,
         departure: irisItem.hasDeparture
           ? {
-            train: {
-              journeyId: null,
+              train: {
+                journeyId: null,
+                category: irisItem.line.productName || "",
+                type: memoizedGetTrainType(irisItem.line.productName || ""),
+                no: parseInt(irisItem.line.fahrtNr),
+                lineName: irisItem.line.name.split(" ")[1],
+              },
               category: irisItem.line.productName || "",
-              type: memoizedGetTrainType(irisItem.line.productName || ""),
-              no: parseInt(irisItem.line.fahrtNr),
-              lineName: irisItem.line.name.split(" ")[1],
-            },
-            category: irisItem.line.productName || "",
-            canceled: irisItem.canceled,
-            time: irisItem.plannedWhen.departure,
-            timePredicted: irisItem.when.departure,
-            diff: calculateDelay(
-              irisItem.when.departure,
-              irisItem.plannedWhen.departure
-            ),
-            timeType: irisItem.onlyPlanData
-              ? "IRIS_PLANNED"
-              : "IRIS_PREDICTED",
-            platform: irisItem.plannedPlatform || "",
-            platformPredicted: irisItem.platform || "",
-            administration: {
-              id: "", // Add appropriate value
-              operatorCode: "", // Add appropriate value
-              operatorName: irisItem.line.operator || "",
-            },
-            destination: {
-              name: irisItem.to,
-            },
-            path: irisItem.departurePath || [],
-          }
+              canceled: irisItem.canceled,
+              time: irisItem.plannedWhen.departure,
+              timePredicted: irisItem.when.departure,
+              diff: calculateDelay(
+                irisItem.when.departure,
+                irisItem.plannedWhen.departure
+              ),
+              timeType: irisItem.onlyPlanData
+                ? "IRIS_PLANNED"
+                : "IRIS_PREDICTED",
+              platform: irisItem.plannedPlatform || "",
+              platformPredicted: irisItem.platform || "",
+              administration: {
+                id: "", // Add appropriate value
+                operatorCode: "", // Add appropriate value
+                operatorName: irisItem.line.operator || "",
+              },
+              destination: {
+                name: irisItem.to,
+              },
+              path: irisItem.departurePath || [],
+            }
           : null,
-          isEarlyTerminated: false,
-        qualityChanges: irisItem.qualityChanges
+        isEarlyTerminated: false,
+        qualityChanges: irisItem.qualityChanges,
       });
     }
   });
@@ -285,7 +315,7 @@ const mergeStationData = (
     return parts[0] === "" ? `-${parts[1]}` : parts[0];
   }
 
-  for (const [key, value] of processedItems.entries()) {
+  for (const [_, value] of processedItems.entries()) {
     let groupId;
     if (value.wing?.wing) {
       groupId = extractId(value.wing?.wing);
@@ -302,35 +332,15 @@ const mergeStationData = (
       }
     }
   }
-  mergedData.stopGroups = Array.from(wingGroups.values());
+  const stopGroups = Array.from(wingGroups.values());
 
-  // Sort using numeric timestamps
-  mergedData.stopGroups.sort((a, b) => {
-    const aDepartureTime =
-      a[0].departure && a[0].departure.time
-        ? moment(a[0].departure.time)
-        : a[0].arrival && a[0].arrival.time
-        ? moment(a[0].arrival.time)
-        : moment().tz("Europe/Berlin");
-    const bDepartureTime = b[0].departure
-      ? moment(b[0].departure.time)
-      : b[0].arrival && b[0].arrival.time
-      ? moment(b[0].arrival.time)
-      : moment().tz("Europe/Berlin");
-    const now = moment().tz("Europe/Berlin");
-    const aHasLeft =
-      aDepartureTime && aDepartureTime.isBefore(now.subtract(10, "minutes"));
-    const bHasLeft =
-      bDepartureTime && bDepartureTime.isBefore(now.subtract(10, "minutes"));
-
-    if (aHasLeft && bHasLeft) {
-      return aDepartureTime.diff(bDepartureTime);
-    }
-    if (aHasLeft) return -1;
-    if (bHasLeft) return 1;
-
-    return aDepartureTime.diff(bDepartureTime);
+  stopGroups.sort((a, b) => {
+    return moment(getTime(a[0])).diff(moment(getTime(b[0])));
   });
+  //Extract trains that have left and sort by predicted time. This ensures no mixing of left and not left trains
+  const leftStopGroups = stopGroups.filter((group) => hasLeft(group[0])).sort((a, b) => moment(getTime(a[0], true)).diff(moment(getTime(b[0], true))));
+  const combined = [...leftStopGroups, ...stopGroups.filter((group)=>!hasLeft(group[0]))];
+  mergedData.stopGroups = combined;
   return mergedData;
 };
 
