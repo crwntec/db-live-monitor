@@ -1,4 +1,4 @@
-import { IrisFchg, IrisTimetable, IrisWingdef, TimetableElementDetail, IrisResult, IrisMessage, IrisStop } from "@/types/iris.ts";
+import { IrisFchg, IrisTimetable, IrisWingdef, TimetableElementDetail, IrisResult, IrisMessage } from "@/types/iris.ts";
 import { getStationRelevance } from "@/lib/stations/index.ts";
 import { makeRequest } from "@/util/request/makeRequest";
 
@@ -307,8 +307,13 @@ export const convertTimetable = async (
         wing = {
           origin: e.attributes.id,
           wing: wings,
-          start: start ? { station: start.attributes["st-name"], pt: start.attributes.pt } : null,
-          end: end ? { station: end.attributes["st-name"], pt: end.attributes.pt } : null,
+          start: start ? { station: start.attributes["st-name"], pt: start.attributes.pt } : {
+            station: "",
+            pt: "",},
+          end: end ? { station: end.attributes["st-name"], pt: end.attributes.pt } : {
+            station: "",
+            pt: "",
+          },
         };
       }
     }
@@ -326,12 +331,16 @@ export const convertTimetable = async (
       hasArrival,
       hasDeparture,
       when: {
-        arrival: hasArrival ? convertIRISTime(arrString ||"") : "-",
-        departure: hasDeparture ? convertIRISTime(depString ||"") : "-",
+        arrival: hasArrival ? convertIRISTime(arrString || "").toISOString() : "-",
+        departure: hasDeparture ? convertIRISTime(depString || "").toISOString() : "-",
       },
       plannedWhen: {
-        arrival: hasArrival ? convertIRISTime(arrString || "") : "-",
-        departure: hasDeparture ? convertIRISTime(depString || "") : "-",
+        arrival: hasArrival
+          ? convertIRISTime(arrString || "").toISOString()
+          : "-",
+        departure: hasDeparture
+          ? convertIRISTime(depString || "").toISOString()
+          : "-",
       },
       canceled: newArr?.attributes?.cs === "c",
       delayMessages,
@@ -340,7 +349,9 @@ export const convertTimetable = async (
       platform: hasArrival
         ? newArr?.attributes?.cp || arrival?.attributes?.pp
         : newDep?.attributes?.cp || departure?.attributes?.pp,
-      plannedPlatform: hasArrival ? arrival?.attributes?.pp : departure?.attributes?.pp,
+      plannedPlatform: hasArrival
+        ? arrival?.attributes?.pp
+        : departure?.attributes?.pp,
       hasWings,
       wing,
       from: hasArrival ? irisArPath[0]?.name : dataTimetable.attributes.station,
@@ -350,10 +361,10 @@ export const convertTimetable = async (
       arrivalPath: irisArPath,
       departurePath: irisDpPath,
       line: {
-        fahrtNr: line?.attributes?.n,
+        fahrtNr: line?.attributes?.n || "-",
         name: `${line?.attributes?.c} ${lineString}`,
-        productName: line?.attributes?.c,
-        operator: line?.attributes?.o,
+        productName: line?.attributes?.c || "-",
+        operator: line?.attributes?.o || "-",
       },
     };
   };

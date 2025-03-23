@@ -116,7 +116,7 @@ export interface IrisStop {
   platform?: string;
   plannedPlatform?: string;
   hasWings: boolean;
-  wing?: IrisWing;
+  wing?: IrisWing | null;
   from: string;
   to: string;
   arrivalPath: IrisPathItem[];

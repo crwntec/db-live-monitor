@@ -13,11 +13,16 @@ export interface JourneyT {
     stops:                 Stop[];
     started:               boolean;
     finished:              boolean;
-    hims:                  object[];
+    hims:                  Him[];
     validUntil:            Date;
     validFrom:             Date;
     isLoyaltyCaseEligible: boolean;
     carriageSequence?:      CarriageSequenceT | null;
+}
+export interface Him {
+    id: string;
+    caption: string;
+    shortText: string;
 }
 
 export interface Stop {
