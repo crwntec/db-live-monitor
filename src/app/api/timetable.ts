@@ -10,6 +10,7 @@ import {
   Stop,
   StopTime,
 } from "@/types/timetable";
+import { getTime } from "@/util";
 
 // Add caching for IRIS data with a short TTL (e.g., 30 seconds)
 const IRIS_CACHE = new Map();
@@ -83,17 +84,7 @@ const fetchIrisDepartures = async (eva: string) => {
   return converted;
 };
 
-const getTime = (stop: Stop, usePredicted = false) => {
-  const departureTime = usePredicted
-    ? stop.departure?.timePredicted
-    : stop.departure?.time;
-  const arrivalTime = usePredicted
-    ? stop.arrival?.timePredicted
-    : stop.arrival?.time;
-  return (
-    departureTime || arrivalTime || moment().tz("Europe/Berlin").toISOString()
-  );
-};
+
 const hasLeft = (stop: Stop) => moment(getTime(stop, true)).isBefore(moment())
 
 const mergeStationData = (
