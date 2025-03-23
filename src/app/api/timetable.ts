@@ -8,7 +8,6 @@ import {
   WebAPIStop,
   StationData,
   Stop,
-  StopTime,
 } from "@/types/timetable";
 import { getTime } from "@/util";
 

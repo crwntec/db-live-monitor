@@ -7,25 +7,6 @@ import { getDelayColor } from "@/util/colors";
 import { cn, getTimeJourney } from "@/util";
 import { Stop } from "@/types/journey";
 
-const calculateProgress = (
-  stops: Stop[],
-  currentTime: moment.Moment
-): number => {
-  if (stops.length < 2) return 0;
-  const firstStop = stops[0];
-  if (!firstStop) return 0;
-  const lastStop = stops[stops.length - 1];
-
-  const startTime = moment(getTimeJourney(firstStop, true)).valueOf();
-  const endTime = moment(getTimeJourney(lastStop, true)).valueOf();
-
-  const now = currentTime.valueOf();
-
-  if (now < startTime) return 0;
-  if (now > endTime) return 100;
-
-  return ((now - startTime) / (endTime - startTime)) * 100;
-};
 
 export default function StopsContainer({ stops }: { stops: Stop[] }) {
   const [progress, setProgress] = useState(0);
@@ -88,7 +69,6 @@ export default function StopsContainer({ stops }: { stops: Stop[] }) {
     segmentProgress * ((nextTime - prevTime) / (endTime - startTime)) * 100;
 
   const stopPositions = stops.map((_,index) =>(index/(stops.length - 1)*100));
-  console.log(stopPositions)
   setHeightProgress(stopPositions[prevStopIndex] + (segmentProgress * (stopPositions[nextStopIndex] - stopPositions[prevStopIndex])));
 
   setProgress(overallProgress)
