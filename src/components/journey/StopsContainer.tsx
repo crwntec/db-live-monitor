@@ -14,20 +14,6 @@ export default function StopsContainer({ stops }: { stops: Stop[] }) {
   const [currentTime, setCurrentTime] = useState(
     moment().tz("Europe/Berlin").add(0, "minutes")
   );
-
-  useEffect(() => {
-    calculateAndSetProgress();
-    const interval = setInterval(() => {
-      setCurrentTime(moment().tz("Europe/Berlin"));
-    }, 60000);
-
-    return () => clearInterval(interval);
-  }, []);
-
-  useEffect(() => {
-    calculateAndSetProgress();
-  }, [currentTime, stops]);
-
   const calculateAndSetProgress = () => {
     if (stops.length < 2) return 0;
 
@@ -73,6 +59,20 @@ export default function StopsContainer({ stops }: { stops: Stop[] }) {
 
   setProgress(overallProgress)
   };
+
+  useEffect(() => {
+    calculateAndSetProgress();
+    const interval = setInterval(() => {
+      setCurrentTime(moment().tz("Europe/Berlin"));
+    }, 60000);
+
+    return () => clearInterval(interval);
+  }, [calculateAndSetProgress]);
+
+  useEffect(() => {
+    calculateAndSetProgress();
+  }, [currentTime, stops]);
+
 
   const isCurrentStop = (stop: Stop, index: number) => {
     const arrivalTime = moment(
@@ -132,7 +132,7 @@ export default function StopsContainer({ stops }: { stops: Stop[] }) {
     return departureTime.isValid() && currentTime.isAfter(departureTime);
   };
 
-  let seenMessages = new Map();
+  const seenMessages = new Map();
 
   return (
     <div className="space-y-2">

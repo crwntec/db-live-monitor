@@ -13,7 +13,7 @@ export interface JourneyT {
     stops:                 Stop[];
     started:               boolean;
     finished:              boolean;
-    hims:                  any[];
+    hims:                  object[];
     validUntil:            Date;
     validFrom:             Date;
     isLoyaltyCaseEligible: boolean;

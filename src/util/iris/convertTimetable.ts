@@ -1,8 +1,8 @@
-import { IrisFchg, IrisTimetable, IrisWingdef, TimetableElementDetail, IrisResult } from "@/types/iris.ts";
+import { IrisFchg, IrisTimetable, IrisWingdef, TimetableElementDetail, IrisResult, IrisMessage, IrisStop } from "@/types/iris.ts";
 import { getStationRelevance } from "@/lib/stations/index.ts";
 import { makeRequest } from "@/util/request/makeRequest";
 
-let parsedCats = [
+const parsedCats = [
   { cat: 0, text: "Unbekannt" },
   { cat: 1, text: "Unbekannt" },
   { cat: 2, text: "Polizeiliche Ermittlung" },
@@ -202,7 +202,7 @@ export const convertTimetable = async (
     throw new Error("Invalid changes provided.");
   }
 
-  let dataTimetable = {
+  const dataTimetable = {
         attributes: data1.elements[0].attributes,
         elements: [...data1.elements[0].elements, ...data2.elements[0].elements],
       }
@@ -211,7 +211,8 @@ export const convertTimetable = async (
 
   if (!dataTimetable?.attributes || !changesTimetable?.elements) return { station: "", stops: [] };
 
-  let newJSON = { station: dataTimetable.attributes.station, stops: [] as any[] };
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const newJSON: IrisResult = { station: dataTimetable.attributes.station, stops: [] as any[] };
 
   dataTimetable.elements = dataTimetable.elements?.filter((e) => e !== undefined) || [];
   changesTimetable.elements = changesTimetable.elements?.filter((e) => e !== undefined) || [];
@@ -223,8 +224,8 @@ export const convertTimetable = async (
       changesTimetable.elements.find((o) => o.attributes?.id === e.attributes.id) ||
       changes.elements[0].elements?.find((o) => o.attributes?.id === e.attributes.id);
 
-    let delayMessages: any[] = [];
-    let qualityChanges: any[] = [];
+    const delayMessages: IrisMessage[] = [];
+    const qualityChanges: IrisMessage[] = [];
 
     const newArr = foundChanges?.elements?.find((o) => o.name === "ar");
     const newDep = foundChanges?.elements?.find((o) => o.name === "dp");
@@ -359,7 +360,7 @@ export const convertTimetable = async (
 
   const processedStops = (await Promise.all(dataTimetable.elements.map(processStop))).filter(Boolean);
 
-  newJSON.stops = processedStops.filter(
+  newJSON.stops = processedStops.filter((stop) => stop !== null).filter(
     (item, index, array) =>
       array.findIndex(
         (el) => el?.tripId === item?.tripId || el?.line.fahrtNr === item?.line.fahrtNr

@@ -1,5 +1,5 @@
 export interface IrisTimetable {
-  declaration: any;
+  declaration: string;
   elements: TimetableElement[];
 }
 
@@ -135,6 +135,7 @@ export interface IrisPathItem {
 }
 
 export interface IrisMessage {
+  id: string;
   text: string;
   timestamp: Date;
 }

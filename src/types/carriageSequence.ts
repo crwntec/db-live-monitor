@@ -5,7 +5,7 @@ export interface CarriageSequenceT {
     journeyID: string
     sequenceStatus: string
     groups: CarriageSequenceGroup[]
-    platform: CarriageSequencePlatform
+    platform: unknown // TODO add Platform type
 }
 
 export interface CarriageSequenceGroup {
@@ -48,6 +48,6 @@ export interface CarriageSequenceAmenity {
     type: string
 }
 
-export interface CarriageSequencePlatform {
+// export interface CarriageSequencePlatform {
 
-}
+// }
