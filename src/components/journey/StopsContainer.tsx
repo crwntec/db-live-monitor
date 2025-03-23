@@ -4,93 +4,135 @@ import { useState, useEffect } from "react";
 import { CircleAlert } from "lucide-react";
 import moment from "moment";
 import { getDelayColor } from "@/util/colors";
-import { cn } from "@/util";
+import { cn, getTimeJourney } from "@/util";
 import { Stop } from "@/types/journey";
+
 
 export default function StopsContainer({ stops }: { stops: Stop[] }) {
   const [progress, setProgress] = useState(0);
-  const [currentTime, setCurrentTime] = useState(new Date());
+  const [heigthProgress, setHeightProgress] = useState(0);
+  const [currentTime, setCurrentTime] = useState(
+    moment().tz("Europe/Berlin").add(0, "minutes")
+  );
+  const calculateAndSetProgress = () => {
+    if (stops.length < 2) return 0;
+
+  const firstStop = stops[0];
+  const lastStop = stops[stops.length - 1];
+
+  const startTime = moment(getTimeJourney(firstStop, true)).valueOf();
+  const endTime = moment(getTimeJourney(lastStop, true)).valueOf();
+  const now = currentTime.valueOf();
+
+  if (now <= startTime) return 0;
+  if (now >= endTime) return 100;
+
+  // Find the last completed stop and next stop
+  let prevStop = firstStop;
+  let nextStop = lastStop;
+  let prevStopIndex = 0;
+  let nextStopIndex = 0;
+  for (let i = 1; i < stops.length; i++) {
+    const stopTime = moment(getTimeJourney(stops[i], true)).valueOf();
+    if (stopTime > now) {
+      nextStop = stops[i];
+      nextStopIndex = i;
+      break;
+    }
+    prevStop = stops[i];
+    prevStopIndex = i;
+  }
+
+  const prevTime = moment(getTimeJourney(prevStop, true)).valueOf();
+  const nextTime = moment(getTimeJourney(nextStop, true)).valueOf();
+
+  // Linear interpolation between the two stops
+  const segmentProgress = (now - prevTime) / (nextTime - prevTime);
+
+  // Determine overall progress based on time
+  const overallProgress =
+    ((prevTime - startTime) / (endTime - startTime)) * 100 +
+    segmentProgress * ((nextTime - prevTime) / (endTime - startTime)) * 100;
+
+  const stopPositions = stops.map((_,index) =>(index/(stops.length - 1)*100));
+  setHeightProgress(stopPositions[prevStopIndex] + (segmentProgress * (stopPositions[nextStopIndex] - stopPositions[prevStopIndex])));
+
+  setProgress(overallProgress)
+  };
 
   useEffect(() => {
+    calculateAndSetProgress();
     const interval = setInterval(() => {
-      setCurrentTime(new Date());
+      setCurrentTime(moment().tz("Europe/Berlin"));
     }, 60000);
 
     return () => clearInterval(interval);
-  }, []);
+  }, [calculateAndSetProgress]);
 
   useEffect(() => {
-    if (stops.length < 2) return;
-
-    const firstStop = stops[0];
-    const lastStop = stops[stops.length - 1];
-
-    const startTime = new Date(
-      firstStop.departureTime?.predicted ||
-        firstStop.departureTime?.target ||
-        firstStop.arrivalTime?.target ||
-        0
-    ).getTime();
-    const endTime = new Date(
-      lastStop.arrivalTime?.predicted ||
-        lastStop.arrivalTime?.target ||
-        lastStop.departureTime?.target ||
-        0
-    ).getTime();
-    const now = currentTime.getTime();
-
-    if (now < startTime) {
-      setProgress(0);
-    } else if (now > endTime) {
-      setProgress(100);
-    } else {
-      const totalDuration = endTime - startTime;
-      const elapsed = now - startTime;
-      setProgress((elapsed / totalDuration) * 100);
-    }
+    calculateAndSetProgress();
   }, [currentTime, stops]);
 
+
   const isCurrentStop = (stop: Stop, index: number) => {
-    const arrivalTime = new Date(
+    const arrivalTime = moment(
       stop.arrivalTime?.predicted || stop.arrivalTime?.target || 0
-    ).getTime();
-    const departureTime = new Date(
+    );
+    const departureTime = moment(
       stop.departureTime?.predicted || stop.departureTime?.target || 0
-    ).getTime();
-    const now = currentTime.getTime();
+    );
 
-    if (index === 0 && departureTime) {
-      return now <= departureTime;
+    // First stop is current if we haven't departed yet
+    if (index === 0 && departureTime.isValid()) {
+      return (
+        currentTime.isBefore(departureTime) || currentTime.isSame(departureTime)
+      );
     }
 
-    if (index === stops.length - 1 && arrivalTime) {
-      return now >= arrivalTime;
+    // Last stop is current if we've arrived
+    if (index === stops.length - 1 && arrivalTime.isValid()) {
+      return (
+        currentTime.isAfter(arrivalTime) || currentTime.isSame(arrivalTime)
+      );
     }
 
-    if (arrivalTime && departureTime) {
-      return now >= arrivalTime && now <= departureTime;
+    // For middle stops, we're at the stop if we're between arrival and departure
+    if (arrivalTime.isValid() && departureTime.isValid()) {
+      return (
+        (currentTime.isAfter(arrivalTime) || currentTime.isSame(arrivalTime)) &&
+        (currentTime.isBefore(departureTime) ||
+          currentTime.isSame(departureTime))
+      );
     }
 
+    // Fallback logic
     return (
-      (arrivalTime && now >= arrivalTime) ||
-      (departureTime && now <= departureTime)
+      (arrivalTime.isValid() &&
+        (currentTime.isAfter(arrivalTime) ||
+          currentTime.isSame(arrivalTime))) ||
+      (departureTime.isValid() &&
+        (currentTime.isBefore(departureTime) ||
+          currentTime.isSame(departureTime)))
     );
   };
 
   const isCompletedStop = (stop: Stop, index: number) => {
+    // Last stop is completed if we've arrived
     if (index === stops.length - 1) {
-      const arrivalTime = new Date(
-        stop.arrivalTime?.predicted || stop.arrivalTime?.target || 0
-      ).getTime();
-      return currentTime.getTime() > arrivalTime;
+      const arrivalTime = moment(
+        stop.arrivalTime?.predicted || stop.arrivalTime?.target
+      );
+      return arrivalTime.isValid() && currentTime.isAfter(arrivalTime);
     }
 
-    const departureTime = new Date(
-      stop.departureTime?.predicted || stop.departureTime?.target || 0
-    ).getTime();
-    return currentTime.getTime() > departureTime;
+    // Other stops are completed if we've departed
+    const departureTime = moment(
+      stop.departureTime?.predicted || stop.departureTime?.target
+    );
+    return departureTime.isValid() && currentTime.isAfter(departureTime);
   };
-  let seenMessages = new Map();
+
+  const seenMessages = new Map();
 
   return (
     <div className="space-y-2">
@@ -120,7 +162,7 @@ export default function StopsContainer({ stops }: { stops: Stop[] }) {
         {/* Progress bar fill */}
         <div
           className="absolute left-3 top-0 w-0.5 bg-blue-500 transition-all duration-1000 ease-in-out"
-          style={{ height: `${progress}%` }}
+          style={{ height: `${heigthProgress}%` }}
         />
 
         {/* Stops */}
@@ -139,7 +181,7 @@ export default function StopsContainer({ stops }: { stops: Stop[] }) {
                     isCompleted
                       ? "bg-blue-500 border-blue-500"
                       : "bg-background border-gray-500",
-                    isCurrent ? "ring-2 ring-purple-600 ring-offset-1" : "",
+                    isCurrent ? "bg-blue-500 border-blue-800" : "",
                     isCanceled ? "bg-red-500 border-red-500" : ""
                   )}
                 />
@@ -147,9 +189,9 @@ export default function StopsContainer({ stops }: { stops: Stop[] }) {
                 {/* Station info */}
                 <div
                   className={cn(
-                    "rounded-lg",
+                    "rounded-lg py-0.5 px-1",
                     isCurrent ? "bg-blue-500/5" : "",
-                    isCanceled ? "bg-red-50" : ""
+                    isCanceled ? "bg-red-500/5" : ""
                   )}
                 >
                   <div className="flex items-center">

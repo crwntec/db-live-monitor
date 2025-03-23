@@ -1,5 +1,5 @@
 export interface IrisTimetable {
-  declaration: any;
+  declaration: string;
   elements: TimetableElement[];
 }
 
@@ -116,7 +116,7 @@ export interface IrisStop {
   platform?: string;
   plannedPlatform?: string;
   hasWings: boolean;
-  wing?: IrisWing;
+  wing?: IrisWing | null;
   from: string;
   to: string;
   arrivalPath: IrisPathItem[];
@@ -135,6 +135,7 @@ export interface IrisPathItem {
 }
 
 export interface IrisMessage {
+  id: string;
   text: string;
   timestamp: Date;
 }
