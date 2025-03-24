@@ -121,7 +121,7 @@ export default function Home() {
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.3 }}
-            className="mt-3 border rounded-lg shadow-lg bg-white dark:bg-gray-800 w-full"
+            className="mt-3 border-gray-500 rounded-lg shadow-lg bg-white dark:bg-gray-800 w-full"
           >
             {stations.map((station, index) => (
               <motion.button
@@ -129,7 +129,7 @@ export default function Home() {
                 onClick={() => handleStationClick(station.eva)}
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
-                className={`w-full p-4 flex items-center space-x-3 text-left hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors border-b last:border-b-0 dark:border-gray-700 dark:text-white ${
+                className={`w-full p-4 rounded-md flex items-center space-x-3 text-left hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors border-b last:border-b-0 dark:border-gray-700 dark:text-white ${
                   selectedStationIndex === index
                     ? "bg-gray-200 dark:bg-gray-600"
                     : ""
