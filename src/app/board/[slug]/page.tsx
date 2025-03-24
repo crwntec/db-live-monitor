@@ -8,7 +8,7 @@ async function fetchTimetable(params: Promise<{ slug: string }>) {
         const evaIds = await getEVAFromDS100(slug);
         if (!evaIds) return null;
 
-        const data = await getTimetableForStation(Array.isArray(evaIds) ? evaIds.map(String) : [evaIds]);
+        const data = await getTimetableForStation(Array.isArray(evaIds) ? evaIds.map(String) : [evaIds], 7);
         return data;
     } catch (error) {
         console.error("Error fetching timetable:", error);

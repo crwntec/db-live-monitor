@@ -10,6 +10,7 @@ import Footer from "@/components/Footer";
 export default function Home() {
   const [searchQuery, setSearchQuery] = useState("");
   const [stations, setStations] = useState<Station[]>([]);
+  const [selectedStationIndex, setSelectedStationIndex] = useState<number>(-1);
   const [isPending, startTransition] = useTransition();
   const [inputLoading, setInputLoading] = useState(false);
 
@@ -39,6 +40,23 @@ export default function Home() {
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value);
   };
+
+  useEffect(() => {
+    const handleKeydown = (e: KeyboardEvent) => {
+      if (e.key === "ArrowDown" && stations.length > 0) {
+        setSelectedStationIndex((prevIndex) => (prevIndex + 1) % stations.length);
+      }
+      if (e.key === "ArrowUp" && stations.length > 0) {
+        setSelectedStationIndex((prevIndex) => (prevIndex - 1 + stations.length) % stations.length);
+      }
+      if (e.key === "Enter" && stations.length > 0) {
+        handleStationClick(stations[selectedStationIndex].eva);
+      }
+    };
+
+    window.addEventListener("keydown", handleKeydown);
+    return () => window.removeEventListener("keydown", handleKeydown);
+  }, [stations, selectedStationIndex]);
 
   const handleStationClick = (eva: number) => {
     startTransition(() => router.push(`/board/${eva}`));
@@ -77,7 +95,15 @@ export default function Home() {
                 <button
                   key={station.eva}
                   onClick={() => handleStationClick(station.eva)}
-                  className="w-full p-4 text-left hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors border-b last:border-b-0 dark:border-gray-700 dark:text-white"
+                  className={`
+                    w-full p-4 text-left
+                    hover:bg-gray-100 dark:hover:bg-gray-700
+                    transition-colors
+                    border-b last:border-b-0
+                    dark:border-gray-700
+                    dark:text-white
+                    ${selectedStationIndex === stations.indexOf(station) ? "bg-gray-200 dark:bg-gray-600" : ""}
+                  `}
                 >
                   {station.name}
                 </button>

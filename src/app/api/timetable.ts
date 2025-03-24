@@ -352,7 +352,8 @@ const memoizedGetTrainType = (() => {
 })();
 
 export const getTimetableForStation = async (
-  evaIds: string[]
+  evaIds: string[],
+  lookBackItems: number
 ): Promise<StationData | null> => {
   // Handle multiple evaIds
   const results: { [key: string]: StationData | null } = {};
@@ -423,7 +424,7 @@ export const getTimetableForStation = async (
       moment(getTime(a[0], true)).diff(moment(getTime(b[0], true)))
     );
   const combined = [
-    ...leftStopGroups,
+    ...leftStopGroups.slice(-lookBackItems),
     ...allStopGroups.filter((group) => !hasLeft(group[0])),
   ];
 
