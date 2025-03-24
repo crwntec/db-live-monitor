@@ -1,19 +1,19 @@
 import { Stop } from "@/types/timetable";
 import { Stop as JourneyStop } from "@/types/journey";
-import moment from "moment-timezone";// This would be in lib/utils.ts
-import { type ClassValue, clsx } from "clsx"
-import { twMerge } from "tailwind-merge"
+import moment from "moment-timezone"; // This would be in lib/utils.ts
+import { type ClassValue, clsx } from "clsx";
+import { twMerge } from "tailwind-merge";
 
 export function cn(...inputs: ClassValue[]) {
-  return twMerge(clsx(inputs))
+  return twMerge(clsx(inputs));
 }
 
 export function hasLeft(item: Stop, lookBack: number) {
-    const nowTimestamp = moment().tz("Europe/Berlin").valueOf();
-    const time = moment(
-      item.arrival ? item.arrival.timePredicted : item.departure?.timePredicted
-    );
-    return nowTimestamp > time.add(lookBack, "minutes").valueOf();
+  const nowTimestamp = moment().tz("Europe/Berlin");
+  const time = moment(
+    item.departure ? item.departure.timePredicted : item.arrival?.timePredicted
+  ).tz("Europe/Berlin");
+  return time.isBefore(nowTimestamp.subtract(lookBack, "minutes"));
 }
 
 export function getTime(stop: Stop, usePredicted = false) {
@@ -26,7 +26,7 @@ export function getTime(stop: Stop, usePredicted = false) {
   return (
     departureTime || arrivalTime || moment().tz("Europe/Berlin").toISOString()
   );
-};
+}
 export function getTimeJourney(stop: JourneyStop, usePredicted = false) {
   if (!stop) return moment().tz("Europe/Berlin").toISOString();
   const departureTime = usePredicted
@@ -38,4 +38,4 @@ export function getTimeJourney(stop: JourneyStop, usePredicted = false) {
   return (
     departureTime || arrivalTime || moment().tz("Europe/Berlin").toISOString()
   );
-};
+}
