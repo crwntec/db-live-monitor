@@ -7,6 +7,8 @@ import { useRouter } from "next/navigation";
 import { Spinner } from "flowbite-react";
 import Footer from "@/components/Footer";
 import Image from "next/image";
+import { Search, MapPin } from "lucide-react";
+import { motion } from "framer-motion";
 
 export default function Home() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -69,7 +71,6 @@ export default function Home() {
 
   return (
     <main className="min-h-screen p-8 flex flex-col justify-between items-center bg-gray-100 dark:bg-gray-900">
-      {/* Loading overlay */}
       {isPending && (
         <div className="absolute inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50 z-50">
           <Spinner size="lg" />
@@ -95,36 +96,50 @@ export default function Home() {
         </p>
 
         <div className="relative w-full">
-          <input
-            type="text"
-            value={searchQuery}
-            onChange={handleInputChange}
-            placeholder="Enter station name..."
-            className="w-full p-4 border rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-800 pr-12"
-          />
-          {inputLoading && (
-            <div className="absolute inset-y-0 right-3 flex items-center">
-              <Spinner size="sm" />
-            </div>
-          )}
+          <div className="relative flex items-center">
+            <Search
+              className="absolute left-4 text-gray-500 dark:text-gray-400"
+              size={20}
+            />
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={handleInputChange}
+              placeholder="Enter station name..."
+              className="w-full p-4 pl-12 border rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-800"
+            />
+            {inputLoading && (
+              <div className="absolute inset-y-0 right-3 flex items-center">
+                <Spinner size="sm" />
+              </div>
+            )}
+          </div>
         </div>
 
         {stations.length > 0 && (
-          <div className="mt-3 border rounded-lg shadow-lg bg-white dark:bg-gray-800 w-full">
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3 }}
+            className="mt-3 border rounded-lg shadow-lg bg-white dark:bg-gray-800 w-full"
+          >
             {stations.map((station, index) => (
-              <button
+              <motion.button
                 key={station.eva}
                 onClick={() => handleStationClick(station.eva)}
-                className={`w-full p-4 text-left hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors border-b last:border-b-0 dark:border-gray-700 dark:text-white ${
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                className={`w-full p-4 flex items-center space-x-3 text-left hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors border-b last:border-b-0 dark:border-gray-700 dark:text-white ${
                   selectedStationIndex === index
                     ? "bg-gray-200 dark:bg-gray-600"
                     : ""
                 }`}
               >
-                {station.name}
-              </button>
+                <MapPin className="text-blue-500" size={20} />
+                <span>{station.name}</span>
+              </motion.button>
             ))}
-          </div>
+          </motion.div>
         )}
       </div>
 
