@@ -323,14 +323,7 @@ const mergeStationData = (
     }
   }
   const stopGroups = Array.from(wingGroups.values());
-
-  stopGroups.sort((a, b) => {
-    return moment(getTime(a[0])).diff(moment(getTime(b[0])));
-  });
-  //Extract trains that have left and sort by predicted time. This ensures no mixing of left and not left trains
-  const leftStopGroups = stopGroups.filter((group) => hasLeft(group[0])).sort((a, b) => moment(getTime(a[0], true)).diff(moment(getTime(b[0], true))));
-  const combined = [...leftStopGroups, ...stopGroups.filter((group)=>!hasLeft(group[0]))];
-  mergedData.stopGroups = combined;
+  mergedData.stopGroups = stopGroups;
   return mergedData;
 };
 
@@ -418,6 +411,21 @@ export const getTimetableForStation = async (
       allStopGroups.push(...result.stopGroups); // Merge all stops into a single array
     }
   }
+  
+
+  allStopGroups.sort((a, b) => {
+    return moment(getTime(a[0])).diff(moment(getTime(b[0])));
+  });
+  //Extract trains that have left and sort by predicted time. This ensures no mixing of left and not left trains
+  const leftStopGroups = allStopGroups
+    .filter((group) => hasLeft(group[0]))
+    .sort((a, b) =>
+      moment(getTime(a[0], true)).diff(moment(getTime(b[0], true)))
+    );
+  const combined = [
+    ...leftStopGroups,
+    ...allStopGroups.filter((group) => !hasLeft(group[0])),
+  ];
 
   return {
     evaNo: evaIds[0],
@@ -428,6 +436,6 @@ export const getTimetableForStation = async (
     stationNames: Object.keys(results).map(
       (eva) => results[eva]?.stationName || ""
     ),
-    stopGroups: allStopGroups,
+    stopGroups: combined,
   };
 };
