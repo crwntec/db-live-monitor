@@ -12,7 +12,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata = {
-  title: "DB-Live-Monitor",
+  title: "DB Live Monitor",
   description: "Unofficial Live Departure Monitor for German Railway Stations",
 };
 

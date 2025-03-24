@@ -6,6 +6,9 @@ import { Station } from "@/types/stations";
 import { useRouter } from "next/navigation";
 import { Spinner } from "flowbite-react";
 import Footer from "@/components/Footer";
+import Image from "next/image";
+import { Search, MapPin } from "lucide-react";
+import { motion } from "framer-motion";
 
 export default function Home() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -32,7 +35,7 @@ export default function Home() {
       } finally {
         setInputLoading(false);
       }
-    }, 300); // Debounce delay
+    }, 300);
 
     return () => clearTimeout(delayDebounce);
   }, [searchQuery]);
@@ -44,10 +47,14 @@ export default function Home() {
   useEffect(() => {
     const handleKeydown = (e: KeyboardEvent) => {
       if (e.key === "ArrowDown" && stations.length > 0) {
-        setSelectedStationIndex((prevIndex) => (prevIndex + 1) % stations.length);
+        setSelectedStationIndex(
+          (prevIndex) => (prevIndex + 1) % stations.length
+        );
       }
       if (e.key === "ArrowUp" && stations.length > 0) {
-        setSelectedStationIndex((prevIndex) => (prevIndex - 1 + stations.length) % stations.length);
+        setSelectedStationIndex(
+          (prevIndex) => (prevIndex - 1 + stations.length) % stations.length
+        );
       }
       if (e.key === "Enter" && stations.length > 0) {
         handleStationClick(stations[selectedStationIndex].eva);
@@ -63,24 +70,43 @@ export default function Home() {
   };
 
   return (
-    <main className="min-h-screen p-8 flex flex-col justify-between items-center">
-      {/* Global loading overlay */}
+    <main className="min-h-screen p-8 flex flex-col justify-between items-center bg-gray-100 dark:bg-gray-900">
       {isPending && (
         <div className="absolute inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50 z-50">
           <Spinner size="lg" />
         </div>
       )}
 
-      <div className="max-w-2xl w-full">
-        <h1 className="text-3xl font-bold mb-8 text-center">DB-Live-Monitor</h1>
-        <div className="relative">
-          <div className="relative w-full">
+      <div className="max-w-2xl w-full flex flex-col items-center text-center">
+        {/* Logo */}
+        <div className="flex items-center">
+          <Image
+            src="/icons/icon-512.png"
+            alt="DB Live Monitor Logo"
+            width={100}
+            height={100}
+            className="mb-4 pr-4"
+          />
+          <h1 className="text-4xl font-bold mb-6 text-gray-800 dark:text-white">
+            DB Live Monitor
+          </h1>
+        </div>
+        <p className="text-lg text-gray-600 dark:text-gray-300 mb-6">
+          Unofficial Live Departure Monitor for German Railway Stations
+        </p>
+
+        <div className="relative w-full">
+          <div className="relative flex items-center">
+            <Search
+              className="absolute left-4 text-gray-500 dark:text-gray-400"
+              size={20}
+            />
             <input
               type="text"
               value={searchQuery}
               onChange={handleInputChange}
               placeholder="Enter station name..."
-              className="w-full p-4 border rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-gray-300 dark:bg-gray-800 pr-12 flex items-center"
+              className="w-full p-4 pl-12 border rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-800"
             />
             {inputLoading && (
               <div className="absolute inset-y-0 right-3 flex items-center">
@@ -88,30 +114,35 @@ export default function Home() {
               </div>
             )}
           </div>
-
-          {stations.length > 0 && (
-            <div className="mt-2 border rounded-lg shadow-lg dark:bg-gray-800 dark:border-gray-700 flex flex-col">
-              {stations.map((station) => (
-                <button
-                  key={station.eva}
-                  onClick={() => handleStationClick(station.eva)}
-                  className={`
-                    w-full p-4 text-left
-                    hover:bg-gray-100 dark:hover:bg-gray-700
-                    transition-colors
-                    border-b last:border-b-0
-                    dark:border-gray-700
-                    dark:text-white
-                    ${selectedStationIndex === stations.indexOf(station) ? "bg-gray-200 dark:bg-gray-600" : ""}
-                  `}
-                >
-                  {station.name}
-                </button>
-              ))}
-            </div>
-          )}
         </div>
+
+        {stations.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3 }}
+            className="mt-3 border-gray-500 rounded-lg shadow-lg bg-white dark:bg-gray-800 w-full"
+          >
+            {stations.map((station, index) => (
+              <motion.button
+                key={station.eva}
+                onClick={() => handleStationClick(station.eva)}
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                className={`w-full p-4 rounded-md flex items-center space-x-3 text-left hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors border-b last:border-b-0 dark:border-gray-700 dark:text-white ${
+                  selectedStationIndex === index
+                    ? "bg-gray-200 dark:bg-gray-600"
+                    : ""
+                }`}
+              >
+                <MapPin className="text-blue-500" size={20} />
+                <span>{station.name}</span>
+              </motion.button>
+            ))}
+          </motion.div>
+        )}
       </div>
+
       <Footer />
     </main>
   );
