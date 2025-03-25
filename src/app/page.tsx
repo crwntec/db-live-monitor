@@ -87,11 +87,11 @@ export default function Home() {
             height={100}
             className="mb-4 pr-4"
           />
-          <h1 className="text-4xl font-bold mb-6 text-gray-800 dark:text-white">
+          <h1 className="sm:text-4xl text-2xl font-bold mb-6 text-gray-800 dark:text-white">
             DB Live Monitor
           </h1>
         </div>
-        <p className="text-lg text-gray-600 dark:text-gray-300 mb-6">
+        <p className="md:text-lg text-base text-gray-600 dark:text-gray-300 mb-6">
           Unofficial Live Departure Monitor for German Railway Stations
         </p>
 
