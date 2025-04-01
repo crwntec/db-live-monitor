@@ -1,7 +1,7 @@
 "use client";
 
 import { Github } from "lucide-react";
-import { version } from "@/../package.json"
+import pjson  from "@/../package.json"
 
 
 export default function Footer() {
@@ -9,7 +9,7 @@ export default function Footer() {
     <footer className="w-full py-6 mt-12">
       <div className="container mx-auto flex justify-center items-center px-6">
         <div className="flex items-center gap-4">
-          <span className="text-sm">Version {version}</span>
+          <span className="text-sm">Version {pjson.version}</span>
           <a
             href={'https://github.com/crwntec/db-live-monitor'}
             target="_blank"

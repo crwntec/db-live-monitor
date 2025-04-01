@@ -7,7 +7,6 @@ import { getDelayColor } from "@/util/colors";
 import { cn, getTimeJourney } from "@/util";
 import { Stop } from "@/types/journey";
 
-
 export default function StopsContainer({ stops }: { stops: Stop[] }) {
   const [progress, setProgress] = useState(0);
   const [heigthProgress, setHeightProgress] = useState(0);
@@ -17,47 +16,59 @@ export default function StopsContainer({ stops }: { stops: Stop[] }) {
   const calculateAndSetProgress = () => {
     if (stops.length < 2) return 0;
 
-  const firstStop = stops[0];
-  const lastStop = stops[stops.length - 1];
+    const firstStop = stops[0];
+    const lastStop = stops[stops.length - 1];
 
-  const startTime = moment(getTimeJourney(firstStop, true)).valueOf();
-  const endTime = moment(getTimeJourney(lastStop, true)).valueOf();
-  const now = currentTime.valueOf();
+    const startTime = moment(getTimeJourney(firstStop, true)).valueOf();
+    const endTime = moment(getTimeJourney(lastStop, true)).valueOf();
+    const now = currentTime.valueOf();
 
-  if (now <= startTime) return 0;
-  if (now >= endTime) return 100;
-
-  // Find the last completed stop and next stop
-  let prevStop = firstStop;
-  let nextStop = lastStop;
-  let prevStopIndex = 0;
-  let nextStopIndex = 0;
-  for (let i = 1; i < stops.length; i++) {
-    const stopTime = moment(getTimeJourney(stops[i], true)).valueOf();
-    if (stopTime > now) {
-      nextStop = stops[i];
-      nextStopIndex = i;
-      break;
+    if (now <= startTime) {
+      setProgress(0);
+      return;
     }
-    prevStop = stops[i];
-    prevStopIndex = i;
-  }
+    if (now >= endTime) {
+      setProgress(100);
+      setHeightProgress(100);
+      return;
+    }
 
-  const prevTime = moment(getTimeJourney(prevStop, true)).valueOf();
-  const nextTime = moment(getTimeJourney(nextStop, true)).valueOf();
+    // Find the last completed stop and next stop
+    let prevStop = firstStop;
+    let nextStop = lastStop;
+    let prevStopIndex = 0;
+    let nextStopIndex = 0;
+    for (let i = 1; i < stops.length; i++) {
+      const stopTime = moment(getTimeJourney(stops[i], true)).valueOf();
+      if (stopTime > now) {
+        nextStop = stops[i];
+        nextStopIndex = i;
+        break;
+      }
+      prevStop = stops[i];
+      prevStopIndex = i;
+    }
 
-  // Linear interpolation between the two stops
-  const segmentProgress = (now - prevTime) / (nextTime - prevTime);
+    const prevTime = moment(getTimeJourney(prevStop, true)).valueOf();
+    const nextTime = moment(getTimeJourney(nextStop, true)).valueOf();
 
-  // Determine overall progress based on time
-  const overallProgress =
-    ((prevTime - startTime) / (endTime - startTime)) * 100 +
-    segmentProgress * ((nextTime - prevTime) / (endTime - startTime)) * 100;
+    // Linear interpolation between the two stops
+    const segmentProgress = (now - prevTime) / (nextTime - prevTime);
 
-  const stopPositions = stops.map((_,index) =>(index/(stops.length - 1)*100));
-  setHeightProgress(stopPositions[prevStopIndex] + (segmentProgress * (stopPositions[nextStopIndex] - stopPositions[prevStopIndex])));
+    // Determine overall progress based on time
+    const overallProgress =
+      ((prevTime - startTime) / (endTime - startTime)) * 100 +
+      segmentProgress * ((nextTime - prevTime) / (endTime - startTime)) * 100;
 
-  setProgress(overallProgress)
+    const stopPositions = stops.map(
+      (_, index) => (index / (stops.length - 1)) * 100
+    );
+    setHeightProgress(
+      stopPositions[prevStopIndex] +
+        segmentProgress *
+          (stopPositions[nextStopIndex] - stopPositions[prevStopIndex])
+    );
+    setProgress(overallProgress);
   };
 
   useEffect(() => {
@@ -72,7 +83,6 @@ export default function StopsContainer({ stops }: { stops: Stop[] }) {
   useEffect(() => {
     calculateAndSetProgress();
   }, [currentTime, stops]);
-
 
   const isCurrentStop = (stop: Stop, index: number) => {
     const arrivalTime = moment(

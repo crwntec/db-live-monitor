@@ -1,14 +1,23 @@
-import { getJourney } from "@/app/api/journey";
+import { getJourneyFromJID } from "@/app/api/journey";
 import Journey from "./Journey";
 
-export default async function Page({ params, searchParams } : { params: Promise<{ slug: string }>, searchParams: Promise<{ referringEva: string }> }) {
+export default async function Page({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ slug: string }>;
+  searchParams: Promise<{ referringEva: string }>;
+}) {
   const { slug } = await params;
 
-  const dataPromise = getJourney(slug);
+  const dataPromise = getJourneyFromJID(slug);
 
   return (
     <div>
-      <Journey dataPromise={dataPromise} referringEva={(await searchParams)['referringEva']} />
+      <Journey
+        dataPromise={dataPromise}
+        referringEva={(await searchParams)["referringEva"]}
+      />
     </div>
   );
 }
