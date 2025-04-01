@@ -1,6 +1,6 @@
 {
   "name": "dbm",
-  "version": "7.5.2",
+  "version": "7.6.2",
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",

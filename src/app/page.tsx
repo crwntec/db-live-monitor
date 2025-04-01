@@ -58,9 +58,7 @@ export default function Home() {
   useEffect(() => {
     const handleKeydown = (e: KeyboardEvent) => {
       if (e.key === "ArrowDown" && stations.length > 0) {
-        setSelectedIndex(
-          (prevIndex) => (prevIndex + 1) % stations.length
-        );
+        setSelectedIndex((prevIndex) => (prevIndex + 1) % stations.length);
       }
       if (e.key === "ArrowUp" && stations.length > 0) {
         setSelectedIndex(
@@ -86,31 +84,31 @@ export default function Home() {
   };
 
   return (
-    <main className="min-h-screen p-8 flex flex-col justify-between items-center bg-gray-100 dark:bg-gray-900">
+    <main className="min-h-screen px-4 py-6 flex flex-col justify-between items-center bg-gray-100 dark:bg-gray-900">
       {isPending && (
-        <div className="absolute inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50 z-50">
+        <div className="fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50 z-50">
           <Spinner size="lg" />
         </div>
       )}
 
-      <div className="max-w-2xl w-full flex flex-col items-center text-center">
+      <div className="max-w-lg w-full flex flex-col items-center text-center">
         {/* Logo */}
-        <div className="flex items-center">
+        <div className="flex flex-col items-center mb-4">
           <Image
             src="/icons/icon-512.png"
             alt="DB Live Monitor Logo"
-            width={100}
-            height={100}
-            className="mb-4 pr-4"
+            width={80}
+            height={80}
           />
-          <h1 className="sm:text-4xl text-2xl font-bold mb-6 text-gray-800 dark:text-white">
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-800 dark:text-white mt-2">
             DB Live Monitor
           </h1>
         </div>
-        <p className="md:text-lg text-base text-gray-600 dark:text-gray-300 mb-6">
+        <p className="text-sm sm:text-base text-gray-600 dark:text-gray-300 mb-4">
           Unofficial Live Departure Monitor for German Railway Stations
         </p>
 
+        {/* Search Box */}
         <div className="relative w-full">
           <div className="relative flex items-center">
             <Search
@@ -121,8 +119,8 @@ export default function Home() {
               type="text"
               value={searchQuery}
               onChange={handleInputChange}
-              placeholder="Enter station name..."
-              className="w-full p-4 pl-12 border rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-800"
+              placeholder="Enter station or train number..."
+              className="w-full p-3 pl-12 text-sm border rounded-lg focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-800"
             />
             {inputLoading && (
               <div className="absolute inset-y-0 right-3 flex items-center">
@@ -132,20 +130,20 @@ export default function Home() {
           </div>
         </div>
 
+        {/* Stations Results */}
         {stations.length > 0 && (
           <motion.div
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.3 }}
-            className="mt-3 border-gray-500 rounded-lg shadow-lg bg-white dark:bg-gray-800 w-full"
+            className="mt-3 w-full border-gray-500 rounded-lg shadow-md bg-white dark:bg-gray-800"
           >
             {stations.map((station, index) => (
               <motion.button
                 key={station.eva}
                 onClick={() => handleStationClick(station.eva)}
-                whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
-                className={`w-full p-4 rounded-md flex items-center space-x-3 text-left hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors border-b last:border-b-0 dark:border-gray-700 dark:text-white ${
+                className={`w-full p-3 flex items-center space-x-3 text-left hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors border-b last:border-b-0 dark:text-white ${
                   selectedIndex === index ? "bg-gray-200 dark:bg-gray-600" : ""
                 }`}
               >
@@ -155,31 +153,31 @@ export default function Home() {
             ))}
           </motion.div>
         )}
+
+        {/* Trips Results */}
         {trips.length > 0 && (
           <motion.div
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.3 }}
-            className="mt-3 border-gray-500 rounded-lg shadow-lg bg-white dark:bg-gray-800 w-full"
+            className="mt-3 w-full border-gray-500 rounded-lg shadow-md bg-white dark:bg-gray-800"
           >
             {trips.map((trip, index) => (
               <motion.button
                 key={trip.id}
                 onClick={() => handleTripClick(trip)}
-                whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
-                className={`w-full p-4 flex items-center space-x-3 text-left hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors border-b last:border-b-0 dark:border-gray-700 dark:text-white ${
+                className={`w-full p-3 flex items-center space-x-3 text-left hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors border-b last:border-b-0 dark:text-white ${
                   selectedIndex === index ? "bg-gray-200 dark:bg-gray-600" : ""
                 }`}
               >
-                <TrainFront className="text-red-500" size={20} />
+                <TrainFront className="text-blue-500" size={20} />
                 <span>{trip.line?.name || "Unknown Train"}</span>
-                <span className="ml-auto text-sm text-gray-500 dark:text-gray-400 flex items-center">
-                  {" "}
+                <span className="text-xs sm:text-sm sm:ml-auto text-gray-500 dark:text-gray-400 flex items-center">
                   {trip.origin?.name} <ArrowRight size={12} />{" "}
                   {trip.destination?.name}
                 </span>
-                <span className="ml-auto text-sm text-gray-500 dark:text-gray-400">
+                <span className="ml-auto text-xs hidden sm:text-sm sm:block text-gray-500 dark:text-gray-400">
                   {moment(trip.plannedDeparture).format("HH:mm")}
                 </span>
               </motion.button>
@@ -187,7 +185,6 @@ export default function Home() {
           </motion.div>
         )}
       </div>
-
       <Footer />
     </main>
   );
