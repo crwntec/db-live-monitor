@@ -1,26 +1,45 @@
-import axios from "axios"
-import config from "./base.json"
+import axios from "axios";
+import config from "./base.json";
+import { WebAPIResult } from "@/types/timetable";
 
-export const departures = (stationEva: string, timeFrame: { start: string, end: string }) => {
-    return axios.get(config["base-url"] + "board/departure/" + stationEva, {
-        params: {
-            modeOfTransport: "HIGH_SPEED_TRAIN,REGIONAL_TRAIN,CITY_TRAIN,INTER_REGIONAL_TRAIN,INTERCITY_TRAIN",
-            occupancy: true,
-            timeStart: timeFrame.start,
-            timeEnd: timeFrame.end,
-            expandTimeFrame: "TIME_END",
-        }
-    }).then((response) => response.data);
-}
+type TimeFrame = { start: string; end: string };
 
-export const arrivals = (stationEva: string, timeFrame: { start: string, end: string }) => {
-    return axios.get(config["base-url"] + "board/arrival/" + stationEva, {
-        params: {
-            modeOfTransport: "HIGH_SPEED_TRAIN,REGIONAL_TRAIN,CITY_TRAIN,INTER_REGIONAL_TRAIN,INTERCITY_TRAIN",
-            occupancy: true,
-            timeStart: timeFrame.start,
-            timeEnd: timeFrame.end,
-            expandTimeFrame: "TIME_END",
-        }
-    }).then((response) => response.data);
-}
+type ApiResponse = Promise<WebAPIResult>;
+
+const BASE_URL = config["base-url"];
+const COMMON_PARAMS = {
+  modeOfTransport:
+    "HIGH_SPEED_TRAIN,REGIONAL_TRAIN,CITY_TRAIN,INTER_REGIONAL_TRAIN,INTERCITY_TRAIN",
+  occupancy: true,
+  expandTimeFrame: "TIME_END",
+};
+
+const fetchBoardData = async (
+  type: "departure" | "arrival",
+  stationEva: string,
+  timeFrame: TimeFrame
+): ApiResponse => {
+  try {
+    const response = await axios.get(`${BASE_URL}board/${type}/${stationEva}`, {
+      params: {
+        ...COMMON_PARAMS,
+        timeStart: timeFrame.start,
+        timeEnd: timeFrame.end,
+      },
+    });
+    return response.data;
+  } catch (error) {
+    console.error(`Error fetching ${type} data:`, error);
+    throw error;
+  }
+};
+
+export const departures = (
+  stationEva: string,
+  timeFrame: TimeFrame
+): ApiResponse => fetchBoardData("departure", stationEva, timeFrame);
+
+export const arrivals = (
+  stationEva: string,
+  timeFrame: TimeFrame
+): ApiResponse => fetchBoardData("arrival", stationEva, timeFrame);

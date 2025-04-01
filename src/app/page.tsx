@@ -7,13 +7,17 @@ import { useRouter } from "next/navigation";
 import { Spinner } from "flowbite-react";
 import Footer from "@/components/Footer";
 import Image from "next/image";
-import { Search, MapPin } from "lucide-react";
+import { Search, MapPin, TrainFront, ArrowRight } from "lucide-react";
 import { motion } from "framer-motion";
+import { Trip } from "hafas-client";
+import moment from "moment-timezone";
+import { getJourneyId } from "@/app/api/journey";
 
 export default function Home() {
   const [searchQuery, setSearchQuery] = useState("");
   const [stations, setStations] = useState<Station[]>([]);
-  const [selectedStationIndex, setSelectedStationIndex] = useState<number>(-1);
+  const [trips, setTrips] = useState<Trip[]>([]);
+  const [selectedIndex, setSelectedIndex] = useState<number>(-1);
   const [isPending, startTransition] = useTransition();
   const [inputLoading, setInputLoading] = useState(false);
 
@@ -22,6 +26,7 @@ export default function Home() {
   useEffect(() => {
     if (searchQuery.length < 2) {
       setStations([]);
+      setTrips([]);
       return;
     }
 
@@ -29,13 +34,19 @@ export default function Home() {
     const delayDebounce = setTimeout(async () => {
       try {
         const response = await autoCompleteStation(searchQuery);
-        setStations(response);
+        if (response.isTrips) {
+          setTrips(response.possibleTrips || []);
+          setStations([]);
+        } else {
+          setStations(response.possibleStations || []);
+          setTrips([]);
+        }
       } catch (error) {
         console.error("Error fetching stations:", error);
       } finally {
         setInputLoading(false);
       }
-    }, 300);
+    }, 600);
 
     return () => clearTimeout(delayDebounce);
   }, [searchQuery]);
@@ -47,26 +58,31 @@ export default function Home() {
   useEffect(() => {
     const handleKeydown = (e: KeyboardEvent) => {
       if (e.key === "ArrowDown" && stations.length > 0) {
-        setSelectedStationIndex(
+        setSelectedIndex(
           (prevIndex) => (prevIndex + 1) % stations.length
         );
       }
       if (e.key === "ArrowUp" && stations.length > 0) {
-        setSelectedStationIndex(
+        setSelectedIndex(
           (prevIndex) => (prevIndex - 1 + stations.length) % stations.length
         );
       }
       if (e.key === "Enter" && stations.length > 0) {
-        handleStationClick(stations[selectedStationIndex].eva);
+        handleStationClick(stations[selectedIndex].eva);
       }
     };
 
     window.addEventListener("keydown", handleKeydown);
     return () => window.removeEventListener("keydown", handleKeydown);
-  }, [stations, selectedStationIndex]);
+  }, [stations, selectedIndex]);
 
   const handleStationClick = (eva: number) => {
     startTransition(() => router.push(`/board/${eva}`));
+  };
+
+  const handleTripClick = async (trip: Trip) => {
+    const jid = await getJourneyId(trip);
+    startTransition(() => router.push(`/journey/${jid}`));
   };
 
   return (
@@ -130,13 +146,42 @@ export default function Home() {
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 className={`w-full p-4 rounded-md flex items-center space-x-3 text-left hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors border-b last:border-b-0 dark:border-gray-700 dark:text-white ${
-                  selectedStationIndex === index
-                    ? "bg-gray-200 dark:bg-gray-600"
-                    : ""
+                  selectedIndex === index ? "bg-gray-200 dark:bg-gray-600" : ""
                 }`}
               >
                 <MapPin className="text-blue-500" size={20} />
                 <span>{station.name}</span>
+              </motion.button>
+            ))}
+          </motion.div>
+        )}
+        {trips.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3 }}
+            className="mt-3 border-gray-500 rounded-lg shadow-lg bg-white dark:bg-gray-800 w-full"
+          >
+            {trips.map((trip, index) => (
+              <motion.button
+                key={trip.id}
+                onClick={() => handleTripClick(trip)}
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                className={`w-full p-4 flex items-center space-x-3 text-left hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors border-b last:border-b-0 dark:border-gray-700 dark:text-white ${
+                  selectedIndex === index ? "bg-gray-200 dark:bg-gray-600" : ""
+                }`}
+              >
+                <TrainFront className="text-red-500" size={20} />
+                <span>{trip.line?.name || "Unknown Train"}</span>
+                <span className="ml-auto text-sm text-gray-500 dark:text-gray-400 flex items-center">
+                  {" "}
+                  {trip.origin?.name} <ArrowRight size={12} />{" "}
+                  {trip.destination?.name}
+                </span>
+                <span className="ml-auto text-sm text-gray-500 dark:text-gray-400">
+                  {moment(trip.plannedDeparture).format("HH:mm")}
+                </span>
               </motion.button>
             ))}
           </motion.div>
