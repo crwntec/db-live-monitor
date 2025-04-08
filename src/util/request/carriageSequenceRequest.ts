@@ -31,7 +31,7 @@ export const getCarriageSequence = async ({
     const response = await axios.request(config);
     return response.data;
   } catch (error: AxiosError | unknown) {
-    if (axios.isAxiosError(error) && (error.response?.status == 500 || error.response?.status == 404) {
+    if (axios.isAxiosError(error) && (error.response?.status == 500 || error.response?.status == 404)) {
       return null;
     }
     console.error("Error fetching carriage sequence:", error);
