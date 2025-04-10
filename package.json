@@ -18,7 +18,7 @@
     "hafas-client": "^6.3.5",
     "lucide-react": "^0.477.0",
     "moment-timezone": "^0.5.47",
-    "next": "^15.2.3",
+    "next": "^15.2.4",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "uuid": "^11.0.5",
