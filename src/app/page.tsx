@@ -143,7 +143,7 @@ export default function Home() {
                 key={station.eva}
                 onClick={() => handleStationClick(station.eva)}
                 whileTap={{ scale: 0.98 }}
-                className={`w-full p-3 flex items-center space-x-3 text-left hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors border-b last:border-b-0 dark:text-white ${
+                className={`w-full p-3 flex items-center space-x-3 text-left hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors border-b border-gray-700 last:border-b-0 dark:text-white ${
                   selectedIndex === index ? "bg-gray-200 dark:bg-gray-600" : ""
                 }`}
               >
@@ -167,19 +167,27 @@ export default function Home() {
                 key={trip.id}
                 onClick={() => handleTripClick(trip)}
                 whileTap={{ scale: 0.98 }}
-                className={`w-full p-3 flex items-center space-x-3 text-left hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors border-b last:border-b-0 dark:text-white ${
+                className={`w-full p-3 text-left hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors border-b border-gray-700 last:border-b-0 dark:text-white ${
                   selectedIndex === index ? "bg-gray-200 dark:bg-gray-600" : ""
                 }`}
               >
-                <TrainFront className="text-blue-500" size={20} />
-                <span>{trip.line?.name || "Unknown Train"}</span>
-                <span className="text-xs sm:text-sm sm:ml-auto text-gray-500 dark:text-gray-400 flex items-center">
-                  {trip.origin?.name} <ArrowRight size={12} />{" "}
-                  {trip.destination?.name}
-                </span>
-                <span className="ml-auto text-xs hidden sm:text-sm sm:block text-gray-500 dark:text-gray-400">
-                  {moment(trip.plannedDeparture).format("HH:mm")}
-                </span>
+                <div className="flex flex-col gap-1">
+                  <div className="flex justify-between items-center">
+                    <div className="flex items-center">
+                      <TrainFront className="text-blue-500 mr-2" size={20} />
+                      <span>{trip.line?.name || "Unknown Train"}</span>
+                    </div>
+                    <div className="text-sm text-gray-500 dark:text-gray-400">
+                      {moment(trip.plannedDeparture).format("HH:mm")}
+                    </div>
+                  </div>
+
+                  <div className="w-full text-xs sm:text-sm text-gray-500 dark:text-gray-400 flex items-center">
+                    {trip.origin?.name}
+                    <ArrowRight className="mx-1" size={12} />
+                    {trip.destination?.name}
+                  </div>
+                </div>
               </motion.button>
             ))}
           </motion.div>
