@@ -1,6 +1,6 @@
 {
   "name": "dbm",
-  "version": "7.5.3",
+  "version": "7.6.2",
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",
@@ -15,6 +15,7 @@
     "dotenv": "^16.4.7",
     "flowbite-react": "^0.10.2",
     "framer-motion": "^12.5.0",
+    "hafas-client": "^6.3.5",
     "lucide-react": "^0.477.0",
     "moment-timezone": "^0.5.47",
     "next": "^15.2.4",
@@ -25,10 +26,10 @@
   },
   "devDependencies": {
     "@types/db-hafas-stations-autocomplete": "^2.0.2",
+    "@types/hafas-client": "^6.3.0",
+    "@types/jsdom": "^21.1.7",
     "@types/node": "22.13.9",
     "@types/react": "19.0.10",
-    "eslint": "9.23.0",
-    "eslint-config-next": "15.2.3",
     "postcss": "^8",
     "tailwindcss": "^3.4.1",
     "typescript": "^5.8.2"
