@@ -1,6 +1,7 @@
 import { createClient, HafasClient, Trip } from "hafas-client";
 import { profile } from "hafas-client/p/oebb/index";
 import { stationBoard } from "../db-web-api";
+import moment from "moment-timezone";
 
 // In-memory cache (simple key-value store)
 const tripCache = new Map<string, Promise<Trip[]>>();
@@ -27,8 +28,8 @@ export const findTrips = async (
 
   const tripPromise = hafasClient
     .tripsByName(query, {
-      fromWhen: new Date(new Date().setHours(0, 0, 0, 0)), // Midnight today
-      untilWhen: new Date(new Date().setDate(new Date().getDate() + 1)), // Until tomorrow
+      fromWhen: moment().tz("Europe/Berlin").startOf("day").toDate(), // Midnight today
+      untilWhen: moment().tz("Europe/Berlin").endOf("day").toDate(),
       products: {
         suburban: true,
         subway: false,
