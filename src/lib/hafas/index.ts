@@ -29,8 +29,8 @@ export const findTrips = async (
 
   const tripPromise = hafasClient
     .tripsByName(query, {
-      fromWhen: date || moment().tz("Europe/Berlin").startOf("day").toDate(),
-      untilWhen: date || moment().tz("Europe/Berlin").endOf("day").toDate(),
+      fromWhen: moment(date).tz("Europe/Berlin").toDate() || moment().tz("Europe/Berlin").startOf("day").toDate(),
+      untilWhen: moment(date).tz("Europe/Berlin").toDate() || moment().tz("Europe/Berlin").endOf("day").toDate(),
       products: {
         suburban: true,
         subway: false,
