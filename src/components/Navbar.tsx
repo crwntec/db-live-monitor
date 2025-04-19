@@ -21,7 +21,7 @@ export default function Navbar({ title, referring }: {
         </div>
       )}
 
-      <nav className="flex items-center justify-between px-4 py-3 h-16 bg-blue-500 sticky top-0 z-50">
+      <nav className="flex items-center justify-between px-4 py-3 h-16 bg-blue-500 top-0 z-50">
         <h1
           className="text-2xl font-bold text-white cursor-pointer transition-opacity hover:opacity-80"
           onClick={() => startTransition(() => router.push(referring))}

@@ -1,6 +1,6 @@
 {
   "name": "dbm",
-  "version": "7.6.2",
+  "version": "7.7.1",
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",
@@ -16,7 +16,9 @@
     "flowbite-react": "^0.10.2",
     "framer-motion": "^12.5.0",
     "hafas-client": "^6.3.5",
+    "leaflet-defaulticon-compatibility": "^0.1.2",
     "lucide-react": "^0.477.0",
+    "maplibre-gl": "^5.3.1",
     "moment-timezone": "^0.5.47",
     "next": "^15.2.4",
     "react": "^19.0.0",
@@ -28,6 +30,7 @@
     "@types/db-hafas-stations-autocomplete": "^2.0.2",
     "@types/hafas-client": "^6.3.0",
     "@types/jsdom": "^21.1.7",
+    "@types/leaflet": "^1.9.17",
     "@types/node": "22.13.9",
     "@types/react": "19.0.10",
     "postcss": "^8",
