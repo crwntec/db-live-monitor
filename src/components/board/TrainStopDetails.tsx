@@ -4,11 +4,11 @@ import { useTransition } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { Spinner } from "flowbite-react";
 
-import StopMessageContainer from "./StopMessageContainer";
+import MessageContainer from "./MessageContainer";
 import LineContainer from "./LineContainer";
 import TimeContainer from "./TimeContainer";
-import StopPathContainer from "./StopPathContainer";
-import WingIndicator from "./TrainWingIndicator";
+import PathContainer from "./PathContainer";
+import WingIndicator from "./WingIndicator";
 
 import { Stop, StopTime, WebAPITrain } from "@/types/timetable";
 
@@ -72,11 +72,11 @@ export default function TrainStopDetails({
     <div className="flex flex-col gap-2 px-3 py-2 relative">
       {stop.delayMessages?.length === 0 &&
         stop.qualityChanges?.length === 0 && (
-          <StopPathContainer
+          <PathContainer
             path={stop.departure?.path ?? stop.arrival?.path ?? []}
           />
         )}
-      <StopMessageContainer stop={stop} />
+      <MessageContainer stop={stop} />
       <button
         onClick={handleStopSelect}
         className="hover:cursor-pointer flex items-center justify-between w-full p-2 rounded-md transition-colors"

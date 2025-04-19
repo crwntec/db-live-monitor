@@ -21,7 +21,7 @@ export const getJourneyFromJID = async (
   const hafasClient = createHafas();
   const possibleTrips = await findTrips(journey.no.toString(), hafasClient, 1, [
     "80",
-  ], journey.date,);
+  ], journey.date);
   const trip = await tripInfo(possibleTrips[0].id, hafasClient);
   const carriageSequence = await getCarriageSequence({
     category: journey.name.includes("ICE") ? "ICE" : "IC",

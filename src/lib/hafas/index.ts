@@ -29,8 +29,8 @@ export const findTrips = async (
 
   const tripPromise = hafasClient
     .tripsByName(query, {
-      fromWhen: moment(date).tz("Europe/Berlin").toDate() || moment().tz("Europe/Berlin").startOf("day").toDate(),
-      untilWhen: moment(date).tz("Europe/Berlin").toDate() || moment().tz("Europe/Berlin").endOf("day").toDate(),
+      fromWhen: moment(date).subtract(1, "seconds").tz("Europe/Berlin").toDate() || moment().tz("Europe/Berlin").startOf("day").toDate(),
+      untilWhen: moment(date).add(1, "seconds").tz("Europe/Berlin").toDate() || moment().tz("Europe/Berlin").endOf("day").toDate(),
       products: {
         suburban: true,
         subway: false,
@@ -57,7 +57,7 @@ export const findTrips = async (
         })
         .slice(0, limit);
       return filteredTrips;
-    });
+    })
 
   tripCache.set(cacheKey, tripPromise);
   return tripPromise;
