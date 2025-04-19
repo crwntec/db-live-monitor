@@ -24,49 +24,56 @@ export default function StopBase({
   index: number;
 }) {
   const [isPending, startTransition] = useTransition();
-  const isWinged = stopGroup.length > 1;
-  const hasWingInfo = stop.wing != null;
-
   const pathname = usePathname();
   const router = useRouter();
 
+  const isWinged = stopGroup.length > 1;
+  const hasWingInfo = stop.wing != null;
   const wing = isWinged ? stopGroup[index === 0 ? 1 : 0] : null;
 
   const constructName = (train: WebAPITrain) =>
     train ? `${train.category} ${train.lineName} (${train.no})` : "";
 
   const handleStopSelect = () => {
+    if (!stop.train.journeyId) return;
+
+    const params = new URLSearchParams({
+      referringEva: pathname.split("/")[2] ?? "",
+    });
+
+    if (wing) {
+      params.set("wingId", wing.train.journeyId ?? "");
+
+      if (isWinged) {
+        const start = hasWingInfo
+          ? stop.wing?.start.station
+          : wing?.wing?.start.station;
+        const end = hasWingInfo
+          ? stop.wing?.end.station
+          : wing?.wing?.end.station;
+
+        if (start) params.set("wingStart", start);
+        if (end) params.set("wingDest", end);
+        params.set("wingName", constructName(wing.train));
+      }
+    }
+
     startTransition(() => {
-      router.push(
-        stop.train.journeyId
-          ? `/journey/${stop.train.journeyId}?referringEva=${
-              pathname.split("/")[2]
-            }&wingId=${wing?.train.journeyId || ""}${
-              isWinged
-                ? `&wingStart=${
-                    hasWingInfo
-                      ? stop.wing?.start.station
-                      : wing?.wing?.start.station
-                  }&wingDest=${
-                    hasWingInfo
-                      ? stop.wing?.end.station
-                      : wing?.wing?.end.station
-                  }`
-                : ""
-            }&wingName=${wing ? constructName(wing.train) : ""}`
-          : "#"
-      );
+      router.push(`/journey/${stop.train.journeyId}?${params.toString()}`);
     });
   };
+
+  const stopTime =
+    (stop.departure && stop.departure.destination
+      ? stop.departure
+      : stop.arrival) as StopTime;
 
   return (
     <div className="flex flex-col gap-2 px-3 py-2 relative">
       {stop.delayMessages?.length === 0 &&
         stop.qualityChanges?.length === 0 && (
           <PathContainer
-            path={
-              stop.departure ? stop.departure.path : stop.arrival?.path || []
-            }
+            path={stop.departure?.path ?? stop.arrival?.path ?? []}
           />
         )}
       <MessageContainer stop={stop} />
@@ -94,14 +101,7 @@ export default function StopBase({
         </div>
         <div className="flex flex-col md:flex-row lg:flex-col gap-2">
           <div className="flex items-center justify-between w-full">
-            <TimeContainer
-              time={
-                (stop.departure && stop.departure.destination
-                  ? stop.departure
-                  : stop.arrival) as StopTime
-              }
-              canceled={stop.canceled}
-            />
+            <TimeContainer time={stopTime} canceled={stop.canceled} />
             <div className="flex justify-end gap-1 w-14">
               <span
                 className={`${
@@ -120,7 +120,6 @@ export default function StopBase({
         </div>
       </button>
 
-      {/* Inline Loader on Button */}
       {isPending && (
         <div className="absolute inset-0 flex items-center justify-center bg-white/80 dark:bg-black/50 z-10 rounded-md">
           <Spinner size="sm" />

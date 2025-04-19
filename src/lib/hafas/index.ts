@@ -14,7 +14,8 @@ export const findTrips = async (
   query: string,
   hafasClient: HafasClient,
   limit: number,
-  allowedEVAPrefixes: string[]
+  allowedEVAPrefixes: string[],
+  date?: Date
 ): Promise<Trip[]> => {
   const cacheKey = `${query}-${allowedEVAPrefixes.join(",")}`;
 
@@ -28,8 +29,8 @@ export const findTrips = async (
 
   const tripPromise = hafasClient
     .tripsByName(query, {
-      fromWhen: moment().tz("Europe/Berlin").startOf("day").toDate(), // Midnight today
-      untilWhen: moment().tz("Europe/Berlin").endOf("day").toDate(),
+      fromWhen: date || moment().tz("Europe/Berlin").startOf("day").toDate(),
+      untilWhen: date || moment().tz("Europe/Berlin").endOf("day").toDate(),
       products: {
         suburban: true,
         subway: false,

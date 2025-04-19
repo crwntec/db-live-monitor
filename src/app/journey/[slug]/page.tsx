@@ -13,11 +13,11 @@ export default async function Page({
   const dataPromise = getJourneyFromJID(slug);
 
   return (
-    <div>
+    <>
       <Journey
         dataPromise={dataPromise}
         referringEva={(await searchParams)["referringEva"]}
       />
-    </div>
+    </>
   );
 }
