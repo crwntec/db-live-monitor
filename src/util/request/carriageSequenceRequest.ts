@@ -1,5 +1,5 @@
 import { CarriageSequenceT } from "@/types/carriageSequence";
-import axios, { AxiosError } from "axios";
+import axios from "axios"; 
 
 export const getCarriageSequence = async ({
   category,
@@ -13,7 +13,7 @@ export const getCarriageSequence = async ({
   evaNumber: string;
   number: number;
   time: Date;
-}) : Promise<CarriageSequenceT | null> => {
+}): Promise<CarriageSequenceT | null> => {
   const config = {
     method: "get",
     maxBodyLength: Infinity,
@@ -30,8 +30,11 @@ export const getCarriageSequence = async ({
   try {
     const response = await axios.request(config);
     return response.data;
-  } catch (error: AxiosError | unknown) {
-    if (axios.isAxiosError(error) && (error.response?.status == 500 || error.response?.status == 404)) {
+  } catch (error) {
+    if (
+      axios.isAxiosError(error) &&
+      (error.response?.status === 500 || error.response?.status === 404)
+    ) {
       return null;
     }
     console.error("Error fetching carriage sequence:", error);
