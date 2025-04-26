@@ -81,7 +81,7 @@ export default function CarriageSequence({ carriageSequence }:{ carriageSequence
                     <div className="flex items-center gap-2">
                       <MapPin size={14} strokeWidth={3} />
                       <strong className="md:block hidden">Sektor:</strong>{" "}
-                      {vehicle.platformPosition.sector || "N/A"}
+                      {vehicle.platformPosition?.sector || "N/A"}
                     </div>
                     <div className="flex items-center gap-2">
                       <ArrowLeftRight size={14} strokeWidth={3} />
