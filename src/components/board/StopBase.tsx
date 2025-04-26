@@ -34,6 +34,7 @@ export default function StopBase({
   const constructName = (train: WebAPITrain) =>
     train ? `${train.category} ${train.lineName} (${train.no})` : "";
 
+
   const handleStopSelect = () => {
     if (!stop.train.journeyId) return;
 
@@ -89,14 +90,14 @@ export default function StopBase({
               stop.canceled ? "line-through text-red-800" : ""
             } ${
               (stop.departure?.path && !stop.departure?.destination) ||
-              stop.isEarlyTerminated
+              (stop.isEarlyTerminated || stop.departure?.destination.canceled)
                 ? "text-red-500"
                 : ""
             } text-sm md:text-base`}
           >
             {stop.departure?.destination
-              ? `Nach ${stop.departure.destination.name}`
-              : `Von ${stop.arrival?.origin.name}`}
+              ? `Nach ${stop.departure.destination.canceled ? stop.departure.path.filter(stop => !stop.canceled).at(-1)?.name : stop.departure.destination.name}`
+              : `Von ${stop.arrival?.origin.canceled ? stop.arrival.path.filter(stop => !stop.canceled).at(-1)?.name : stop.arrival?.origin.name}`}
           </span>
         </div>
         <div className="flex flex-col md:flex-row lg:flex-col gap-2">

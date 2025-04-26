@@ -1,13 +1,25 @@
 import { IrisPathItem } from "@/types/iris";
 
 export default function PathContainer({ path }: { path: IrisPathItem[] }) {
-  if (!path || !Array.isArray(path)) return null;
+  if (!path?.length) return null;
 
-  const relevantStops = [...path]
-    .sort((a, b) => b.relevance - a.relevance) // Sort in descending order by relevance
-    .slice(0, 3) // Limit to top 3 items
-    .map(stop => stop.name) // Extract only names
-    .join(" • "); // Join names with " • "
+  const canceledStops = path.filter(stop => stop.canceled);
 
-  return <div className="text-xs sm:text-md text-gray-400">{relevantStops}</div>;
+  const content = canceledStops.length > 0
+    ? `Ohne Halt in: ${canceledStops.map(stop => stop.name).join(", ")}`
+    : [...path]
+        .sort((a, b) => b.relevance - a.relevance)
+        .slice(0, 3)
+        .map(stop => stop.name)
+        .join(" • ");
+
+  return (
+    <div
+      className={`text-xs sm:text-sm ${
+        canceledStops.length > 0 ? "font-semibold text-red-500" : "text-gray-500"
+      }`}
+    >
+      {content}
+    </div>
+  );
 }

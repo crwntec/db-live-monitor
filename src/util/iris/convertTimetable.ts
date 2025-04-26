@@ -278,19 +278,23 @@ export const convertTimetable = async (
     const arrString = hasArrival ? arrival?.attributes?.pt : "-";
     const depString = hasDeparture ? departure?.attributes?.pt : "-";
 
+    const plannedARPath = hasArrival ? arrival?.attributes?.ppth?.split("|") || [] : [];
+    const currentARPath = newArr?.attributes?.cpth?.split("|") || [];
     const irisArPath = await Promise.all(
-      (hasArrival ? arrival?.attributes?.ppth?.split("|") || [] : []).map(async (item) => ({
+      plannedARPath.map(async (item) => ({
         name: item,
         relevance: await getStationRelevance(item),
+        canceled: !currentARPath.includes(item) && currentARPath.length > 0,
       }))
     );
 
-    const plannedPath = hasDeparture ? departure?.attributes?.ppth?.split("|") || [] : [];
-
+    const plannedDPPath = hasDeparture ? departure?.attributes?.ppth?.split("|") || [] : [];
+    const currentDPPath = newDep?.attributes?.cpth?.split("|") || [];
     const irisDpPath = await Promise.all(
-      (newDep?.attributes?.ppth?.split("|") || plannedPath).map(async (item) => ({
+      plannedDPPath.map(async (item) => ({
         name: item,
         relevance: await getStationRelevance(item),
+        canceled: !currentDPPath.includes(item) && currentDPPath.length > 0,
       }))
     );
 
@@ -356,7 +360,7 @@ export const convertTimetable = async (
       wing,
       from: hasArrival ? irisArPath[0]?.name : dataTimetable.attributes.station,
       to: hasDeparture
-        ? plannedPath[plannedPath.length - 1]
+        ? plannedDPPath[plannedDPPath.length - 1]
         : dataTimetable.attributes.station,
       arrivalPath: irisArPath,
       departurePath: irisDpPath,
