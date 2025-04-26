@@ -1,6 +1,6 @@
 {
   "name": "dbm",
-  "version": "7.7.2",
+  "version": "7.8.1",
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",
@@ -12,6 +12,7 @@
     "axios": "^1.8.2",
     "clsx": "^2.1.1",
     "db-hafas-stations-autocomplete": "^2.0.0",
+    "db-vendo-client": "^6.8.2",
     "dotenv": "^16.4.7",
     "flowbite-react": "^0.10.2",
     "framer-motion": "^12.5.0",

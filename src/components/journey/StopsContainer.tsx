@@ -6,8 +6,19 @@ import moment from "moment";
 import { getDelayColor } from "@/util/colors";
 import { cn, getTimeJourney } from "@/util";
 import { Stop } from "@/types/journey";
+import { getVendoJourney } from "@/app/api/journey";
+import LoadFactor from "./LoadFactor";
+import { Spinner } from "flowbite-react";
 
-export default function StopsContainer({ stops }: { stops: Stop[] }) {
+export default function StopsContainer({
+  stops,
+  risId,
+}: {
+  stops: Stop[];
+  risId: string;
+}) {
+  const [stopsWithVendo, setStopsWithVendo] = useState<Stop[]>(stops);
+  const [vendoLoading, setVendoLoading] = useState(false);
   const [progress, setProgress] = useState(0);
   const [heigthProgress, setHeightProgress] = useState(0);
   const [currentTime, setCurrentTime] = useState(
@@ -83,6 +94,26 @@ export default function StopsContainer({ stops }: { stops: Stop[] }) {
   useEffect(() => {
     calculateAndSetProgress();
   }, [currentTime, stops]);
+
+  useEffect(() => {
+    async function fetchJourney() {
+      setVendoLoading(true);
+      const vendoData = await getVendoJourney(risId);
+      setVendoLoading(false);
+      if (!vendoData) return;
+      setStopsWithVendo((prev) =>
+        prev.map((stop) => {
+          const vendoStop = vendoData.stopovers?.find((vendoStop) => vendoStop.stop?.id == stop.station.evaNo);
+          if (!vendoStop) return stop;
+          return {
+            ...stop,
+            loadFactor: vendoStop.loadFactor
+          };
+        })
+      );
+    }
+    fetchJourney();
+  }, [risId]);
 
   const isCurrentStop = (stop: Stop, index: number) => {
     const arrivalTime = moment(
@@ -177,7 +208,7 @@ export default function StopsContainer({ stops }: { stops: Stop[] }) {
 
         {/* Stops */}
         <div className="space-y-6">
-          {stops.map((stop, index) => {
+          {stopsWithVendo.map((stop, index) => {
             const isCompleted = isCompletedStop(stop, index);
             const isCurrent = isCurrentStop(stop, index);
             const isCanceled = stop.status === "Canceled";
@@ -253,9 +284,15 @@ export default function StopsContainer({ stops }: { stops: Stop[] }) {
                         </p>
                       </div>
                       {/* Track information */}
-                      <p className="whitespace-nowrap">
+                      <div className="whitespace-nowrap flex items-center">
+                        <div className="mr-4">
+                          {vendoLoading && <Spinner size="sm" color="gray" />}
+                          {stop.loadFactor && (
+                            <LoadFactor loadFactor={stop.loadFactor} />
+                          )}
+                        </div>
                         <strong>{stop.track.prediction || "N/A"}</strong>
-                      </p>
+                      </div>
                     </div>
                   </div>
                 </div>

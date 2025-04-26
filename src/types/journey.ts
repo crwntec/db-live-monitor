@@ -43,6 +43,7 @@ export interface Stop {
   departureTime?: Time;
   arrivalId?: string;
   arrivalTime?: Time;
+  loadFactor?: string;
 }
 
 export interface Time {

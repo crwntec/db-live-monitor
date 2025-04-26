@@ -1,4 +1,5 @@
 "use server";
+import { createVendoClient } from "@/lib/db-vendo-client";
 import { getJourneyInfo } from "@/lib/db-web-api";
 // import { findJourneys } from "@/lib/journey-search";
 import {
@@ -43,3 +44,9 @@ export const getJourneyFromJID = async (
 
 export const getJourneyId = async (trip: Trip): Promise<string> =>
   await getJIDFromTrip(trip);
+
+export const getVendoJourney = async (risId: string) => {
+  const vendoClient = createVendoClient();
+  if(!vendoClient.trip) throw new Error("trip is not defined on vendoClient");
+  return (await vendoClient.trip(risId,{})).trip;
+};
