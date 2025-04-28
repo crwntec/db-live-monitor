@@ -5,11 +5,10 @@
       "error",
       { "argsIgnorePattern": "^_", "varsIgnorePattern": "^_" }
     ],
-    "react-hoks/exhaustive-deps": "off",
-    "@typescript-eslint/no-explicit-any": "off"
+    "react-hooks/exhaustive-deps": "off",
     "@typescript-eslint/no-explicit-any": [
-        "error",
-      { "argsIgnorePattern": "^_", "varsIgnorePattern": "^_" }
-    ],
+      "error",
+      { "ignoreRestArgs": true }
+    ]
   }
 }
