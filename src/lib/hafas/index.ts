@@ -18,7 +18,6 @@ export const findTrips = async (
   date?: Date
 ): Promise<Trip[]> => {
   const cacheKey = `${query}-${allowedEVAPrefixes.join(",")}`;
-
   if (tripCache.has(cacheKey)) {
     return tripCache.get(cacheKey)!;
   }
@@ -29,8 +28,8 @@ export const findTrips = async (
 
   const tripPromise = hafasClient
     .tripsByName(query, {
-      fromWhen: moment(date).subtract(1, "seconds").tz("Europe/Berlin").toDate() || moment().tz("Europe/Berlin").startOf("day").toDate(),
-      untilWhen: moment(date).add(1, "seconds").tz("Europe/Berlin").toDate() || moment().tz("Europe/Berlin").endOf("day").toDate(),
+      fromWhen: date ? moment(date).subtract(1, "seconds").tz("Europe/Berlin").toDate() : moment().tz("Europe/Berlin").startOf("day").toDate(),
+      untilWhen: date ? moment(date).add(1, "seconds").tz("Europe/Berlin").toDate() : moment().tz("Europe/Berlin").endOf("day").toDate(),
       products: {
         suburban: true,
         subway: false,
@@ -39,6 +38,7 @@ export const findTrips = async (
         ferry: false,
         regional: true,
         taxi: false,
+        onCall: false
       },
       onlyCurrentlyRunning: false,
     })
@@ -46,6 +46,7 @@ export const findTrips = async (
       const seenLineNames = new Set();
       const filteredTrips = trips.trips
         .filter((trip) => {
+          // console.log(trip)
           if (!trip.line?.fahrtNr) return false;
           if (seenLineNames.has(trip.line.name)) return false;
           seenLineNames.add(trip.line.name);

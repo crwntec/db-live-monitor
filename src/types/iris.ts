@@ -132,6 +132,7 @@ export interface IrisStop {
 export interface IrisPathItem {
   name: string;
   relevance: number;
+  canceled: boolean;
 }
 
 export interface IrisMessage {

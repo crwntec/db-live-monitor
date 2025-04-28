@@ -9,7 +9,13 @@ import {
 } from "lucide-react";
 import { JourneyT } from "@/types/journey";
 
-export default function TrainInfo({ train, referringEva }: { train: JourneyT, referringEva: string}) {
+export default function TrainInfo({
+  train,
+  referringEva,
+}: {
+  train: JourneyT;
+  referringEva: string;
+}) {
   const searchParams = useSearchParams();
   const wingId = searchParams.get("wingId");
   const wingStart = searchParams.get("wingStart");
@@ -47,11 +53,11 @@ export default function TrainInfo({ train, referringEva }: { train: JourneyT, re
 
       {/* Train Messages */}
       {train.hims.length > 0 && (
-        <div className="col-span-1 sm:col-span-2 border-t pt-3 mt-3 w-full">
+        <div className="col-span-1 sm:col-span-2 border-t mt-5 pt-5 w-full flex flex-col items-center gap-4">
           {train.hims.map((him) => (
             <div
-              className="mb-2 flex items-start sm:items-center space-x-2 w-full"
               key={him.id}
+              className="flex items-center gap-3 w-full text-yellow-500"
             >
               <TriangleAlert size={15} />
               <div className="flex-1">
@@ -64,6 +70,20 @@ export default function TrainInfo({ train, referringEva }: { train: JourneyT, re
               </div>
             </div>
           ))}
+        </div>
+      )}
+
+      {/* Canceled Stops */}
+      {train.stops.some((s) => s.status === "Canceled") && (
+        <div className="col-span-1 sm:col-span-2 border-t pt-5 w-full flex items-center gap-3 text-red-500">
+          <TriangleAlert size={15} />
+          <div className="flex-1 text-sm font-bold break-words whitespace-normal">
+            Ohne Halt in{" "}
+            {train.stops
+              .filter((s) => s.status === "Canceled")
+              .map((s) => s.station.name)
+              .join(", ")}
+          </div>
         </div>
       )}
 
