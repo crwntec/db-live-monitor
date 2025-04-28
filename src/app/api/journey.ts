@@ -1,4 +1,5 @@
 "use server";
+import { createVendoClient } from "@/lib/db-vendo-client";
 import { getJourneyInfo } from "@/lib/db-web-api";
 // import { findJourneys } from "@/lib/journey-search";
 import {
@@ -19,9 +20,14 @@ export const getJourneyFromJID = async (
   if (!journey) return null;
   // findJourneys(journey.no.toString());
   const hafasClient = createHafas();
-  const possibleTrips = await findTrips(journey.no.toString(), hafasClient, 1, [
-    "80",
-  ], journey.date);
+  const possibleTrips = await findTrips(
+    journey.no.toString(),
+    hafasClient,
+    1,
+    ["80"],
+    journey.date
+  ).catch((_) => []);
+  if (possibleTrips.length === 0) return journey;
   const trip = await tripInfo(possibleTrips[0].id, hafasClient);
   const carriageSequence = await getCarriageSequence({
     category: journey.name.includes("ICE") ? "ICE" : "IC",
@@ -43,3 +49,13 @@ export const getJourneyFromJID = async (
 
 export const getJourneyId = async (trip: Trip): Promise<string> =>
   await getJIDFromTrip(trip);
+
+export const getVendoJourney = async (risId: string) => {
+  const vendoClient = createVendoClient();
+  if (!vendoClient.trip) throw new Error("trip is not defined on vendoClient");
+  const res = await vendoClient.trip(risId, {}).catch((_) => {
+    return null;
+  });
+  if (!res) return "null";
+  return JSON.stringify(res.trip);
+};
