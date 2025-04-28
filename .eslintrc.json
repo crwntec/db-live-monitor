@@ -5,6 +5,7 @@
       "error",
       { "argsIgnorePattern": "^_", "varsIgnorePattern": "^_" }
     ],
-    "react-hoks/exhaustive-deps": "off"
+    "react-hoks/exhaustive-deps": "off",
+    "@typescript-eslint/no-explicit-any": "off"
   }
 }
