@@ -97,7 +97,7 @@ export default function StopBase({
           >
             {stop.departure?.destination
               ? `Nach ${stop.departure.destination.canceled ? stop.departure.path.filter(stop => !stop.canceled).at(-1)?.name : stop.departure.destination.name}`
-              : `Von ${stop.arrival?.origin.canceled ? stop.arrival.path.filter(stop => !stop.canceled).at(-1)?.name : stop.arrival?.origin.name}`}
+              : `Von ${stop.arrival?.origin.canceled ? stop.arrival.path.filter(stop => !stop.canceled).at(0)?.name : stop.arrival?.origin.name}`}
           </span>
         </div>
         <div className="flex flex-col md:flex-row lg:flex-col gap-2">
