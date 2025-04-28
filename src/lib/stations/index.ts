@@ -62,7 +62,7 @@ export async function getStationRelevance(name: string): Promise<number> {
 }
 export async function autocompleteStation(input: string) {
   const results = autocomplete(input, 6);
-  const mappedResults = [];
+  const mappedResults: Station[] = [];
 
   for (const result of results) {
     const station = await findStationByEvaId(result.id);

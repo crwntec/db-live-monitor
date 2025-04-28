@@ -1,4 +1,4 @@
-import { IrisFchg, IrisTimetable, IrisWingdef, TimetableElementDetail, IrisResult, IrisMessage } from "@/types/iris.ts";
+import { IrisFchg, IrisTimetable, IrisWingdef, TimetableElementDetail, IrisResult, IrisMessage, IrisWing } from "@/types/iris.ts";
 import { getStationRelevance } from "@/lib/stations/index.ts";
 import { makeRequest } from "@/util/request/makeRequest";
 
@@ -301,7 +301,7 @@ export const convertTimetable = async (
     const hasWings = Boolean(arrival?.attributes?.wings || departure?.attributes?.wings);
     const wings = hasWings ? (arrival?.attributes?.wings || departure?.attributes?.wings || "") : "";
 
-    let wing = null;
+    let wing: IrisWing | null = null;
     if (hasWings && wings) {
       const wingDef = (await getWings(e.attributes.id, wings))?.elements?.[0]?.elements;
       if (wingDef) {
