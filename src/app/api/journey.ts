@@ -20,9 +20,14 @@ export const getJourneyFromJID = async (
   if (!journey) return null;
   // findJourneys(journey.no.toString());
   const hafasClient = createHafas();
-  const possibleTrips = await findTrips(journey.no.toString(), hafasClient, 1, [
-    "80",
-  ], journey.date);
+  const possibleTrips = await findTrips(
+    journey.no.toString(),
+    hafasClient,
+    1,
+    ["80"],
+    journey.date
+  ).catch((_) => []);
+  if (possibleTrips.length === 0) return journey;
   const trip = await tripInfo(possibleTrips[0].id, hafasClient);
   const carriageSequence = await getCarriageSequence({
     category: journey.name.includes("ICE") ? "ICE" : "IC",
@@ -47,6 +52,10 @@ export const getJourneyId = async (trip: Trip): Promise<string> =>
 
 export const getVendoJourney = async (risId: string) => {
   const vendoClient = createVendoClient();
-  if(!vendoClient.trip) throw new Error("trip is not defined on vendoClient");
-  return (await vendoClient.trip(risId,{})).trip;
+  if (!vendoClient.trip) throw new Error("trip is not defined on vendoClient");
+  const res = await vendoClient.trip(risId, {}).catch((_) => {
+    return null;
+  });
+  if (!res) return "null";
+  return JSON.stringify(res.trip);
 };

@@ -96,21 +96,28 @@ export default function StopsContainer({
   }, [currentTime, stops]);
 
   useEffect(() => {
+    if (!risId) return;
     async function fetchJourney() {
       setVendoLoading(true);
-      const vendoData = await getVendoJourney(risId);
-      setVendoLoading(false);
-      if (!vendoData) return;
+      const vendoData = JSON.parse(await getVendoJourney(risId));
+      if (!vendoData) {
+        setVendoLoading(false);
+        return;
+      }
+
       setStopsWithVendo((prev) =>
         prev.map((stop) => {
-          const vendoStop = vendoData.stopovers?.find((vendoStop) => vendoStop.stop?.id == stop.station.evaNo);
+          const vendoStop = vendoData.stopovers?.find(
+            (vendoStop: any) => vendoStop.stop?.id === stop.station.evaNo
+          );
           if (!vendoStop) return stop;
           return {
             ...stop,
-            loadFactor: vendoStop.loadFactor
+            loadFactor: vendoStop.loadFactor,
           };
         })
       );
+      setVendoLoading(false);
     }
     fetchJourney();
   }, [risId]);
@@ -284,14 +291,14 @@ export default function StopsContainer({
                         </p>
                       </div>
                       {/* Track information */}
-                      <div className="whitespace-nowrap flex items-center">
-                        <div className="mr-4">
-                          {vendoLoading && <Spinner size="sm" color="gray" />}
-                          {stop.loadFactor && (
-                            <LoadFactor loadFactor={stop.loadFactor} />
-                          )}
-                        </div>
-                        <strong>{stop.track.prediction || "N/A"}</strong>
+                      <div className="whitespace-nowrap flex items-center gap-2 min-w-[80px] justify-end">
+                        {vendoLoading && <Spinner size="sm" color="gray" />}
+                        {stop.loadFactor && (
+                          <LoadFactor loadFactor={stop.loadFactor} />
+                        )}
+                        <strong className="text-right w-8">
+                          {stop.track.prediction || "N/A"}
+                        </strong>
                       </div>
                     </div>
                   </div>

@@ -17,31 +17,65 @@ export default function LoadFactor({ loadFactor }: { loadFactor: string }) {
       case "full":
         return "Zug ausgebucht";
       default:
-        break;
+        return "";
     }
   };
+
   const loadFactorToColor = (loadFactor: string) => {
     switch (loadFactor) {
       case "low":
-        return "green";
+        return {
+          light: "#28a745", // Green in light mode
+          dark: "#66bb6a"   // Lighter green in dark mode
+        };
       case "low-to-medium":
-        return "yellow";
+        return {
+          light: "#ffc107", // Yellow in light mode
+          dark: "#ffb300"   // Darker yellow in dark mode
+        };
       case "high":
-        return "orange";
+        return {
+          light: "#fd7e14", // Orange in light mode
+          dark: "#ff5722"   // Darker orange in dark mode
+        };
       case "very-high":
-        return "red";
+        return {
+          light: "#dc3545", // Red in light mode
+          dark: "#e53935"   // Darker red in dark mode
+        };
       case "exceptionally-high":
-        return "red";
+        return {
+          light: "#c82333", // Dark red in light mode
+          dark: "#d32f2f"   // Even darker red in dark mode
+        };
       case "full":
-        return "red";
+        return {
+          light: "#dc3545", // Red in light mode
+          dark: "#e53935"   // Darker red in dark mode
+        };
       default:
-        break;
+        return {
+          light: "#6c757d", // Grey in light mode
+          dark: "#9e9e9e"   // Dark grey in dark mode
+        };
     }
-  }
+  };
+
+  // Get color for the current mode (light/dark)
+  const colors = loadFactorToColor(loadFactor);
+
   return (
     <span>
-      <Tooltip content={loadFactorToText(loadFactor)}>
-        <UsersRound size={16} color={loadFactorToColor(loadFactor)} />
+      <Tooltip content={loadFactorToText(loadFactor)} className="dark:bg-gray-800 bg-gray-200 text-black dark:text-white">
+        <UsersRound
+          size={16}
+          style={{
+            cursor: "pointer",
+            color: colors.light, // Default light mode color
+            transition: "color 0.3s"
+          }}
+          className="dark:text-transparent" // Ensures icon is transparent in dark mode if necessary
+        />
       </Tooltip>
     </span>
   );
