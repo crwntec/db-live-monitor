@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",
-    "build": "next build && echo 'Contents of node_modules/db-vendo-client:' && ls -la node_modules/db-vendo-client",
+    "build": "next build && echo 'Contents of node_modules/db-hafas-stations:' && ls -la node_modules/db-hafas-stations",
     "start": "next start",
     "lint": "next lint"
   },
