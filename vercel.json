@@ -1,0 +1,7 @@
+{
+  "functions": {
+    "api/**/*.ts": {
+      "includeFiles": ["node_modules/db-hafas-stations/**"]
+    }
+  }
+}
