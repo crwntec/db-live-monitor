@@ -1,7 +1,10 @@
 {
   "functions": {
-    "api/**/*.ts": {
-      "includeFiles": ["node_modules/db-hafas-stations/**"]
+    "app/**/*.ts": {
+      "includeFiles": "node_modules/db-hafas-stations/**"
+    },
+    "pages/api/**/*.ts": {
+      "includeFiles": "node_modules/db-hafas-stations/**"
     }
   }
 }
