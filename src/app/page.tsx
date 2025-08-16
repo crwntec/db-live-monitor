@@ -46,7 +46,7 @@ export default function Home() {
       } finally {
         setInputLoading(false);
       }
-    }, 600);
+    }, 100);
 
     return () => clearTimeout(delayDebounce);
   }, [searchQuery]);
