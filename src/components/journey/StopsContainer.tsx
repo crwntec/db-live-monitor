@@ -6,9 +6,10 @@ import moment from "moment";
 import { getDelayColor } from "@/util/colors";
 import { cn, getTimeJourney } from "@/util";
 import { Stop } from "@/types/journey";
-import { getVendoJourney } from "@/app/api/journey";
+import { getWebJourney } from "@/app/api/journey";
 import LoadFactor from "./LoadFactor";
 import { Spinner } from "flowbite-react";
+import { Halte } from "@/types/web";
 
 export default function StopsContainer({
   stops,
@@ -17,8 +18,8 @@ export default function StopsContainer({
   stops: Stop[];
   risId: string;
 }) {
-  const [stopsWithVendo, setStopsWithVendo] = useState<Stop[]>(stops);
-  const [vendoLoading, setVendoLoading] = useState(false);
+  const [stopsWithWeb, setStopsWithWeb] = useState<Stop[]>(stops);
+  const [webJourneyLoading, setWebJourneyLoading] = useState(false);
   const [progress, setProgress] = useState(0);
   const [heigthProgress, setHeightProgress] = useState(0);
   const [currentTime, setCurrentTime] = useState(
@@ -98,26 +99,26 @@ export default function StopsContainer({
   useEffect(() => {
     if (!risId) return;
     async function fetchJourney() {
-      setVendoLoading(true);
-      const vendoData = JSON.parse(await getVendoJourney(risId));
-      if (!vendoData) {
-        setVendoLoading(false);
+      setWebJourneyLoading(true);
+      const webJourneyData = await getWebJourney(risId);
+      if (!webJourneyData) {
+        setWebJourneyLoading(false);
         return;
       }
 
-      setStopsWithVendo((prev) =>
+      setStopsWithWeb((prev) =>
         prev.map((stop) => {
-          const vendoStop = vendoData.stopovers?.find(
-            (vendoStop: any) => vendoStop.stop?.id === stop.station.evaNo
+          const webJourneyStop = webJourneyData.stops?.find(
+            (s: Halte) => s?.extId === stop.station.evaNo
           );
-          if (!vendoStop) return stop;
+          if (!webJourneyStop) return stop;
           return {
             ...stop,
-            loadFactor: vendoStop.loadFactor,
+            loadFactor: webJourneyStop.loadFactor,
           };
         })
       );
-      setVendoLoading(false);
+      setWebJourneyLoading(false);
     }
     fetchJourney();
   }, [risId]);
@@ -215,7 +216,7 @@ export default function StopsContainer({
 
         {/* Stops */}
         <div className="space-y-6">
-          {stopsWithVendo.map((stop, index) => {
+          {stopsWithWeb.map((stop, index) => {
             const isCompleted = isCompletedStop(stop, index);
             const isCurrent = isCurrentStop(stop, index);
             const isCanceled = stop.status === "Canceled";
@@ -292,7 +293,7 @@ export default function StopsContainer({
                       </div>
                       {/* Track information */}
                       <div className="whitespace-nowrap flex items-center gap-2 min-w-[80px] justify-end">
-                        {vendoLoading && <Spinner size="sm" color="gray" />}
+                        {(webJourneyLoading) && <Spinner size="sm" color="gray" />}
                         {stop.loadFactor && (
                           <LoadFactor loadFactor={stop.loadFactor} />
                         )}
