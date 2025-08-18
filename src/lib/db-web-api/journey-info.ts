@@ -2,7 +2,8 @@ import axios from "axios";
 import config from "./base.json"
 import { JourneyT } from "@/types/journey";
 import { loadFactorToText } from "@/util";
-import { WebJourneyT } from "@/types/web";
+import { VendoJourneyT } from "@/types/vendo";
+import {v4 as uuidv4} from 'uuid';
 
 const randomHexString = (length: number): string => 
     [...Array(length)]
@@ -16,13 +17,14 @@ const createRandomUserAgent = (): string => {
     return ua + ` UniqueId/${randomPart}`;
 }
 const getBrowserHeaders = () => ({
-     'Accept': 'application/json',
+    'Accept': 'application/x.db.vendo.mob.zuglauf.v2+json',
+    'Content-Type': 'application/x.db.vendo.mob.zuglauf.v2+json',
     'Accept-Encoding': 'gzip, deflate, br',
     'Accept-Language': 'de-DE,de;q=0.9,en-US;q=0.8,en;q=0.7',
     'Referer': 'https://www.bahn.de/',
     'Origin': 'https://www.bahn.de',
     'User-Agent': createRandomUserAgent(), 
-    'X-Requested-With': 'XMLHttpRequest', 
+    'X-Correlation-ID': uuidv4() + '_' + uuidv4()
 })
 
 export const getJourneyInfoRegio = async (journeyID: string) : Promise<JourneyT | null> => {
@@ -37,11 +39,11 @@ export const getJourneyInfoRegio = async (journeyID: string) : Promise<JourneyT 
     }).catch(_ => null);
 };
 
-export const getJourneyInfoWeb = async (journeyID: string): Promise<WebJourneyT | null> => {
-    const url = `${config["journey-web-base"]}?journeyId=${encodeURIComponent(journeyID)}&poly=false`;
+export const getJourneyInfoVendo = async (journeyID: string): Promise<VendoJourneyT | null> => {
+    const url = `${config["journey-vendo-base"]}/${encodeURIComponent(journeyID)}`;
 
     return axios.get(url, {
-        headers: getBrowserHeaders(), // Use the new header generation function
+        headers: getBrowserHeaders(),
         timeout: 10000
     }).then((response) => {
         // Your existing data mapping logic is fine
@@ -49,7 +51,7 @@ export const getJourneyInfoWeb = async (journeyID: string): Promise<WebJourneyT 
             ...response.data,
             stops: response.data.halte.map((stop: any) => ({
                 ...stop,
-                loadFactor: loadFactorToText(stop.auslastungsmeldungen[1].stufe, false)
+                loadFactor: stop.auslastungsInfos[1].anzeigeTextKurz=="Keine Auslastungsinformation verfügbar" ? "no-info" : loadFactorToText(stop.auslastungsInfos[1].stufe, false)
             }))
         };
     }).catch(e => {

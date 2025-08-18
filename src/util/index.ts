@@ -55,7 +55,7 @@ export const loadFactorToText = (loadFactor: number | string, readable = true) =
       case 5:
         return readable ? "Zug ausgebucht" : "full";
       default:
-        return "";
+        return "N/A";
     }
   } else if (typeof loadFactor === "string") {
     switch (loadFactor) {
@@ -72,7 +72,7 @@ export const loadFactorToText = (loadFactor: number | string, readable = true) =
       case "full":
         return "Zug ausgebucht";
       default:
-        return "";
+        return "N/A";
     }
   }
   return "";

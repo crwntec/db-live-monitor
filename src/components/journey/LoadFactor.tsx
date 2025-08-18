@@ -3,7 +3,6 @@ import { Tooltip } from "flowbite-react";
 import { UsersRound } from "lucide-react";
 
 export default function LoadFactor({ loadFactor }: { loadFactor: string }) {
-
   // Get color for the current mode (light/dark)
   const colors = loadFactorToColor(loadFactor);
 

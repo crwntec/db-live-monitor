@@ -1,5 +1,5 @@
 {
     "board-base": "https://regio-guide.de/@prd/zupo-travel-information/api/public/ri/board",
     "journey-regio-base": "https://regio-guide.de/@prd/zupo-travel-information/api/public/ri/journey",
-    "journey-web-base":  "https://int.bahn.de/web/api/reiseloesung/fahrt"
+    "journey-vendo-base":  "https://app.vendo.noncd.db.de/mob/zuglauf"
 }

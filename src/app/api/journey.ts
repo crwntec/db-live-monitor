@@ -1,6 +1,6 @@
 "use server";
 import { getJourneyInfo } from "@/lib/db-web-api";
-import { getJourneyInfoWeb } from "@/lib/db-web-api/journey-info";
+import { getJourneyInfoVendo } from "@/lib/db-web-api/journey-info";
 // import { findJourneys } from "@/lib/journey-search";
 import {
   createHafas,
@@ -50,8 +50,8 @@ export const getJourneyFromJID = async (
 export const getJourneyId = async (trip: Trip): Promise<string> =>
   await getJIDFromTrip(trip);
 
-export const getWebJourney = async (risId: string) => { 
-  const res = await getJourneyInfoWeb(risId);
+export const getVendoJourney = async (risId: string) => { 
+  const res = await getJourneyInfoVendo(risId);
   if (!res) return null;
   return res;
 };
