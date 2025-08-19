@@ -8,7 +8,7 @@ import { CarriageSequenceT } from "./carriageSequence";
 export interface JourneyT {
   name: string;
   no: number;
-  risId: string;
+  hafasId: string;
   journeyId: string;
   tenantId: string;
   administrationId: string;

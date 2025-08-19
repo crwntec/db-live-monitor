@@ -102,7 +102,6 @@ export default function StopsContainer({
       setVendoJourneyLoading(true);
       const vendoJourneyData = await getVendoJourney(risId);
       if (!vendoJourneyData) {
-        console.error("Failed to fetch vendo journey");
         setVendoJourneyLoading(false);
         return;
       }

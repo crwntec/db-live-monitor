@@ -39,9 +39,8 @@ export const getJourneyInfoRegio = async (journeyID: string) : Promise<JourneyT 
     }).catch(_ => null);
 };
 
-export const getJourneyInfoVendo = async (journeyID: string): Promise<VendoJourneyT | null> => {
-    const url = `${config["journey-vendo-base"]}/${encodeURIComponent(journeyID)}`;
-
+export const getJourneyInfoVendo = async (hafasJourneyId: string): Promise<VendoJourneyT | null> => {
+    const url = `${config["journey-vendo-base"]}/${encodeURIComponent(hafasJourneyId)}`;
     return axios.get(url, {
         headers: getBrowserHeaders(),
         timeout: 10000
@@ -55,7 +54,8 @@ export const getJourneyInfoVendo = async (journeyID: string): Promise<VendoJourn
             }))
         };
     }).catch(e => {
-        console.error('API Error (Web):', e.response?.status, e.response?.data);
+        if (e.response?.status === 422) return null;
+        console.error('API Error (Vendo):', e.response?.status, e.response?.data, url);
         return null;
     });
 };

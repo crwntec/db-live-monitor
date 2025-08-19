@@ -84,24 +84,24 @@ export const tripInfo = async (
   return tripPromise;
 };
 
-export const convertTripId = async (trip: Trip): Promise<string> => {
-  if (!trip || !trip.origin || !trip.origin.id) return "";
+export const convertTripIdToRis = async (hafasTrip: Trip): Promise<string> => {
+  if (!hafasTrip || !hafasTrip.origin || !hafasTrip.origin.id) return "";
 
-  const cacheKey = trip.line?.fahrtNr || "";
+  const cacheKey = hafasTrip.line?.fahrtNr || "";
   if (tripIdCache.has(cacheKey)) {
     return tripIdCache.get(cacheKey)!;
   }
 
   const timeFrame = {
-    start: trip.plannedDeparture || "",
-    end: trip.plannedDeparture || "",
+    start: hafasTrip.plannedDeparture || "",
+    end: hafasTrip.plannedDeparture || "",
   };
 
   const tripPromise = stationBoard
-    .departures(trip.origin.id, timeFrame)
+    .departures(hafasTrip.origin.id, timeFrame)
     .then((regioGuideResults) => {
       const matchingTrip = regioGuideResults.items.find(
-        (item) => String(item.train.no) === String(trip.line?.fahrtNr)
+        (item) => String(item.train.no) === String(hafasTrip.line?.fahrtNr)
       );
       return matchingTrip ? matchingTrip.train.journeyId || "" : "";
     });

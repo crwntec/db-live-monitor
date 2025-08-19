@@ -3,4 +3,4 @@ import { getJourneyInfoRegio } from "./journey-info";
 
 const stationBoard = { departures, arrivals };
 
-export { stationBoard, getJourneyInfoRegio as getJourneyInfo };
+export { stationBoard, getJourneyInfoRegio };
