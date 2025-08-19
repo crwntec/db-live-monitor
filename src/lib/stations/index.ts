@@ -5,9 +5,9 @@ import autocomplete from "db-hafas-stations-autocomplete";
 
 // Define caching mechanism
 let stationsCache: Station[] = [];
-let evaIdMap: Map<number, Station> = new Map();
-let ds100Map: Map<string, Station> = new Map();
-let nameMap: Map<string, Station> = new Map();
+const evaIdMap: Map<number, Station> = new Map();
+const ds100Map: Map<string, Station> = new Map();
+const nameMap: Map<string, Station> = new Map();
 let isInitialized = false;
 
 async function initializeMaps(): Promise<void> {

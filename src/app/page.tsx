@@ -143,12 +143,10 @@ function useOptimizedSearch() {
 // Memoized components for better performance
 const StationResult = memo(({ 
   station, 
-  index, 
   isSelected, 
   onClick 
 }: { 
   station: Station; 
-  index: number; 
   isSelected: boolean; 
   onClick: (eva: number) => void; 
 }) => (
@@ -169,15 +167,13 @@ const StationResult = memo(({
     </div>
   </motion.button>
 ));
-
+StationResult.displayName = "StationResult";
 const TripResult = memo(({ 
   trip, 
-  index, 
   isSelected, 
   onClick 
 }: { 
   trip: Trip; 
-  index: number; 
   isSelected: boolean; 
   onClick: (trip: Trip) => void; 
 }) => (
@@ -208,7 +204,7 @@ const TripResult = memo(({
     </div>
   </motion.button>
 ));
-
+TripResult.displayName = "TripResult";
 export default function Home() {
   const [selectedIndex, setSelectedIndex] = useState<number>(-1);
   const [isPending, startTransition] = useTransition();
@@ -349,7 +345,6 @@ export default function Home() {
               <StationResult
                 key={station.eva}
                 station={station}
-                index={index}
                 isSelected={selectedIndex === index}
                 onClick={handleStationClick}
               />
@@ -360,7 +355,6 @@ export default function Home() {
               <TripResult
                 key={hafasTrip.id}
                 trip={hafasTrip}
-                index={index + stations.length}
                 isSelected={selectedIndex === index + stations.length}
                 onClick={handleTripClick}
               />
@@ -375,7 +369,7 @@ export default function Home() {
             animate={{ opacity: 1 }}
             className="mt-3 w-full p-4 text-center text-gray-500 dark:text-gray-400 text-sm"
           >
-            No results found for "{searchQuery}"
+            No results found for &quot;{searchQuery}&quot;
           </motion.div>
         )}
       </div>
