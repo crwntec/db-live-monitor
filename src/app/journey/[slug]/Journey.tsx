@@ -26,7 +26,7 @@ export default async function Journey({
         {/* Stops */}
         <section className="mb-8 p-4">
           <h2 className="text-xl font-semibold mb-3">Zwischenhalte</h2>
-          <StopsContainer stops={data.stops} risId={data.risId} />
+          <StopsContainer stops={data.stops} risId={data.hafasId} />
         </section>
 
         {/* Carriage Sequence */}

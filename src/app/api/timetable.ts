@@ -210,7 +210,9 @@ const mergeStationData = (
     const existing = processedItems.get(key);
     if (
       !existing &&
-      cutoffTimestamp < moment(irisItem.when.arrival).valueOf()
+      irisItem.when.arrival &&
+      moment(irisItem.when.arrival, moment.ISO_8601, true).isValid() &&
+      moment(irisItem.when.arrival).valueOf() > cutoffTimestamp
     ) {
       // If no existing data, create new entry with IRIS data
       processedItems.set(key, {

@@ -11,12 +11,12 @@ import { Search, MapPin, TrainFront, ArrowRight } from "lucide-react";
 import { motion } from "framer-motion";
 import { Trip } from "hafas-client";
 import moment from "moment-timezone";
-import { getJourneyId } from "@/app/api/journey";
+import { getRisId } from "@/app/api/journey";
 
 export default function Home() {
   const [searchQuery, setSearchQuery] = useState("");
   const [stations, setStations] = useState<Station[]>([]);
-  const [trips, setTrips] = useState<Trip[]>([]);
+  const [hafasTrips, setTrips] = useState<Trip[]>([]);
   const [selectedIndex, setSelectedIndex] = useState<number>(-1);
   const [isPending, startTransition] = useTransition();
   const [inputLoading, setInputLoading] = useState(false);
@@ -46,7 +46,7 @@ export default function Home() {
       } finally {
         setInputLoading(false);
       }
-    }, 600);
+    }, 100);
 
     return () => clearTimeout(delayDebounce);
   }, [searchQuery]);
@@ -78,8 +78,8 @@ export default function Home() {
     startTransition(() => router.push(`/board/${eva}`));
   };
 
-  const handleTripClick = async (trip: Trip) => {
-    const jid = await getJourneyId(trip);
+  const handleTripClick = async (hafasTrip: Trip) => {
+    const jid = await getRisId(hafasTrip);
     startTransition(() => router.push(`/journey/${jid}`));
   };
 
@@ -155,17 +155,17 @@ export default function Home() {
         )}
 
         {/* Trips Results */}
-        {trips.length > 0 && (
+        {hafasTrips.length > 0 && (
           <motion.div
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.3 }}
             className="mt-3 w-full border-gray-500 rounded-lg shadow-md bg-white dark:bg-gray-800"
           >
-            {trips.map((trip, index) => (
+            {hafasTrips.map((hafasTrip, index) => (
               <motion.button
-                key={trip.id}
-                onClick={() => handleTripClick(trip)}
+                key={hafasTrip.id}
+                onClick={() => handleTripClick(hafasTrip)}
                 whileTap={{ scale: 0.98 }}
                 className={`w-full p-3 text-left hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors border-b border-gray-700 last:border-b-0 dark:text-white ${
                   selectedIndex === index ? "bg-gray-200 dark:bg-gray-600" : ""
@@ -175,17 +175,17 @@ export default function Home() {
                   <div className="flex justify-between items-center">
                     <div className="flex items-center">
                       <TrainFront className="text-blue-500 mr-2" size={20} />
-                      <span>{trip.line?.name || "Unknown Train"}</span>
+                      <span>{hafasTrip.line?.name || "Unknown Train"}</span>
                     </div>
                     <div className="text-sm text-gray-500 dark:text-gray-400">
-                      {moment(trip.plannedDeparture).format("HH:mm")}
+                      {moment(hafasTrip.plannedDeparture).format("HH:mm")}
                     </div>
                   </div>
 
                   <div className="w-full text-xs sm:text-sm text-gray-500 dark:text-gray-400 flex items-center">
-                    {trip.origin?.name}
+                    {hafasTrip.origin?.name}
                     <ArrowRight className="mx-1" size={12} />
-                    {trip.destination?.name}
+                    {hafasTrip.destination?.name}
                   </div>
                 </div>
               </motion.button>

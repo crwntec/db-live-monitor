@@ -1,4 +1,4 @@
-import { getJourneyFromJID } from "@/app/api/journey";
+import { getJourneyFromRisId } from "@/app/api/journey";
 import Journey from "./Journey";
 
 export default async function Page({
@@ -10,7 +10,7 @@ export default async function Page({
 }) {
   const { slug } = await params;
 
-  const dataPromise = getJourneyFromJID(slug);
+  const dataPromise = getJourneyFromRisId(slug);
 
   return (
     <>

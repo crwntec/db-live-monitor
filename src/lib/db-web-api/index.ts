@@ -1,6 +1,6 @@
 import { departures, arrivals } from "./station-board";
-import { getJourneyInfo } from "./journey-info";
+import { getJourneyInfoRegio } from "./journey-info";
 
 const stationBoard = { departures, arrivals };
 
-export { stationBoard, getJourneyInfo };
+export { stationBoard, getJourneyInfoRegio };

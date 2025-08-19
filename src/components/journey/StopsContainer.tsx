@@ -9,6 +9,7 @@ import { Stop } from "@/types/journey";
 import { getVendoJourney } from "@/app/api/journey";
 import LoadFactor from "./LoadFactor";
 import { Spinner } from "flowbite-react";
+import { HaltT } from "@/types/vendo";
 
 export default function StopsContainer({
   stops,
@@ -18,7 +19,7 @@ export default function StopsContainer({
   risId: string;
 }) {
   const [stopsWithVendo, setStopsWithVendo] = useState<Stop[]>(stops);
-  const [vendoLoading, setVendoLoading] = useState(false);
+  const [vendoJourneyLoading, setVendoJourneyLoading] = useState(false);
   const [progress, setProgress] = useState(0);
   const [heigthProgress, setHeightProgress] = useState(0);
   const [currentTime, setCurrentTime] = useState(
@@ -98,26 +99,25 @@ export default function StopsContainer({
   useEffect(() => {
     if (!risId) return;
     async function fetchJourney() {
-      setVendoLoading(true);
-      const vendoData = JSON.parse(await getVendoJourney(risId));
-      if (!vendoData) {
-        setVendoLoading(false);
+      setVendoJourneyLoading(true);
+      const vendoJourneyData = await getVendoJourney(risId);
+      if (!vendoJourneyData) {
+        setVendoJourneyLoading(false);
         return;
       }
-
       setStopsWithVendo((prev) =>
         prev.map((stop) => {
-          const vendoStop = vendoData.stopovers?.find(
-            (vendoStop: any) => vendoStop.stop?.id === stop.station.evaNo
+          const vendoJourneyStop = vendoJourneyData.stops?.find(
+            (s: HaltT) => s?.ort.evaNr === stop.station.evaNo
           );
-          if (!vendoStop) return stop;
+          if (!vendoJourneyStop) return stop;
           return {
             ...stop,
-            loadFactor: vendoStop.loadFactor,
+            loadFactor: vendoJourneyStop.loadFactor,
           };
         })
       );
-      setVendoLoading(false);
+      setVendoJourneyLoading(false);
     }
     fetchJourney();
   }, [risId]);
@@ -292,7 +292,7 @@ export default function StopsContainer({
                       </div>
                       {/* Track information */}
                       <div className="whitespace-nowrap flex items-center gap-2 min-w-[80px] justify-end">
-                        {vendoLoading && <Spinner size="sm" color="gray" />}
+                        {vendoJourneyLoading && <Spinner size="sm" color="gray" />}
                         {stop.loadFactor && (
                           <LoadFactor loadFactor={stop.loadFactor} />
                         )}

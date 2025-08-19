@@ -5,8 +5,6 @@ import { WebAPIResult } from "@/types/timetable";
 type TimeFrame = { start: string; end: string };
 
 type ApiResponse = Promise<WebAPIResult>;
-
-const BASE_URL = config["base-url"];
 const COMMON_PARAMS = {
   modeOfTransport:
     "HIGH_SPEED_TRAIN,REGIONAL_TRAIN,CITY_TRAIN,INTER_REGIONAL_TRAIN,INTERCITY_TRAIN",
@@ -20,7 +18,7 @@ const fetchBoardData = async (
   timeFrame: TimeFrame
 ): ApiResponse => {
   try {
-    const response = await axios.get(`${BASE_URL}board/${type}/${stationEva}`, {
+    const response = await axios.get(`${config["board-base"]}/${type}/${stationEva}`, {
       params: {
         ...COMMON_PARAMS,
         timeStart: timeFrame.start,
