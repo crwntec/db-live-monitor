@@ -171,7 +171,7 @@ const mergeStationData = (
               destination: item.destination || { name: "" },
             },
             isEarlyTerminated:
-              (irisItem &&
+              (irisItem && irisItem.departurePath.length>0 &&
                 irisItem.departurePath[irisItem?.departurePath.length - 1]
                   .name !== item.destination?.name) ||
               false,
