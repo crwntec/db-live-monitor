@@ -5,23 +5,39 @@ import autocomplete from "db-hafas-stations-autocomplete";
 
 // Define caching mechanism
 let stationsCache: Station[] = [];
+const evaIdMap: Map<number, Station> = new Map();
+const ds100Map: Map<string, Station> = new Map();
+const nameMap: Map<string, Station> = new Map();
+let isInitialized = false;
 
-/**
- * Reads and returns station data from the imported JSON data with caching
- * @returns {Promise<Station[]>} Promise that resolves to an array of station objects
- */
-export async function readStations(): Promise<Station[]> {
-  if (stationsCache.length > 0) {
-    return stationsCache;
-  }
-
+async function initializeMaps(): Promise<void> {
+  if (isInitialized) return;
+  
   try {
     stationsCache = stationsData;
-    return stationsCache;
+    
+    for (const station of stationsCache) {
+      evaIdMap.set(station.eva, station);
+      if (station.ds100) {
+        ds100Map.set(station.ds100, station);
+      }
+      if (station.name) {
+        nameMap.set(station.name, station);
+      }
+    }
+    
+    isInitialized = true;
   } catch (error) {
-    console.error("Error reading stations:", error);
-    return [];
+    console.error("Error initializing station maps:", error);
+    throw error;
   }
+}
+/**
+ * Reads and returns station data with lazy initialization
+ */
+export async function readStations(): Promise<Station[]> {
+  await initializeMaps();
+  return stationsCache;
 }
 
 /**
@@ -32,9 +48,8 @@ export async function readStations(): Promise<Station[]> {
 export async function findStationByEvaId(
   evaId: string | number
 ): Promise<Station | null> {
-  const stations = await readStations();
-  const station = stations.find((station) => station.eva == Number(evaId));
-  return station || null;
+  await initializeMaps();
+  return evaIdMap.get(Number(evaId)) || null;
 }
 
 /**
@@ -45,8 +60,8 @@ export async function findStationByEvaId(
 export async function findStationByDS100(
   ds100: string
 ): Promise<Station | null> {
-  const stations = await readStations();
-  return stations.find((station) => station.ds100 === ds100) || null;
+  await initializeMaps();
+  return ds100Map.get(ds100) || null;
 }
 
 /**
@@ -55,20 +70,23 @@ export async function findStationByDS100(
  * @returns {Promise<number>} Promise that resolves to the number of events or 0 if not found
  */
 export async function getStationRelevance(name: string): Promise<number> {
-  const stations = await readStations();
-  return (
-    stations.find((station) => station.name === name)?.number_of_events || 0
-  );
+  await initializeMaps();
+  return nameMap.get(name)?.number_of_events || 0;
 }
-export async function autocompleteStation(input: string) {
+
+export async function autocompleteStation(input: string): Promise<Station[]> {
+  await initializeMaps();
+  
   const results = autocomplete(input, 6);
   const mappedResults: Station[] = [];
-
+  
+  // Batch lookup instead of individual awaits
   for (const result of results) {
-    const station = await findStationByEvaId(result.id);
+    const station = evaIdMap.get(Number(result.id));
     if (station) {
       mappedResults.push(station);
     }
   }
+  
   return mappedResults;
 }

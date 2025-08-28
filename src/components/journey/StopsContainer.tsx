@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback, startTransition } from "react";
 import { CircleAlert } from "lucide-react";
 import moment from "moment";
 import { getDelayColor } from "@/util/colors";
@@ -10,6 +10,7 @@ import { getVendoJourney } from "@/app/api/journey";
 import LoadFactor from "./LoadFactor";
 import { Spinner } from "flowbite-react";
 import { HaltT } from "@/types/vendo";
+import { useRouter } from "next/navigation";
 
 export default function StopsContainer({
   stops,
@@ -18,6 +19,7 @@ export default function StopsContainer({
   stops: Stop[];
   risId: string;
 }) {
+  const router = useRouter();
   const [stopsWithVendo, setStopsWithVendo] = useState<Stop[]>(stops);
   const [vendoJourneyLoading, setVendoJourneyLoading] = useState(false);
   const [progress, setProgress] = useState(0);
@@ -121,6 +123,15 @@ export default function StopsContainer({
     }
     fetchJourney();
   }, [risId]);
+
+  const handleStopSelect = useCallback(
+    (evaNo: string) => {
+      startTransition(() => {
+        router.push(`/board/${evaNo}`);
+      });
+    },
+    [router]
+  );
 
   const isCurrentStop = (stop: Stop, index: number) => {
     const arrivalTime = moment(
@@ -237,10 +248,11 @@ export default function StopsContainer({
                 {/* Station info */}
                 <div
                   className={cn(
-                    "rounded-lg py-0.5 px-1",
+                    "rounded-lg py-0.5 px-3 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors cursor-pointer",
                     isCurrent ? "bg-blue-500/5" : "",
                     isCanceled ? "bg-red-500/5" : ""
                   )}
+                  onClick={() => handleStopSelect(stop.station.evaNo)}
                 >
                   <div className="flex items-center">
                     <div className="flex flex-col min-w-[60px]">
@@ -283,7 +295,7 @@ export default function StopsContainer({
                         })}
                         <p
                           className={cn(
-                            "font-medium whitespace-nowrap",
+                            "font-medium",
                             isCanceled ? "text-red-900 line-through" : ""
                           )}
                         >
@@ -292,7 +304,9 @@ export default function StopsContainer({
                       </div>
                       {/* Track information */}
                       <div className="whitespace-nowrap flex items-center gap-2 min-w-[80px] justify-end">
-                        {vendoJourneyLoading && <Spinner size="sm" color="gray" />}
+                        {vendoJourneyLoading && (
+                          <Spinner size="sm" color="gray" />
+                        )}
                         {stop.loadFactor && (
                           <LoadFactor loadFactor={stop.loadFactor} />
                         )}
