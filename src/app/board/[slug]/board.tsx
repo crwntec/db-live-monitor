@@ -20,9 +20,9 @@ export default async function Board({
               <StopGroup
                 stopGroup={stopGroup}
                 index={index}
-                key={stopGroup[0].train.journeyId || index}
+                key={stopGroup[0].transport.journeyID || index}
               />
-            )
+            ),
         )}
       </ul>
     </div>

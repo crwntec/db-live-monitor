@@ -10,7 +10,8 @@ import TimeContainer from "./TimeContainer";
 import PathContainer from "./PathContainer";
 import WingIndicator from "./WingIndicator";
 
-import { Stop, StopTime, WebAPITrain } from "@/types/timetable";
+import { Stop, StopTime, Transport } from "@/types/timetable";
+import moment from "moment";
 
 export default function StopBase({
   stop,
@@ -31,19 +32,20 @@ export default function StopBase({
   const hasWingInfo = stop.wing != null;
   const wing = isWinged ? stopGroup[index === 0 ? 1 : 0] : null;
 
-  const constructName = (train: WebAPITrain) =>
-    train ? `${train.category} ${train.lineName} (${train.no})` : "";
-
+  const constructName = (transport: Transport) =>
+    transport
+      ? `${transport.category} ${transport.line} (${transport.number})`
+      : "";
 
   const handleStopSelect = () => {
-    if (!stop.train.journeyId) return;
+    if (!stop.transport.journeyID) return;
 
     const params = new URLSearchParams({
       referringEva: pathname.split("/")[2] ?? "",
     });
 
     if (wing) {
-      params.set("wingId", wing.train.journeyId ?? "");
+      params.set("wingId", wing.transport.journeyID ?? "");
 
       if (isWinged) {
         const start = hasWingInfo
@@ -55,19 +57,32 @@ export default function StopBase({
 
         if (start) params.set("wingStart", start);
         if (end) params.set("wingDest", end);
-        params.set("wingName", constructName(wing.train));
+        params.set("wingName", constructName(wing.transport));
       }
     }
 
     startTransition(() => {
-      router.push(`/journey/${stop.train.journeyId}?${params.toString()}`);
+      router.push(`/journey/${stop.transport.journeyID}?${params.toString()}`);
     });
   };
+  function calculateDelay(timeString: string, scheduledTimestring: string) {
+    const time = moment(timeString);
+    const plannedTime = moment(scheduledTimestring);
+    return time.diff(plannedTime, "minutes");
+  }
 
-  const stopTime =
-    (stop.departure && stop.departure.destination
-      ? stop.departure
-      : stop.arrival) as StopTime;
+  const stopTime: StopTime = {
+    time: stop.departure ? stop.departure.time : stop.arrival?.time || "",
+    timeScheduled: stop.departure
+      ? stop.departure.timeSchedule
+      : stop.arrival?.timeSchedule || "",
+    diff: calculateDelay(
+      stop.departure ? stop.departure.time : stop.arrival?.time || "",
+      stop.departure
+        ? stop.departure.timeSchedule
+        : stop.arrival?.timeSchedule || "",
+    ),
+  };
 
   return (
     <div className="flex flex-col gap-2 px-3 py-2 relative">
@@ -84,20 +99,21 @@ export default function StopBase({
       >
         <div className="flex items-center gap-2">
           {isWinged && <WingIndicator index={index} />}
-          <LineContainer train={stop.train} />
+          <LineContainer transport={stop.transport} />
           <span
             className={`${hasLeft ? "line-through" : ""} ${
               stop.canceled ? "line-through text-red-800" : ""
             } ${
-              (stop.departure?.path && !stop.departure?.destination) ||
-              (stop.isEarlyTerminated || stop.departure?.destination.canceled)
+              stop.transport.differingDestination ||
+              stop.transport.differingOrigin ||
+              stop.isEarlyTerminated
                 ? "text-red-500"
                 : ""
             } text-sm md:text-base`}
           >
             {stop.departure?.destination
-              ? `Nach ${stop.departure.destination.canceled ? stop.departure.path.filter(stop => !stop.canceled).at(-1)?.name : stop.departure.destination.name}`
-              : `Von ${stop.arrival?.origin.canceled ? stop.arrival.path.filter(stop => !stop.canceled).at(0)?.name : stop.arrival?.origin.name}`}
+              ? `Nach ${stop.isEarlyTerminated ? stop.transport.differingDestination : stop.departure.destination.name}`
+              : `Von ${stop.transport.differingOrigin?.name || stop.arrival?.origin.name}`}
           </span>
         </div>
         <div className="flex flex-col md:flex-row lg:flex-col gap-2">
@@ -106,15 +122,15 @@ export default function StopBase({
             <div className="flex justify-end gap-1 w-14">
               <span
                 className={`${
-                  stop.arrival?.platform === stop.arrival?.platformPredicted
+                  stop.arrival?.platformSchedule === stop.arrival?.platform
                     ? "text-green-500"
                     : "line-through text-red-500"
                 }`}
               >
                 {stop.arrival?.platform || stop.departure?.platform}
               </span>
-              {stop.arrival?.platform !== stop.arrival?.platformPredicted && (
-                <span>{stop.arrival?.platformPredicted}</span>
+              {stop.arrival?.platformSchedule !== stop.arrival?.platform && (
+                <span>{stop.arrival?.platform}</span>
               )}
             </div>
           </div>

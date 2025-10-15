@@ -11,18 +11,18 @@ export function cn(...inputs: ClassValue[]) {
 export function hasLeft(item: Stop, lookBack: number) {
   const nowTimestamp = moment().tz("Europe/Berlin");
   const time = moment(
-    item.departure ? item.departure.timePredicted : item.arrival?.timePredicted
+    item.departure ? item.departure.time : item.arrival?.time,
   ).tz("Europe/Berlin");
   return time.isBefore(nowTimestamp.subtract(lookBack, "minutes"));
 }
 
 export function getTime(stop: Stop, usePredicted = false) {
   const departureTime = usePredicted
-    ? stop.departure?.timePredicted
-    : stop.departure?.time;
+    ? stop.departure?.time
+    : stop.departure?.timeSchedule;
   const arrivalTime = usePredicted
-    ? stop.arrival?.timePredicted
-    : stop.arrival?.time;
+    ? stop.arrival?.time
+    : stop.arrival?.timeSchedule;
   return (
     departureTime || arrivalTime || moment().tz("Europe/Berlin").toISOString()
   );
@@ -39,7 +39,10 @@ export function getTimeJourney(stop: JourneyStop, usePredicted = false) {
     departureTime || arrivalTime || moment().tz("Europe/Berlin").toISOString()
   );
 }
-export const loadFactorToText = (loadFactor: number | string, readable = true) => {
+export const loadFactorToText = (
+  loadFactor: number | string,
+  readable = true,
+) => {
   if (typeof loadFactor === "number") {
     switch (loadFactor) {
       case 0:
@@ -78,41 +81,41 @@ export const loadFactorToText = (loadFactor: number | string, readable = true) =
   return "";
 };
 export const loadFactorToColor = (loadFactor: string) => {
-    switch (loadFactor) {
-      case "low":
-        return {
-          light: "#28a745", // Green in light mode
-          dark: "#66bb6a"   // Lighter green in dark mode
-        };
-      case "low-to-medium":
-        return {
-          light: "#ffc107", // Yellow in light mode
-          dark: "#ffb300"   // Darker yellow in dark mode
-        };
-      case "high":
-        return {
-          light: "#fd7e14", // Orange in light mode
-          dark: "#ff5722"   // Darker orange in dark mode
-        };
-      case "very-high":
-        return {
-          light: "#dc3545", // Red in light mode
-          dark: "#e53935"   // Darker red in dark mode
-        };
-      case "exceptionally-high":
-        return {
-          light: "#c82333", // Dark red in light mode
-          dark: "#d32f2f"   // Even darker red in dark mode
-        };
-      case "full":
-        return {
-          light: "#dc3545", // Red in light mode
-          dark: "#e53935"   // Darker red in dark mode
-        };
-      default:
-        return {
-          light: "#6c757d", // Grey in light mode
-          dark: "#9e9e9e"   // Dark grey in dark mode
-        };
-    }
-  };
+  switch (loadFactor) {
+    case "low":
+      return {
+        light: "#28a745", // Green in light mode
+        dark: "#66bb6a", // Lighter green in dark mode
+      };
+    case "low-to-medium":
+      return {
+        light: "#ffc107", // Yellow in light mode
+        dark: "#ffb300", // Darker yellow in dark mode
+      };
+    case "high":
+      return {
+        light: "#fd7e14", // Orange in light mode
+        dark: "#ff5722", // Darker orange in dark mode
+      };
+    case "very-high":
+      return {
+        light: "#dc3545", // Red in light mode
+        dark: "#e53935", // Darker red in dark mode
+      };
+    case "exceptionally-high":
+      return {
+        light: "#c82333", // Dark red in light mode
+        dark: "#d32f2f", // Even darker red in dark mode
+      };
+    case "full":
+      return {
+        light: "#dc3545", // Red in light mode
+        dark: "#e53935", // Darker red in dark mode
+      };
+    default:
+      return {
+        light: "#6c757d", // Grey in light mode
+        dark: "#9e9e9e", // Dark grey in dark mode
+      };
+  }
+};

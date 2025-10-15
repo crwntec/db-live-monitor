@@ -12,7 +12,7 @@ export default function StopGroup({
 }) {
   return (
     <li
-      key={stopGroup[0].train.id + uuidv4()}
+      key={stopGroup[0].transport.journeyID + uuidv4()}
       className={`${
         hasLeft(stopGroup[0], 0)
           ? "bg-gray-300 dark:bg-gray-900"
@@ -20,7 +20,14 @@ export default function StopGroup({
       } border-b border-gray-700 animate-fadeIn`}
       style={{ animationDelay: `${index * 50}ms` }}
     >
-      {stopGroup.map((stop, index) => (
+      <StopBase
+        stop={stopGroup[0]}
+        stopGroup={stopGroup}
+        key={index}
+        hasLeft={hasLeft(stopGroup[0], 0)}
+        index={index}
+      />
+      {/*{stopGroup.map((stop, index) => (
         <StopBase
           stop={stop}
           stopGroup={stopGroup}
@@ -28,7 +35,7 @@ export default function StopGroup({
           hasLeft={hasLeft(stop, 0)}
           index={index}
         />
-      ))}
+      ))}*/}
     </li>
   );
 }
