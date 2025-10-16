@@ -42,6 +42,8 @@ export default function StopBase({
 
     const params = new URLSearchParams({
       referringEva: pathname.split("/")[2] ?? "",
+      trainName: stop.transport.category + stop.transport.number,
+      trainNumber: stop.transport.number.toString(),
     });
 
     if (wing) {
@@ -62,7 +64,7 @@ export default function StopBase({
     }
 
     startTransition(() => {
-      router.push(`/journey/${stop.transport.journeyID}?${params.toString()}`);
+      router.push(`/journey/${stop.transport.number}?${params.toString()}`);
     });
   };
   function calculateDelay(timeString: string, scheduledTimestring: string) {
@@ -112,7 +114,7 @@ export default function StopBase({
             } text-sm md:text-base`}
           >
             {stop.departure?.destination
-              ? `Nach ${stop.isEarlyTerminated ? stop.transport.differingDestination : stop.departure.destination.name}`
+              ? `Nach ${stop.isEarlyTerminated && stop.transport.differingDestination ? stop.transport.differingDestination : stop.departure.destination.name}`
               : `Von ${stop.transport.differingOrigin?.name || stop.arrival?.origin.name}`}
           </span>
         </div>

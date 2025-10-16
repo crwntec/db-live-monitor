@@ -12,7 +12,9 @@ export default function TimeContainer({
     <div className="flex items-center ">
       <div
         className={`text-sm ${
-          canceled ? "line-through text-red-500" : getDelayColor(time.diff)
+          canceled
+            ? "line-through text-red-500"
+            : getDelayColor(time.diff, true)
         } hidden sm:block`}
       >
         (+{time.diff || 0}min)

@@ -5,27 +5,23 @@ import { CircleAlert } from "lucide-react";
 import moment from "moment";
 import { getDelayColor } from "@/util/colors";
 import { cn, getTimeJourney } from "@/util";
-import { Stop } from "@/types/journey";
 import { getVendoJourney } from "@/app/api/journey";
 import LoadFactor from "./LoadFactor";
 import { Spinner } from "flowbite-react";
 import { HaltT } from "@/types/vendo";
 import { useRouter } from "next/navigation";
+import { StopOver } from "hafas-client";
 
 export default function StopsContainer({
   stops,
-  risId,
 }: {
-  stops: Stop[];
-  risId: string;
+  stops: (StopOver & { loadFactor?: string })[];
 }) {
   const router = useRouter();
-  const [stopsWithVendo, setStopsWithVendo] = useState<Stop[]>(stops);
-  const [vendoJourneyLoading, setVendoJourneyLoading] = useState(false);
   const [progress, setProgress] = useState(0);
   const [heigthProgress, setHeightProgress] = useState(0);
   const [currentTime, setCurrentTime] = useState(
-    moment().tz("Europe/Berlin").add(0, "minutes")
+    moment().tz("Europe/Berlin").add(0, "minutes"),
   );
   const calculateAndSetProgress = () => {
     if (stops.length < 2) return 0;
@@ -75,12 +71,12 @@ export default function StopsContainer({
       segmentProgress * ((nextTime - prevTime) / (endTime - startTime)) * 100;
 
     const stopPositions = stops.map(
-      (_, index) => (index / (stops.length - 1)) * 100
+      (_, index) => (index / (stops.length - 1)) * 100,
     );
     setHeightProgress(
       stopPositions[prevStopIndex] +
         segmentProgress *
-          (stopPositions[nextStopIndex] - stopPositions[prevStopIndex])
+          (stopPositions[nextStopIndex] - stopPositions[prevStopIndex]),
     );
     setProgress(overallProgress);
   };
@@ -98,48 +94,18 @@ export default function StopsContainer({
     calculateAndSetProgress();
   }, [currentTime, stops]);
 
-  useEffect(() => {
-    if (!risId) return;
-    async function fetchJourney() {
-      setVendoJourneyLoading(true);
-      const vendoJourneyData = await getVendoJourney(risId);
-      if (!vendoJourneyData) {
-        setVendoJourneyLoading(false);
-        return;
-      }
-      setStopsWithVendo((prev) =>
-        prev.map((stop) => {
-          const vendoJourneyStop = vendoJourneyData.stops?.find(
-            (s: HaltT) => s?.ort.evaNr === stop.station.evaNo
-          );
-          if (!vendoJourneyStop) return stop;
-          return {
-            ...stop,
-            loadFactor: vendoJourneyStop.loadFactor,
-          };
-        })
-      );
-      setVendoJourneyLoading(false);
-    }
-    fetchJourney();
-  }, [risId]);
-
   const handleStopSelect = useCallback(
     (evaNo: string) => {
       startTransition(() => {
         router.push(`/board/${evaNo}`);
       });
     },
-    [router]
+    [router],
   );
 
-  const isCurrentStop = (stop: Stop, index: number) => {
-    const arrivalTime = moment(
-      stop.arrivalTime?.predicted || stop.arrivalTime?.target || 0
-    );
-    const departureTime = moment(
-      stop.departureTime?.predicted || stop.departureTime?.target || 0
-    );
+  const isCurrentStop = (stop: StopOver, index: number) => {
+    const arrivalTime = moment(stop.arrival || stop.plannedArrival || 0);
+    const departureTime = moment(stop.departure || stop.plannedDeparture || 0);
 
     // First stop is current if we haven't departed yet
     if (index === 0 && departureTime.isValid()) {
@@ -175,19 +141,15 @@ export default function StopsContainer({
     );
   };
 
-  const isCompletedStop = (stop: Stop, index: number) => {
+  const isCompletedStop = (stop: StopOver, index: number) => {
     // Last stop is completed if we've arrived
     if (index === stops.length - 1) {
-      const arrivalTime = moment(
-        stop.arrivalTime?.predicted || stop.arrivalTime?.target
-      );
+      const arrivalTime = moment(stop.arrival || stop.plannedArrival);
       return arrivalTime.isValid() && currentTime.isAfter(arrivalTime);
     }
 
     // Other stops are completed if we've departed
-    const departureTime = moment(
-      stop.departureTime?.predicted || stop.departureTime?.target
-    );
+    const departureTime = moment(stop.departure || stop.plannedDeparture);
     return departureTime.isValid() && currentTime.isAfter(departureTime);
   };
 
@@ -203,14 +165,10 @@ export default function StopsContainer({
           ></div>
         </div>
         <div className="flex justify-between mt-2 text-sm text-muted-foreground">
-          <span>
-            {moment(stops[0].departureTime?.predicted || 0).format("HH:mm")}
-          </span>
+          <span>{moment(stops[0].departure || 0).format("HH:mm")}</span>
           <span>{Math.round(progress)}%</span>
           <span>
-            {moment(stops[stops.length - 1].arrivalTime?.predicted || 0).format(
-              "HH:mm"
-            )}
+            {moment(stops[stops.length - 1].arrival || 0).format("HH:mm")}
           </span>
         </div>
       </div>
@@ -226,13 +184,13 @@ export default function StopsContainer({
 
         {/* Stops */}
         <div className="space-y-6">
-          {stopsWithVendo.map((stop, index) => {
+          {stops.map((stop, index) => {
             const isCompleted = isCompletedStop(stop, index);
             const isCurrent = isCurrentStop(stop, index);
-            const isCanceled = stop.status === "Canceled";
+            const isCanceled = stop.cancelled;
 
             return (
-              <div key={stop.station.evaNo} className="relative pl-10">
+              <div key={stop.stop?.id} className="relative pl-10">
                 {/* Station marker */}
                 <div
                   className={cn(
@@ -241,7 +199,7 @@ export default function StopsContainer({
                       ? "bg-blue-500 border-blue-500"
                       : "bg-background border-gray-500",
                     isCurrent ? "bg-blue-500 border-blue-800" : "",
-                    isCanceled ? "bg-red-500 border-red-500" : ""
+                    isCanceled ? "bg-red-500 border-red-500" : "",
                   )}
                 />
 
@@ -250,42 +208,63 @@ export default function StopsContainer({
                   className={cn(
                     "rounded-lg py-0.5 px-3 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors cursor-pointer",
                     isCurrent ? "bg-blue-500/5" : "",
-                    isCanceled ? "bg-red-500/5" : ""
+                    isCanceled ? "bg-red-500/5" : "",
                   )}
-                  onClick={() => handleStopSelect(stop.station.evaNo)}
+                  onClick={() => handleStopSelect(stop.stop?.id || "")}
                 >
                   <div className="flex items-center">
-                    <div className="flex flex-col min-w-[60px]">
-                      <p className="flex items-center whitespace-nowrap">
-                        <span className="mr-2">
-                          {moment(
-                            stop.departureTime?.target ||
-                              stop.arrivalTime?.target
-                          ).format("HH:mm") || "N/A"}
-                        </span>
-                      </p>
-                      <p
-                        className={`whitespace-nowrap ${getDelayColor(
-                          stop.departureTime
-                            ? stop.departureTime.diff
-                            : stop.arrivalTime?.diff || null
+                    <div className="flex flex-row items-center mr-2 sm:mr-4">
+                      <div className="flex flex-col sm:mr-3 mr-1">
+                        <p className="flex items-center whitespace-nowrap">
+                          <span className="">
+                            {moment(
+                              stop.plannedDeparture || stop.plannedArrival,
+                            ).format("HH:mm") || "N/A"}
+                          </span>
+                        </p>
+                        <p
+                          className={`whitespace-nowrap ${getDelayColor(
+                            stop.plannedDeparture
+                              ? stop.departureDelay == undefined
+                                ? null
+                                : stop.departureDelay
+                              : stop.arrivalDelay == undefined
+                                ? null
+                                : stop.arrivalDelay,
+                          )}`}
+                        >
+                          {moment(stop.departure || stop.arrival).format(
+                            "HH:mm",
+                          ) || "N/A"}{" "}
+                        </p>
+                      </div>
+                      <span
+                        className={`whitespace-nowrap text-sm flex items-center ${getDelayColor(
+                          stop.plannedDeparture
+                            ? stop.departureDelay == undefined
+                              ? null
+                              : stop.departureDelay
+                            : stop.arrivalDelay == undefined
+                              ? null
+                              : stop.arrivalDelay,
                         )}`}
                       >
-                        {moment(
-                          stop.departureTime?.predicted ||
-                            stop.arrivalTime?.predicted
-                        ).format("HH:mm") || "N/A"}
-                      </p>
+                        (+
+                        {stop.plannedDeparture
+                          ? (stop.departureDelay || 0) / 60 || 0
+                          : (stop.arrivalDelay || 0) / 60 || 0}
+                        <span className="sm:inline hidden">min</span>)
+                      </span>
                     </div>
 
                     <div className="flex justify-between w-full items-center">
                       <div className="flex flex-col">
-                        {stop.messages.map((message) => {
-                          if (seenMessages.has(message.code)) return null;
-                          seenMessages.set(message.code, message.text);
+                        {stop.remarks?.map((message) => {
+                          // if (seenMessages.has(message.code)) return null;
+                          // seenMessages.set(message.code, message.text);
                           return (
                             <span
-                              key={message.code}
+                              key={message.text}
                               className="text-red-500 flex items-center gap-1"
                             >
                               <CircleAlert color="#F05252" size={13} />
@@ -296,22 +275,21 @@ export default function StopsContainer({
                         <p
                           className={cn(
                             "font-medium",
-                            isCanceled ? "text-red-900 line-through" : ""
+                            isCanceled ? "text-red-900 line-through" : "",
                           )}
                         >
-                          {stop.station.name}
+                          {stop.stop?.name}
                         </p>
                       </div>
                       {/* Track information */}
                       <div className="whitespace-nowrap flex items-center gap-2 min-w-[80px] justify-end">
-                        {vendoJourneyLoading && (
-                          <Spinner size="sm" color="gray" />
-                        )}
                         {stop.loadFactor && (
                           <LoadFactor loadFactor={stop.loadFactor} />
                         )}
                         <strong className="text-right w-8">
-                          {stop.track.prediction || "N/A"}
+                          {stop.departurePlatform ||
+                            stop.arrivalPlatform ||
+                            "N/A"}
                         </strong>
                       </div>
                     </div>

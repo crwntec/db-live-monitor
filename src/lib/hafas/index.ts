@@ -15,7 +15,7 @@ export const findTrips = async (
   hafasClient: HafasClient,
   limit: number,
   allowedEVAPrefixes: string[],
-  date?: Date
+  date?: Date,
 ): Promise<Trip[]> => {
   const cacheKey = `${query}-${allowedEVAPrefixes.join(",")}`;
   if (tripCache.has(cacheKey)) {
@@ -25,11 +25,14 @@ export const findTrips = async (
   if (!hafasClient.tripsByName) {
     throw new Error("tripsByName is not defined on hafasClient");
   }
-
   const tripPromise = hafasClient
     .tripsByName(query, {
-      fromWhen: date ? moment(date).subtract(1, "seconds").tz("Europe/Berlin").toDate() : moment().tz("Europe/Berlin").startOf("day").toDate(),
-      untilWhen: date ? moment(date).add(1, "seconds").tz("Europe/Berlin").toDate() : moment().tz("Europe/Berlin").endOf("day").toDate(),
+      fromWhen: date
+        ? moment(date).subtract(1, "seconds").tz("Europe/Berlin").toDate()
+        : moment().tz("Europe/Berlin").startOf("day").toDate(),
+      untilWhen: date
+        ? moment(date).add(1, "seconds").tz("Europe/Berlin").toDate()
+        : moment().tz("Europe/Berlin").endOf("day").toDate(),
       products: {
         suburban: true,
         subway: false,
@@ -38,7 +41,7 @@ export const findTrips = async (
         ferry: false,
         regional: true,
         taxi: false,
-        onCall: false
+        onCall: false,
       },
       onlyCurrentlyRunning: false,
     })
@@ -58,7 +61,7 @@ export const findTrips = async (
         })
         .slice(0, limit);
       return filteredTrips;
-    })
+    });
 
   tripCache.set(cacheKey, tripPromise);
   return tripPromise;
@@ -66,7 +69,7 @@ export const findTrips = async (
 
 export const tripInfo = async (
   tripId: string,
-  hafasClient: HafasClient
+  hafasClient: HafasClient,
 ): Promise<Trip> => {
   if (tripInfoCache.has(tripId)) {
     return tripInfoCache.get(tripId)!;
@@ -85,27 +88,28 @@ export const tripInfo = async (
 };
 
 export const convertTripIdToRis = async (hafasTrip: Trip): Promise<string> => {
-  if (!hafasTrip || !hafasTrip.origin || !hafasTrip.origin.id) return "";
+  // if (!hafasTrip || !hafasTrip.origin || !hafasTrip.origin.id) return "";
 
-  const cacheKey = hafasTrip.line?.fahrtNr || "";
-  if (tripIdCache.has(cacheKey)) {
-    return tripIdCache.get(cacheKey)!;
-  }
+  // const cacheKey = hafasTrip.line?.fahrtNr || "";
+  // if (tripIdCache.has(cacheKey)) {
+  //   return tripIdCache.get(cacheKey)!;
+  // }
 
-  const timeFrame = {
-    start: hafasTrip.plannedDeparture || "",
-    end: hafasTrip.plannedDeparture || "",
-  };
+  // const timeFrame = {
+  //   start: hafasTrip.plannedDeparture || "",
+  //   end: hafasTrip.plannedDeparture || "",
+  // };
 
-  const tripPromise = stationBoard
-    .departures(hafasTrip.origin.id, timeFrame)
-    .then((regioGuideResults) => {
-      const matchingTrip = regioGuideResults.items.find(
-        (item) => String(item.train.no) === String(hafasTrip.line?.fahrtNr)
-      );
-      return matchingTrip ? matchingTrip.train.journeyId || "" : "";
-    });
+  // const tripPromise = stationBoard
+  //   .departures(hafasTrip.origin.id, timeFrame)
+  //   .then((regioGuideResults) => {
+  //     const matchingTrip = regioGuideResults.items.find(
+  //       (item) => String(item.train.no) === String(hafasTrip.line?.fahrtNr),
+  //     );
+  //     return matchingTrip ? matchingTrip.train.journeyId || "" : "";
+  //   });
 
-  tripIdCache.set(cacheKey, tripPromise);
-  return tripPromise;
+  // tripIdCache.set(cacheKey, tripPromise);
+  // return tripPromise;
+  return "TODO";
 };

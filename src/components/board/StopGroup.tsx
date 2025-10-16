@@ -20,14 +20,7 @@ export default function StopGroup({
       } border-b border-gray-700 animate-fadeIn`}
       style={{ animationDelay: `${index * 50}ms` }}
     >
-      <StopBase
-        stop={stopGroup[0]}
-        stopGroup={stopGroup}
-        key={index}
-        hasLeft={hasLeft(stopGroup[0], 0)}
-        index={index}
-      />
-      {/*{stopGroup.map((stop, index) => (
+      {stopGroup.map((stop, index) => (
         <StopBase
           stop={stop}
           stopGroup={stopGroup}
@@ -35,7 +28,7 @@ export default function StopGroup({
           hasLeft={hasLeft(stop, 0)}
           index={index}
         />
-      ))}*/}
+      ))}
     </li>
   );
 }

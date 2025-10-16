@@ -1,6 +1,8 @@
 type HaltT = {
   ankunftsDatum?: string;
+  ezAnkunftsDatum?: string;
   abgangsDatum?: string;
+  ezAbgangsDatum?: string;
   ort: {
     name: string;
     locationId: string;
@@ -12,6 +14,7 @@ type HaltT = {
     stationId: string;
   };
   gleis?: string;
+  ezGleis?: string;
   plattform?: string;
   plattformTyp?: string;
   attributNotizen: { text?: string; key?: string; priority?: number }[];

@@ -1,4 +1,4 @@
-import { getJourneyFromRisId } from "@/app/api/journey";
+import { getJourneyFromTrainNumber } from "@/app/api/journey";
 import Journey from "./Journey";
 
 export default async function Page({
@@ -9,15 +9,18 @@ export default async function Page({
   searchParams: Promise<{ referringEva: string }>;
 }) {
   const { slug } = await params;
+  const sp = await searchParams;
 
-  const dataPromise = getJourneyFromRisId(slug);
+  const dataPromise = getJourneyFromTrainNumber(
+    sp["trainName"],
+    slug,
+    sp["referringEva"],
+    sp["date"],
+  );
 
   return (
     <>
-      <Journey
-        dataPromise={dataPromise}
-        referringEva={(await searchParams)["referringEva"]}
-      />
+      <Journey dataPromise={dataPromise} referringEva={sp["referringEva"]} />
     </>
   );
 }

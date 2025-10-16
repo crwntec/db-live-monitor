@@ -3,6 +3,7 @@ import { Stop as JourneyStop } from "@/types/journey";
 import moment from "moment-timezone"; // This would be in lib/utils.ts
 import { type ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
+import { StopOver } from "hafas-client";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -27,14 +28,10 @@ export function getTime(stop: Stop, usePredicted = false) {
     departureTime || arrivalTime || moment().tz("Europe/Berlin").toISOString()
   );
 }
-export function getTimeJourney(stop: JourneyStop, usePredicted = false) {
+export function getTimeJourney(stop: StopOver, usePredicted = false) {
   if (!stop) return moment().tz("Europe/Berlin").toISOString();
-  const departureTime = usePredicted
-    ? stop.departureTime?.predicted
-    : stop.departureTime?.target;
-  const arrivalTime = usePredicted
-    ? stop.arrivalTime?.predicted
-    : stop.arrivalTime?.target;
+  const departureTime = usePredicted ? stop.departure : stop.plannedDeparture;
+  const arrivalTime = usePredicted ? stop.arrival : stop.plannedArrival;
   return (
     departureTime || arrivalTime || moment().tz("Europe/Berlin").toISOString()
   );

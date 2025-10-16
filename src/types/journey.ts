@@ -3,29 +3,12 @@ import {
   Hint,
   Warning,
   Status as HStatus,
+  Trip,
 } from "hafas-client";
 import { CarriageSequenceT } from "./carriageSequence";
-export interface JourneyT {
-  name: string;
-  no: number;
-  hafasId: string;
-  journeyId: string;
-  tenantId: string;
-  administrationId: string;
-  operatorName: string;
-  operatorCode: string;
-  category: string;
-  type: string;
-  date: Date;
-  stops: Stop[];
-  started: boolean;
-  finished: boolean;
-  hims: Him[];
+export interface JourneyT extends Trip {
   remarks: readonly (Hint | HStatus | Warning)[];
-  polyline: FeatureCollection | null;
-  validUntil: Date;
-  validFrom: Date;
-  isLoyaltyCaseEligible: boolean;
+  polyline: FeatureCollection | undefined;
   carriageSequence?: CarriageSequenceT | null;
 }
 export interface Him {
