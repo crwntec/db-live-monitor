@@ -1,13 +1,9 @@
 import {
   FeatureCollection,
-  Hint,
-  Warning,
-  Status as HStatus,
   Trip,
 } from "hafas-client";
 import { CarriageSequenceT } from "./carriageSequence";
 export interface JourneyT extends Trip {
-  remarks: readonly (Hint | HStatus | Warning)[];
   polyline: FeatureCollection | undefined;
   carriageSequence?: CarriageSequenceT | null;
 }

@@ -44,6 +44,9 @@ export default function StopBase({
       referringEva: pathname.split("/")[2] ?? "",
       trainName: stop.transport.category + stop.transport.number,
       trainNumber: stop.transport.number.toString(),
+      date: stop.arrival
+        ? stop.arrival.timeSchedule
+        : stop.departure?.timeSchedule || "",
     });
 
     if (wing) {
@@ -82,7 +85,7 @@ export default function StopBase({
       stop.departure ? stop.departure.time : stop.arrival?.time || "",
       stop.departure
         ? stop.departure.timeSchedule
-        : stop.arrival?.timeSchedule || "",
+        : stop.arrival?.timeSchedule || ""
     ),
   };
 
@@ -106,16 +109,23 @@ export default function StopBase({
             className={`${hasLeft ? "line-through" : ""} ${
               stop.canceled ? "line-through text-red-800" : ""
             } ${
-              stop.transport.differingDestination ||
-              stop.transport.differingOrigin ||
+              (stop.transport.differingDestination && !stop.arrival) ||
+              (stop.transport.differingOrigin && !stop.departure) ||
               stop.isEarlyTerminated
                 ? "text-red-500"
                 : ""
             } text-sm md:text-base`}
           >
             {stop.departure?.destination
-              ? `Nach ${stop.isEarlyTerminated && stop.transport.differingDestination ? stop.transport.differingDestination : stop.departure.destination.name}`
-              : `Von ${stop.transport.differingOrigin?.name || stop.arrival?.origin.name}`}
+              ? `Nach ${
+                  stop.isEarlyTerminated && stop.transport.differingDestination
+                    ? stop.transport.differingDestination
+                    : stop.departure.destination.name
+                }`
+              : `Von ${
+                  stop.transport.differingOrigin?.name ||
+                  stop.arrival?.origin.name
+                }`}
           </span>
         </div>
         <div className="flex flex-col md:flex-row lg:flex-col gap-2">
@@ -124,15 +134,15 @@ export default function StopBase({
             <div className="flex justify-end gap-1 w-14">
               <span
                 className={`${
-                  stop.arrival?.platformSchedule === stop.arrival?.platform
+                  stop.arrival ? stop.arrival?.platformSchedule === stop.arrival?.platform : stop.departure?.platformSchedule === stop.departure?.platform
                     ? "text-green-500"
                     : "line-through text-red-500"
                 }`}
               >
-                {stop.arrival?.platform || stop.departure?.platform}
+                {stop.arrival?.platformSchedule || stop.departure?.platformSchedule}
               </span>
-              {stop.arrival?.platformSchedule !== stop.arrival?.platform && (
-                <span>{stop.arrival?.platform}</span>
+              {stop.arrival?.platformSchedule !== stop.arrival?.platform || stop.departure?.platformSchedule !== stop.departure?.platform && (
+                stop.arrival?.platform || stop.departure?.platform
               )}
             </div>
           </div>

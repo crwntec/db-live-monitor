@@ -7,9 +7,124 @@ interface ExtendedStopOver extends StopOver {
   loadFactor?: string;
 }
 
+function mergeStopRemarks(vendoStop: HaltT, hafasStop: StopOver) {
+  const combinedRemarks = [
+    ...(vendoStop.himNotizen
+      ?.filter((n) => n.text)
+      .map((note) => ({
+        type: "warning" as const,
+        code: note.ueberschrift,
+        text: note.text || "",
+      })) || []),
+    ...(vendoStop.echtzeitNotizen
+      ?.filter((n) => n.text)
+      .map((note) => ({
+        type: "status" as const,
+        code: null,
+        text: note.text || "",
+      })) || []),
+    ...(vendoStop.attributNotizen
+      ?.filter((n) => n.text)
+      .map((note) => ({
+        type: "hint" as const,
+        code: note.key,
+        text: note.text || "",
+      })) || []),
+    ...(vendoStop.serviceNotiz?.text
+      ? [
+          {
+            type: "hint" as const,
+            code: vendoStop.serviceNotiz.key,
+            text: vendoStop.serviceNotiz.text,
+          },
+        ]
+      : []),
+  ];
+  hafasStop.remarks?.map((r) => {
+    // Check if any remark with the same text already exists (regardless of type)
+    const textExists = combinedRemarks.some((n) => n.text === r.text);
+
+    if (!textExists) {
+      if (r.type === "warning") {
+        combinedRemarks.push({
+          type: "warning",
+          code: undefined,
+          text: r.text || "",
+        });
+      } else if (r.type === "status") {
+        combinedRemarks.push({
+          type: "status",
+          code: null,
+          text: r.text || "",
+        });
+      } else if (r.type === "hint") {
+        combinedRemarks.push({
+          type: "hint",
+          code: r.code,
+          text: r.text || "",
+        });
+      }
+    }
+  });
+
+  return combinedRemarks;
+}
+function mergeJourneyRemarks(vendoJourney: VendoJourneyT, hafasTrip: Trip) {
+   const combinedRemarks = [
+    ...(vendoJourney.himNotizen
+      ?.filter((n) => n.text)
+      .map((note) => ({
+        type: "warning" as const,
+        text: note.text || "",
+      })) || []),
+    ...(vendoJourney.echtzeitNotizen
+      ?.filter((n) => n.text)
+      .map((note) => ({
+        type: "status" as const,
+        text: note.text || "",
+      })) || []),
+    ...(vendoJourney.attributNotizen
+      ?.filter((n) => n.text)
+      .map((note) => ({
+        type: "hint" as const,
+        code: note.key,
+        text: note.text || "",
+      })) || []),
+  ];
+  hafasTrip.remarks?.map((r) => {
+    // Check if any remark with the same text already exists (regardless of type)
+    const textExists = combinedRemarks.some(
+      (n) =>
+        r.text && n.text.replace(/\s/g, "") === r.text.replace(/\s/g, "")
+    );
+
+    if (!textExists) {
+      if (r.type === "warning") {
+        combinedRemarks.push({
+          type: "warning",
+          text: r.text || "",
+        });
+      } else if (r.type === "status") {
+        combinedRemarks.push({
+          type: "status",
+          text: r.text || "",
+        });
+      } else if (r.type === "hint") {
+        combinedRemarks.push({
+          type: "hint",
+          code: r.code,
+          text: r.text || "",
+        });
+      }
+    }
+  });
+
+  return combinedRemarks;
+}
+
 function mergeHafasVendo(
   vendoJourney: VendoJourneyT | null,
-  hafasTrip: Trip,
+  hafasTrip: Trip
 ): Trip {
   if (!vendoJourney) return hafasTrip;
 
@@ -45,52 +160,19 @@ function mergeHafasVendo(
       vendoActualArrival && vendoPlannedArrival
         ? moment(vendoActualArrival).diff(
             moment(vendoPlannedArrival),
-            "seconds",
+            "seconds"
           )
         : hafasStop.arrivalDelay;
     const departureDelay =
       vendoActualDeparture && vendoPlannedDeparture
         ? moment(vendoActualDeparture).diff(
             moment(vendoPlannedDeparture),
-            "seconds",
+            "seconds"
           )
         : hafasStop.departureDelay;
 
     // Combine remarks from both sources
-    const combinedRemarks = [
-      ...(hafasStop.remarks || []),
-      ...(vendoStop.himNotizen
-        ?.filter((n) => n.text)
-        .map((note) => ({
-          type: "warning" as const,
-          code: note.key,
-          text: note.text || "",
-        })) || []),
-      ...(vendoStop.echtzeitNotizen
-        ?.filter((n) => n.text)
-        .map((note) => ({
-          type: "status" as const,
-          code: note.key,
-          text: note.text || "",
-        })) || []),
-      ...(vendoStop.attributNotizen
-        ?.filter((n) => n.text)
-        .map((note) => ({
-          type: "hint" as const,
-          code: note.key,
-          text: note.text || "",
-        })) || []),
-      ...(vendoStop.serviceNotiz?.text
-        ? [
-            {
-              type: "hint" as const,
-              code: vendoStop.serviceNotiz.key,
-              text: vendoStop.serviceNotiz.text,
-            },
-          ]
-        : []),
-    ];
-
+    const combinedRemarks = mergeStopRemarks(vendoStop, hafasStop);
     return {
       ...hafasStop,
       // Trust Vendo planned times, fallback to Hafas
@@ -148,42 +230,19 @@ function mergeHafasVendo(
     vendoOriginActualDeparture && vendoOriginPlannedDeparture
       ? moment(vendoOriginActualDeparture).diff(
           moment(vendoOriginPlannedDeparture),
-          "seconds",
+          "seconds"
         )
       : hafasTrip.departureDelay;
   const tripArrivalDelay =
     vendoDestinationActualArrival && vendoDestinationPlannedArrival
       ? moment(vendoDestinationActualArrival).diff(
           moment(vendoDestinationPlannedArrival),
-          "seconds",
+          "seconds"
         )
       : hafasTrip.arrivalDelay;
 
   // Merge trip-level remarks
-  const mergedRemarks = [
-    ...(hafasTrip.remarks || []),
-    ...(vendoJourney.himNotizen
-      ?.filter((n) => n.text)
-      .map((note) => ({
-        type: "warning" as const,
-        code: note.key,
-        text: note.text || "",
-      })) || []),
-    ...(vendoJourney.echtzeitNotizen
-      ?.filter((n) => n.text)
-      .map((note) => ({
-        type: "status" as const,
-        code: note.key,
-        text: note.text || "",
-      })) || []),
-    ...(vendoJourney.attributNotizen
-      ?.filter((n) => n.text)
-      .map((note) => ({
-        type: "hint" as const,
-        code: note.key,
-        text: note.text || "",
-      })) || []),
-  ];
+  const mergedRemarks = mergeJourneyRemarks(vendoJourney, hafasTrip);
 
   return {
     ...hafasTrip,

@@ -1,14 +1,11 @@
 "use client";
 
 import { useState, useEffect, useCallback, startTransition } from "react";
-import { CircleAlert } from "lucide-react";
+import { Clock, Info, TriangleAlert } from "lucide-react";
 import moment from "moment";
 import { getDelayColor } from "@/util/colors";
 import { cn, getTimeJourney } from "@/util";
-import { getVendoJourney } from "@/app/api/journey";
 import LoadFactor from "./LoadFactor";
-import { Spinner } from "flowbite-react";
-import { HaltT } from "@/types/vendo";
 import { useRouter } from "next/navigation";
 import { StopOver } from "hafas-client";
 
@@ -21,7 +18,7 @@ export default function StopsContainer({
   const [progress, setProgress] = useState(0);
   const [heigthProgress, setHeightProgress] = useState(0);
   const [currentTime, setCurrentTime] = useState(
-    moment().tz("Europe/Berlin").add(0, "minutes"),
+    moment().tz("Europe/Berlin").add(0, "minutes")
   );
   const calculateAndSetProgress = () => {
     if (stops.length < 2) return 0;
@@ -71,12 +68,12 @@ export default function StopsContainer({
       segmentProgress * ((nextTime - prevTime) / (endTime - startTime)) * 100;
 
     const stopPositions = stops.map(
-      (_, index) => (index / (stops.length - 1)) * 100,
+      (_, index) => (index / (stops.length - 1)) * 100
     );
     setHeightProgress(
       stopPositions[prevStopIndex] +
         segmentProgress *
-          (stopPositions[nextStopIndex] - stopPositions[prevStopIndex]),
+          (stopPositions[nextStopIndex] - stopPositions[prevStopIndex])
     );
     setProgress(overallProgress);
   };
@@ -100,7 +97,7 @@ export default function StopsContainer({
         router.push(`/board/${evaNo}`);
       });
     },
-    [router],
+    [router]
   );
 
   const isCurrentStop = (stop: StopOver, index: number) => {
@@ -153,8 +150,6 @@ export default function StopsContainer({
     return departureTime.isValid() && currentTime.isAfter(departureTime);
   };
 
-  const seenMessages = new Map();
-
   return (
     <div className="space-y-2">
       <div className="mt-4">
@@ -189,6 +184,19 @@ export default function StopsContainer({
             const isCurrent = isCurrentStop(stop, index);
             const isCanceled = stop.cancelled;
 
+            const hints = stop.remarks?.filter((r) => r.type === "hint") || [];
+            const statuses =
+              stop.remarks?.filter((r) => r.type === "status") || [];
+            const warnings =
+              stop.remarks?.filter(
+                (r) =>
+                  r.type === "warning" ||
+                  r.type === "foreign-id" ||
+                  r.type === "local-fare-zone" ||
+                  r.type === "stop-website" ||
+                  r.type === "stop-dhid" ||
+                  r.type === "transit-authority"
+              ) || [];
             return (
               <div key={stop.stop?.id} className="relative pl-10">
                 {/* Station marker */}
@@ -199,7 +207,7 @@ export default function StopsContainer({
                       ? "bg-blue-500 border-blue-500"
                       : "bg-background border-gray-500",
                     isCurrent ? "bg-blue-500 border-blue-800" : "",
-                    isCanceled ? "bg-red-500 border-red-500" : "",
+                    isCanceled ? "bg-red-500 border-red-500" : ""
                   )}
                 />
 
@@ -208,7 +216,7 @@ export default function StopsContainer({
                   className={cn(
                     "rounded-lg py-0.5 px-3 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors cursor-pointer",
                     isCurrent ? "bg-blue-500/5" : "",
-                    isCanceled ? "bg-red-500/5" : "",
+                    isCanceled ? "bg-red-500/5" : ""
                   )}
                   onClick={() => handleStopSelect(stop.stop?.id || "")}
                 >
@@ -218,7 +226,7 @@ export default function StopsContainer({
                         <p className="flex items-center whitespace-nowrap">
                           <span className="">
                             {moment(
-                              stop.plannedDeparture || stop.plannedArrival,
+                              stop.plannedDeparture || stop.plannedArrival
                             ).format("HH:mm") || "N/A"}
                           </span>
                         </p>
@@ -229,12 +237,12 @@ export default function StopsContainer({
                                 ? null
                                 : stop.departureDelay
                               : stop.arrivalDelay == undefined
-                                ? null
-                                : stop.arrivalDelay,
+                              ? null
+                              : stop.arrivalDelay
                           )}`}
                         >
                           {moment(stop.departure || stop.arrival).format(
-                            "HH:mm",
+                            "HH:mm"
                           ) || "N/A"}{" "}
                         </p>
                       </div>
@@ -245,8 +253,8 @@ export default function StopsContainer({
                               ? null
                               : stop.departureDelay
                             : stop.arrivalDelay == undefined
-                              ? null
-                              : stop.arrivalDelay,
+                            ? null
+                            : stop.arrivalDelay
                         )}`}
                       >
                         (+
@@ -258,28 +266,53 @@ export default function StopsContainer({
                     </div>
 
                     <div className="flex justify-between w-full items-center">
-                      <div className="flex flex-col">
-                        {stop.remarks?.map((message) => {
-                          // if (seenMessages.has(message.code)) return null;
-                          // seenMessages.set(message.code, message.text);
-                          return (
-                            <span
-                              key={message.text}
-                              className="text-red-500 flex items-center gap-1"
-                            >
-                              <CircleAlert color="#F05252" size={13} />
-                              <span className="">{message.text}</span>
-                            </span>
-                          );
-                        })}
-                        <p
-                          className={cn(
-                            "font-medium",
-                            isCanceled ? "text-red-900 line-through" : "",
-                          )}
-                        >
-                          {stop.stop?.name}
-                        </p>
+                      <div className="flex flex-col gap-1">
+                        {/* Status messages (critical) */}
+                        {statuses.map((remark) => (
+                          <span
+                            key={remark.text}
+                            className="text-red-400 flex items-center gap-1 text-xs"
+                          >
+                            <Clock size={12} className="flex-shrink-0" />
+                            <span>{remark.text}</span>
+                          </span>
+                        ))}
+
+                        {/* Warnings */}
+                        {warnings.map((remark) => (
+                          <span
+                            key={remark.text}
+                            className="text-orange-400 flex items-center gap-1 text-xs"
+                          >
+                            <TriangleAlert
+                              size={12}
+                              className="flex-shrink-0"
+                            />
+                            <span>{remark.text}</span>
+                          </span>
+                        ))}
+
+                        {/* Hints */}
+                        {hints.map((remark) => (
+                          <span
+                            key={remark.text}
+                            className="text-gray-400 flex items-center gap-1 text-xs"
+                          >
+                            <Info size={12} className="flex-shrink-0" />
+                            <span>{remark.text}</span>
+                          </span>
+                        ))}
+
+                        <div className="flex items-center gap-2">
+                          <p
+                            className={cn(
+                              "font-medium",
+                              isCanceled ? "text-red-900 line-through" : ""
+                            )}
+                          >
+                            {stop.stop?.name}
+                          </p>
+                        </div>
                       </div>
                       {/* Track information */}
                       <div className="whitespace-nowrap flex items-center gap-2 min-w-[80px] justify-end">

@@ -80,7 +80,6 @@ export function formatUIC(identifier: string) {
 
 export function getLongNameForClassNumber(classNumber: string) {
   const _classNumber = parseInt(classNumber.substring(1));
-  // console.log(_classNumber);
   switch (_classNumber) {
     case 147:
     case 146:
@@ -96,6 +95,7 @@ export function getLongNameForClassNumber(classNumber: string) {
     case 401:
       return "401 (ICE 1)";
     case 402:
+    case 808:
       return "402 (ICE 2)";
     case 403:
       return "403 (ICE 3)";
@@ -132,7 +132,7 @@ export function getLongNameForClassNumber(classNumber: string) {
     case 440:
       return "Alstom Coradia Continental";
     default:
-      return "Wagen";
+      return "Wagen: " + classNumber;
   }
 }
 

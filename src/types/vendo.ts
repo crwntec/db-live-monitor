@@ -18,8 +18,13 @@ type HaltT = {
   plattform?: string;
   plattformTyp?: string;
   attributNotizen: { text?: string; key?: string; priority?: number }[];
-  echtzeitNotizen: { text?: string; key?: string; priority?: number }[];
-  himNotizen: { text?: string; key?: string; priority?: number }[];
+  echtzeitNotizen: { text?: string; prio?: number }[];
+  himNotizen: {
+    text?: string;
+    ueberschrift?: string;
+    prio?: number;
+    letzteAktualisierung?: string;
+  }[];
   serviceNotiz?: {
     key: string;
     text: string;
@@ -42,12 +47,13 @@ type VendoJourneyT = {
   mitteltext: string;
   halte: HaltT[];
   stops: HaltT[];
-  himNotizen: { text?: string; key?: string; priority?: number }[];
-  echtzeitNotizen: { text?: string; key?: string; priority?: number }[];
-  attributNotizen: {
-    text: string;
-    key: string;
-    priority?: number;
+  attributNotizen: { text?: string; key?: string; priority?: number }[];
+  echtzeitNotizen: { text?: string; prio?: number }[];
+  himNotizen: {
+    text?: string;
+    ueberschrift?: string;
+    prio?: number;
+    letzteAktualisierung?: string;
   }[];
   verkehrsmittelNummer: string;
   richtung: string;

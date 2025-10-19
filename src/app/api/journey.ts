@@ -5,12 +5,12 @@ import {
   createHafas,
   tripInfo,
   findTrips,
-  convertTripIdToRis,
+  // convertTripIdToRis,
 } from "@/lib/hafas";
 import mergeHafasVendo from "@/lib/merge";
 import { JourneyT } from "@/types/journey";
 import { getCarriageSequence } from "@/util/request/carriageSequenceRequest";
-import { Trip } from "hafas-client";
+// import { Trip } from "hafas-client";
 import moment from "moment";
 
 export const getJourneyFromTrainNumber = async (
@@ -40,7 +40,6 @@ export const getJourneyFromTrainNumber = async (
   const fixed = hafasTrip.id.replace(regex, hafasTrip.line?.fahrtNr || "");
   // Fetch Vendo journey data
   const vendoJourney = await getVendoJourney(fixed);
-
   // Merge Hafas and Vendo data (Vendo takes priority)
   const mergedTrip = mergeHafasVendo(vendoJourney, hafasTrip);
   // console.log(mergedTrip);
@@ -52,6 +51,7 @@ export const getJourneyFromTrainNumber = async (
     number: parseInt(trainNumber),
     time: mdate.toDate(),
   });
+  // console.log(carriageSequence);
 
   const data = {
     ...mergedTrip,
@@ -67,9 +67,9 @@ export const getJourneyFromTrainNumber = async (
   };
 };
 
-export const getRisId = async (hafasTrip: Trip): Promise<string> => {
-  return await convertTripIdToRis(hafasTrip);
-};
+// export const getRisId = async (hafasTrip: Trip): Promise<string> => {
+//   return await convertTripIdToRis(hafasTrip);
+// };
 
 export const getVendoJourney = async (hafasJourneyId: string) => {
   const res = await getJourneyInfoVendo(hafasJourneyId);

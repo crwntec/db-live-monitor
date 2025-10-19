@@ -18,7 +18,7 @@ import {
 import { CarriageSequenceT } from "@/types/carriageSequence";
 
 export default function CarriageSequence({ carriageSequence }:{ carriageSequence: CarriageSequenceT | null }) {
-  //   console.log(carriageSequence);
+    // console.log(carriageSequence);
   return (
     <div>
       <div className="space-y-4">
@@ -50,7 +50,7 @@ export default function CarriageSequence({ carriageSequence }:{ carriageSequence
 
             <div className="space-y-2">
               {group.vehicles.map((vehicle) => (
-                <div key={vehicle.vehicleID} className="border-t pt-2">
+                <div key={vehicle.vehicleID+Math.random()} className="border-t pt-2">
                   <div className="grid grid-cols-2 gap-2 text-sm">
                     <div className="flex items-center gap-2">
                       <ClipboardList size={14} strokeWidth={3} />
