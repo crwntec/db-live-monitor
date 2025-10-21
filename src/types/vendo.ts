@@ -1,6 +1,8 @@
 type HaltT = {
   ankunftsDatum?: string;
+  ezAnkunftsDatum?: string;
   abgangsDatum?: string;
+  ezAbgangsDatum?: string;
   ort: {
     name: string;
     locationId: string;
@@ -12,11 +14,17 @@ type HaltT = {
     stationId: string;
   };
   gleis?: string;
+  ezGleis?: string;
   plattform?: string;
   plattformTyp?: string;
   attributNotizen: { text?: string; key?: string; priority?: number }[];
-  echtzeitNotizen: { text?: string; key?: string; priority?: number }[];
-  himNotizen: { text?: string; key?: string; priority?: number }[];
+  echtzeitNotizen: { text?: string; prio?: number }[];
+  himNotizen: {
+    text?: string;
+    ueberschrift?: string;
+    prio?: number;
+    letzteAktualisierung?: string;
+  }[];
   serviceNotiz?: {
     key: string;
     text: string;
@@ -39,12 +47,13 @@ type VendoJourneyT = {
   mitteltext: string;
   halte: HaltT[];
   stops: HaltT[];
-  himNotizen: { text?: string; key?: string; priority?: number }[];
-  echtzeitNotizen: { text?: string; key?: string; priority?: number }[];
-  attributNotizen: {
-    text: string;
-    key: string;
-    priority?: number;
+  attributNotizen: { text?: string; key?: string; priority?: number }[];
+  echtzeitNotizen: { text?: string; prio?: number }[];
+  himNotizen: {
+    text?: string;
+    ueberschrift?: string;
+    prio?: number;
+    letzteAktualisierung?: string;
   }[];
   verkehrsmittelNummer: string;
   richtung: string;

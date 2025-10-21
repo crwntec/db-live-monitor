@@ -1,12 +1,12 @@
 import { createClient, HafasClient, Trip } from "hafas-client";
 import { profile } from "hafas-client/p/oebb/index";
-import { stationBoard } from "../db-web-api";
+// import { stationBoard } from "../db-web-api";
 import moment from "moment-timezone";
 
 // In-memory cache (simple key-value store)
 const tripCache = new Map<string, Promise<Trip[]>>();
 const tripInfoCache = new Map<string, Promise<Trip>>();
-const tripIdCache = new Map<string, Promise<string>>();
+// const tripIdCache = new Map<string, Promise<string>>();
 
 export const createHafas = () => createClient(profile, "db-live");
 
@@ -15,8 +15,9 @@ export const findTrips = async (
   hafasClient: HafasClient,
   limit: number,
   allowedEVAPrefixes: string[],
-  date?: Date
+  date?: Date,
 ): Promise<Trip[]> => {
+  if (isNaN(Number(query))) return [];
   const cacheKey = `${query}-${allowedEVAPrefixes.join(",")}`;
   if (tripCache.has(cacheKey)) {
     return tripCache.get(cacheKey)!;
@@ -25,11 +26,14 @@ export const findTrips = async (
   if (!hafasClient.tripsByName) {
     throw new Error("tripsByName is not defined on hafasClient");
   }
-
   const tripPromise = hafasClient
     .tripsByName(query, {
-      fromWhen: date ? moment(date).subtract(1, "seconds").tz("Europe/Berlin").toDate() : moment().tz("Europe/Berlin").startOf("day").toDate(),
-      untilWhen: date ? moment(date).add(1, "seconds").tz("Europe/Berlin").toDate() : moment().tz("Europe/Berlin").endOf("day").toDate(),
+      fromWhen: date
+        ? moment(date).subtract(1, "seconds").tz("Europe/Berlin").toDate()
+        : moment().tz("Europe/Berlin").startOf("day").toDate(),
+      untilWhen: date
+        ? moment(date).add(1, "seconds").tz("Europe/Berlin").toDate()
+        : moment().tz("Europe/Berlin").endOf("day").toDate(),
       products: {
         suburban: true,
         subway: false,
@@ -38,7 +42,7 @@ export const findTrips = async (
         ferry: false,
         regional: true,
         taxi: false,
-        onCall: false
+        onCall: false,
       },
       onlyCurrentlyRunning: false,
     })
@@ -58,7 +62,35 @@ export const findTrips = async (
         })
         .slice(0, limit);
       return filteredTrips;
-    })
+    }).catch((e)=>{
+      try {
+    let body: any = e.request?.body;
+
+    // If it's a function (hafas-client often stores it this way)
+    if (typeof body === "function") body = body();
+
+    // If it's a Node.js Buffer, decode it to string
+    if (body && body.type === "Buffer" && Array.isArray(body.data)) {
+      body = Buffer.from(body.data).toString("utf8");
+    }
+
+    // If it’s still a stringified JSON, pretty-print it
+    try {
+      body = JSON.stringify(JSON.parse(body), null, 2);
+    } catch {
+      // ignore if it’s not valid JSON
+    }
+
+    console.error("❌ HAFAS Error:", e.message);
+    console.error("➡️ URL:", e.request?.url);
+    console.error("➡️ Body:", body);
+    console.error("➡️ Date:", date);
+    console.error("➡️ Query:", query);
+  } catch (err) {
+    console.error("⚠️ Could not log request:", err);
+  }
+  return [];
+    });
 
   tripCache.set(cacheKey, tripPromise);
   return tripPromise;
@@ -66,7 +98,7 @@ export const findTrips = async (
 
 export const tripInfo = async (
   tripId: string,
-  hafasClient: HafasClient
+  hafasClient: HafasClient,
 ): Promise<Trip> => {
   if (tripInfoCache.has(tripId)) {
     return tripInfoCache.get(tripId)!;
@@ -84,28 +116,29 @@ export const tripInfo = async (
   return tripPromise;
 };
 
-export const convertTripIdToRis = async (hafasTrip: Trip): Promise<string> => {
-  if (!hafasTrip || !hafasTrip.origin || !hafasTrip.origin.id) return "";
+// export const convertTripIdToRis = async (hafasTrip: Trip): Promise<string> => {
+//   // if (!hafasTrip || !hafasTrip.origin || !hafasTrip.origin.id) return "";
 
-  const cacheKey = hafasTrip.line?.fahrtNr || "";
-  if (tripIdCache.has(cacheKey)) {
-    return tripIdCache.get(cacheKey)!;
-  }
+//   // const cacheKey = hafasTrip.line?.fahrtNr || "";
+//   // if (tripIdCache.has(cacheKey)) {
+//   //   return tripIdCache.get(cacheKey)!;
+//   // }
 
-  const timeFrame = {
-    start: hafasTrip.plannedDeparture || "",
-    end: hafasTrip.plannedDeparture || "",
-  };
+//   // const timeFrame = {
+//   //   start: hafasTrip.plannedDeparture || "",
+//   //   end: hafasTrip.plannedDeparture || "",
+//   // };
 
-  const tripPromise = stationBoard
-    .departures(hafasTrip.origin.id, timeFrame)
-    .then((regioGuideResults) => {
-      const matchingTrip = regioGuideResults.items.find(
-        (item) => String(item.train.no) === String(hafasTrip.line?.fahrtNr)
-      );
-      return matchingTrip ? matchingTrip.train.journeyId || "" : "";
-    });
+//   // const tripPromise = stationBoard
+//   //   .departures(hafasTrip.origin.id, timeFrame)
+//   //   .then((regioGuideResults) => {
+//   //     const matchingTrip = regioGuideResults.items.find(
+//   //       (item) => String(item.train.no) === String(hafasTrip.line?.fahrtNr),
+//   //     );
+//   //     return matchingTrip ? matchingTrip.train.journeyId || "" : "";
+//   //   });
 
-  tripIdCache.set(cacheKey, tripPromise);
-  return tripPromise;
-};
+//   // tripIdCache.set(cacheKey, tripPromise);
+//   // return tripPromise;
+//   return "TODO";
+// };

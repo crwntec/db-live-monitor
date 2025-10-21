@@ -12,7 +12,7 @@ export default function StopGroup({
 }) {
   return (
     <li
-      key={stopGroup[0].train.id + uuidv4()}
+      key={stopGroup[0].transport.journeyID + uuidv4()}
       className={`${
         hasLeft(stopGroup[0], 0)
           ? "bg-gray-300 dark:bg-gray-900"
