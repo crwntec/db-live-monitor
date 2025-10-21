@@ -88,7 +88,7 @@ function mergeJourneyRemarks(vendoJourney: VendoJourneyT, hafasTrip: Trip) {
       .map((note) => ({
         type: "hint" as const,
         code: note.key,
-        text: note.text || "",
+        text: note.key == "CK" ? "Komfort Check-In verfügbar" : note.text || "",
       })) || []),
   ];
   hafasTrip.remarks?.map((r) => {
@@ -110,6 +110,7 @@ function mergeJourneyRemarks(vendoJourney: VendoJourneyT, hafasTrip: Trip) {
           text: r.text || "",
         });
       } else if (r.type === "hint") {
+        if (r.code == 'CK') return
         combinedRemarks.push({
           type: "hint",
           code: r.code,
@@ -196,7 +197,7 @@ function mergeHafasVendo(
       // Vendo doesn't have explicit cancellation field in HaltT
       cancelled:
         combinedRemarks.some((r) => r.text?.includes("entfällt")) ||
-        hafasStop.cancelled,
+        (hafasStop.cancelled && !vendoActualArrival && !vendoActualDeparture),
       // Add Vendo load factor
       loadFactor: vendoStop.loadFactor,
       // Combine remarks from both sources

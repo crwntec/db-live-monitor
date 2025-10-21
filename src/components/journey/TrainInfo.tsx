@@ -146,7 +146,7 @@ function HintBadge({ text, code }: { text: string; code: string | null | undefin
 
   return (
     <div
-      className="relative inline-block"
+      className="relative inline-block z-50"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >

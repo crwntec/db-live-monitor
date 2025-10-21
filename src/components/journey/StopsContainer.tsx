@@ -20,63 +20,78 @@ export default function StopsContainer({
   const [currentTime, setCurrentTime] = useState(
     moment().tz("Europe/Berlin").add(0, "minutes")
   );
-  const calculateAndSetProgress = () => {
-    if (stops.length < 2) return 0;
+  const notCancelledStops = stops.filter((stop) => !stop.cancelled);
+  const cancelledStops = stops.filter((stop) => stop.cancelled);
+ const calculateAndSetProgress = () => {
+  if (notCancelledStops.length < 2) {
+    setProgress(0);
+    setHeightProgress(0);
+    return;
+  }
 
-    const firstStop = stops[0];
-    const lastStop = stops[stops.length - 1];
+  const firstStop = notCancelledStops[0];
+  const lastStop = notCancelledStops[notCancelledStops.length - 1];
 
-    const startTime = moment(getTimeJourney(firstStop, true)).valueOf();
-    const endTime = moment(getTimeJourney(lastStop, true)).valueOf();
-    const now = currentTime.valueOf();
+  const startTime = moment(getTimeJourney(firstStop, true)).valueOf();
+  const endTime = moment(getTimeJourney(lastStop, true)).valueOf();
+  const now = currentTime.valueOf();
 
-    if (now <= startTime) {
-      setProgress(0);
-      return;
+  // Find the index of the first non-cancelled stop in the original stops array
+  const firstStopOriginalIndex = stops.findIndex(s => s === firstStop);
+  const stopPositions = stops.map(
+    (_, index) => (index / (stops.length - 1)) * 100
+  );
+  const startingHeight = stopPositions[firstStopOriginalIndex];
+
+  if (now <= startTime) {
+    setProgress(0);
+    setHeightProgress(startingHeight); // Start at first non-cancelled stop
+    return;
+  }
+  if (now >= endTime) {
+    setProgress(100);
+    setHeightProgress(100);
+    return;
+  }
+
+  // Find the last completed stop and next stop
+  let prevStop = firstStop;
+  let nextStop = lastStop;
+  let prevStopIndex = 0;
+  let nextStopIndex = notCancelledStops.length - 1;
+  for (let i = 1; i < notCancelledStops.length; i++) {
+    const stopTime = moment(getTimeJourney(notCancelledStops[i], true)).valueOf();
+    if (stopTime > now) {
+      nextStop = notCancelledStops[i];
+      nextStopIndex = i;
+      break;
     }
-    if (now >= endTime) {
-      setProgress(100);
-      setHeightProgress(100);
-      return;
-    }
+    prevStop = notCancelledStops[i];
+    prevStopIndex = i;
+  }
 
-    // Find the last completed stop and next stop
-    let prevStop = firstStop;
-    let nextStop = lastStop;
-    let prevStopIndex = 0;
-    let nextStopIndex = 0;
-    for (let i = 1; i < stops.length; i++) {
-      const stopTime = moment(getTimeJourney(stops[i], true)).valueOf();
-      if (stopTime > now) {
-        nextStop = stops[i];
-        nextStopIndex = i;
-        break;
-      }
-      prevStop = stops[i];
-      prevStopIndex = i;
-    }
+  const prevTime = moment(getTimeJourney(prevStop, true)).valueOf();
+  const nextTime = moment(getTimeJourney(nextStop, true)).valueOf();
 
-    const prevTime = moment(getTimeJourney(prevStop, true)).valueOf();
-    const nextTime = moment(getTimeJourney(nextStop, true)).valueOf();
+  // Linear interpolation between the two stops
+  const segmentProgress = (now - prevTime) / (nextTime - prevTime);
 
-    // Linear interpolation between the two stops
-    const segmentProgress = (now - prevTime) / (nextTime - prevTime);
+  // Determine overall progress based on time
+  const overallProgress =
+    ((prevTime - startTime) / (endTime - startTime)) * 100 +
+    segmentProgress * ((nextTime - prevTime) / (endTime - startTime)) * 100;
 
-    // Determine overall progress based on time
-    const overallProgress =
-      ((prevTime - startTime) / (endTime - startTime)) * 100 +
-      segmentProgress * ((nextTime - prevTime) / (endTime - startTime)) * 100;
+  // Find original indices for height calculation
+  const prevStopOriginalIndex = stops.findIndex(s => s === prevStop);
+  const nextStopOriginalIndex = stops.findIndex(s => s === nextStop);
 
-    const stopPositions = stops.map(
-      (_, index) => (index / (stops.length - 1)) * 100
-    );
-    setHeightProgress(
-      stopPositions[prevStopIndex] +
-        segmentProgress *
-          (stopPositions[nextStopIndex] - stopPositions[prevStopIndex])
-    );
-    setProgress(overallProgress);
-  };
+  const heightProgress = stopPositions[prevStopOriginalIndex] +
+    segmentProgress *
+    (stopPositions[nextStopOriginalIndex] - stopPositions[prevStopOriginalIndex]);
+  
+  setHeightProgress(heightProgress);
+  setProgress(overallProgress);
+};
 
   useEffect(() => {
     calculateAndSetProgress();
@@ -85,7 +100,7 @@ export default function StopsContainer({
     }, 60000);
 
     return () => clearInterval(interval);
-  }, [calculateAndSetProgress]);
+  }, []);
 
   useEffect(() => {
     calculateAndSetProgress();
@@ -160,10 +175,10 @@ export default function StopsContainer({
           ></div>
         </div>
         <div className="flex justify-between mt-2 text-sm text-muted-foreground">
-          <span>{moment(stops[0].departure || 0).format("HH:mm")}</span>
+          <span>{moment(notCancelledStops[0].departure || 0).format("HH:mm")}</span>
           <span>{Math.round(progress)}%</span>
           <span>
-            {moment(stops[stops.length - 1].arrival || 0).format("HH:mm")}
+            {moment(notCancelledStops[notCancelledStops.length - 1].arrival || 0).format("HH:mm")}
           </span>
         </div>
       </div>
@@ -241,9 +256,9 @@ export default function StopsContainer({
                               : stop.arrivalDelay
                           )}`}
                         >
-                          {moment(stop.departure || stop.arrival).format(
+                          {stop.departure || stop.arrival ? moment(stop.departure || stop.arrival).format(
                             "HH:mm"
-                          ) || "N/A"}{" "}
+                          ) : "N/A"}{" "}
                         </p>
                       </div>
                       <span
