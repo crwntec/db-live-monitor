@@ -21,7 +21,6 @@ export default function StopsContainer({
     moment().tz("Europe/Berlin").add(0, "minutes")
   );
   const notCancelledStops = stops.filter((stop) => !stop.cancelled);
-  const cancelledStops = stops.filter((stop) => stop.cancelled);
  const calculateAndSetProgress = () => {
   if (notCancelledStops.length < 2) {
     setProgress(0);
@@ -57,17 +56,13 @@ export default function StopsContainer({
   // Find the last completed stop and next stop
   let prevStop = firstStop;
   let nextStop = lastStop;
-  let prevStopIndex = 0;
-  let nextStopIndex = notCancelledStops.length - 1;
   for (let i = 1; i < notCancelledStops.length; i++) {
     const stopTime = moment(getTimeJourney(notCancelledStops[i], true)).valueOf();
     if (stopTime > now) {
       nextStop = notCancelledStops[i];
-      nextStopIndex = i;
       break;
     }
     prevStop = notCancelledStops[i];
-    prevStopIndex = i;
   }
 
   const prevTime = moment(getTimeJourney(prevStop, true)).valueOf();
