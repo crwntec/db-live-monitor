@@ -5,7 +5,7 @@ import moment from "moment-timezone";
 
 // In-memory cache (simple key-value store)
 const tripCache = new Map<string, Promise<Trip[]>>();
-const tripInfoCache = new Map<string, Promise<Trip>>();
+const tripInfoCache = new Map<string, Promise<Trip|null>>();
 // const tripIdCache = new Map<string, Promise<string>>();
 
 export const createHafas = () => createClient(profile, "db-live");
@@ -99,7 +99,7 @@ export const findTrips = async (
 export const tripInfo = async (
   tripId: string,
   hafasClient: HafasClient,
-): Promise<Trip> => {
+): Promise<Trip | null> => {
   if (tripInfoCache.has(tripId)) {
     return tripInfoCache.get(tripId)!;
   }
@@ -110,9 +110,11 @@ export const tripInfo = async (
 
   const tripPromise = hafasClient
     .trip(tripId, { polyline: true })
-    .then((trip) => trip.trip);
-
-  tripInfoCache.set(tripId, tripPromise);
+    .then((trip) => trip.trip).catch((_err) => {
+        console.log("Trip not found " + tripId)
+          return null
+      });
+ tripInfoCache.set(tripId, tripPromise);
   return tripPromise;
 };
 

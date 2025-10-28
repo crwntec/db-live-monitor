@@ -17,7 +17,7 @@ export default function TimeContainer({
             : getDelayColor(time.diff, true)
         } hidden sm:block`}
       >
-        (+{time.diff || 0}min)
+        ({(time.diff >= 0 ? "+" : "") + (time.diff || 0)}min)
       </div>
       <div className="flex flex-col items-end ml-1 sm:w-10 w-24">
         <div
@@ -31,7 +31,7 @@ export default function TimeContainer({
         </div>
         <div
           className={`text-sm ${
-            canceled ? "line-through text-red-500" : getDelayColor(time.diff)
+            canceled ? "line-through text-red-500" :  getDelayColor(time.diff, true)
           }`}
         >
           {moment(time.time).format("HH:mm")}

@@ -5,6 +5,8 @@ import {
 import { CarriageSequenceT } from "./carriageSequence";
 export interface JourneyT extends Trip {
   polyline: FeatureCollection | undefined;
+  hafasId: string;
+  vendoId: string;
   carriageSequence?: CarriageSequenceT | null;
 }
 export interface Him {
