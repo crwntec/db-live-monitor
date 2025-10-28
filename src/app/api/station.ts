@@ -42,7 +42,7 @@ export const getEVAFromDS100 = async (input: string): Promise<number[] | null> =
   }
 
   try {
-    let result: number[] | null = null;
+    let result: number[] | null;
 
     if (ds100Pattern.test(input)) {
       const station = await findStationByDS100(input);

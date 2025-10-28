@@ -1,5 +1,5 @@
-import { createClient, HafasClient, Trip } from "hafas-client";
-import { profile } from "hafas-client/p/oebb/index";
+import {createClient, HafasClient, Trip} from "hafas-client";
+import {profile} from "hafas-client/p/oebb";
 // import { stationBoard } from "../db-web-api";
 import moment from "moment-timezone";
 
@@ -48,20 +48,19 @@ export const findTrips = async (
     })
     .then((trips) => {
       const seenLineNames = new Set();
-      const filteredTrips = trips.trips
-        .filter((trip) => {
-          // console.log(trip)
-          if (!trip.line?.fahrtNr) return false;
-          if (seenLineNames.has(trip.line.name)) return false;
-          seenLineNames.add(trip.line.name);
-          if (!trip.line.fahrtNr.includes(query)) return false;
-          return (
-            allowedEVAPrefixes.includes(trip.origin?.id?.slice(0, 2) || "") ||
-            allowedEVAPrefixes.includes(trip.destination?.id?.slice(0, 2) || "")
-          );
-        })
-        .slice(0, limit);
-      return filteredTrips;
+        return trips.trips
+          .filter((trip) => {
+              // console.log(trip)
+              if (!trip.line?.fahrtNr) return false;
+              if (seenLineNames.has(trip.line.name)) return false;
+              seenLineNames.add(trip.line.name);
+              if (!trip.line.fahrtNr.includes(query)) return false;
+              return (
+                  allowedEVAPrefixes.includes(trip.origin?.id?.slice(0, 2) || "") ||
+                  allowedEVAPrefixes.includes(trip.destination?.id?.slice(0, 2) || "")
+              );
+          })
+          .slice(0, limit);
     }).catch((e)=>{
       try {
     let body: any = e.request?.body;
