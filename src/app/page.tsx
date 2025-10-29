@@ -240,8 +240,8 @@ export default function Home() {
         if (selectedIndex < stations.length) {
           handleStationClick(stations[selectedIndex].eva);
         } else {
-          // const tripIndex = selectedIndex - stations.length;
-          // handleTripClick(hafasTrips[tripIndex]);
+          const tripIndex = selectedIndex - stations.length;
+          handleTripClick(hafasTrips[tripIndex]);
         }
       }
       if (e.key === "Escape") {
@@ -267,14 +267,35 @@ export default function Home() {
     startTransition(() => router.push(`/board/${eva}`));
   }, [router]);
 
-  // const handleTripClick = useCallback(async (hafasTrip: Trip) => {
-  //   try {
-  //     const jid = await getRisId(hafasTrip);
-  //     startTransition(() => router.push(`/journey/${jid}`));
-  //   } catch (error) {
-  //     console.error("Error getting journey ID:", error);
-  //   }
-  // }, [router]);
+    const handleTripClick = useCallback((hafasTrip: Trip) => {
+        // Extract train number from the trip
+        if (!hafasTrip || !hafasTrip.line?.fahrtNr) return;
+        const trainNumber = hafasTrip.line?.fahrtNr
+
+        const trainName = hafasTrip.line?.productName && hafasTrip.line?.fahrtNr
+            ? `${hafasTrip.line.productName}${hafasTrip.line.fahrtNr}`
+            : hafasTrip.line?.name || '';
+
+        const departureTime = hafasTrip.plannedDeparture || hafasTrip.plannedArrival;
+        const referringEva = hafasTrip.origin ? hafasTrip.origin.id : hafasTrip.destination?.id
+        if (!referringEva || !departureTime) return;
+        const params = new URLSearchParams({
+            referringEva: referringEva,
+            trainName: trainName,
+            lineName: hafasTrip.line?.productName + (hafasTrip.line?.id || ""),
+            trainNumber: hafasTrip.line?.fahrtNr || "",
+            date: departureTime,
+            onlyArrival: (hafasTrip.departure == undefined).toString(),
+        });
+
+        // Since we don't have wing information from HAFAS autocomplete,
+        // we won't include wing parameters
+        // The journey page should be able to work without them
+
+        startTransition(() => {
+            router.push(`/journey/${trainNumber}?${params.toString()}`);
+        });
+    }, [router]);
 
   return (
     <main className="min-h-screen px-4 py-6 flex flex-col justify-between items-center bg-gray-100 dark:bg-gray-900">
@@ -351,14 +372,14 @@ export default function Home() {
             ))}
 
             {/* Trip Results */}
-            {/* {hafasTrips.map((hafasTrip, index) => (
+            {hafasTrips.map((hafasTrip, index) => (
               <TripResult
                 key={hafasTrip.id}
                 trip={hafasTrip}
                 isSelected={selectedIndex === index + stations.length}
                 onClick={handleTripClick}
               />
-            ))} */}
+            ))}
           </motion.div>
         )}
 

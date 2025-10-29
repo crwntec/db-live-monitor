@@ -128,6 +128,14 @@ export function getLongNameForClassNumber(classNumber: string) {
             return "S-Bahn " + _classNumber;
         case 425:
             return "ET 425";
+        case 426:
+            return "Stadler Flirt (Zweiteilig)"
+        case 427:
+            return classNumber.substring(0,1)=='3' ? "Stadler FLirt 3XL (dreiteilig)": "Stadler Flirt 3 (dreiteilig)"
+        case 428:
+            return classNumber.substring(0,1)=='3' ? "Stadler FLirt 3XL (vierteilig)": "Stadler Flirt 3 (vierteilig)"
+        case 429:
+            return classNumber.substring(0,1)=='3' ? "Stadler FLirt 3XL (fünfteilig)": "Stadler Flirt 3 (fünfteilig)"
         case 430:
             return "S-Bahn 430";
         case 440:
