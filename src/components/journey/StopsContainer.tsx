@@ -170,10 +170,10 @@ export default function StopsContainer({
           ></div>
         </div>
         <div className="flex justify-between mt-2 text-sm text-muted-foreground">
-          <span>{moment(notCancelledStops[0].departure || 0).format("HH:mm")}</span>
+          <span>{moment(notCancelledStops[0]?.departure || stops[0].departure).format("HH:mm")}</span>
           <span>{Math.round(progress)}%</span>
           <span>
-            {moment(notCancelledStops[notCancelledStops.length - 1].arrival || 0).format("HH:mm")}
+            {moment(notCancelledStops[notCancelledStops.length - 1]?.arrival || stops[stops.length - 1].arrival).format("HH:mm")}
           </span>
         </div>
       </div>

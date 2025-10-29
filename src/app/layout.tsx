@@ -1,5 +1,7 @@
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import {Metadata} from "next";
+import React from "react";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -11,7 +13,7 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-export const metadata = {
+export const metadata: Metadata = {
   title: "DB Live Monitor",
   description: "Unofficial Live Departure Monitor for German Railway Stations",
 };

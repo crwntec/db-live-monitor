@@ -43,7 +43,7 @@ export default function TrainInfo({
 
   const cancelledStops = train.stopovers?.filter((s) => s.cancelled) || [];
 
-  return (
+    return (
     <div className="border border-gray-700 rounded-lg shadow-lg bg-gray-800 overflow-hidden">
       {/* Header Section */}
       <div className="bg-gradient-to-r from-gray-900 to-gray-800 p-4 border-b border-gray-700">
@@ -131,7 +131,7 @@ export default function TrainInfo({
           <div className="flex items-center gap-2 text-xs text-blue-400">
             <Info className="w-3.5 h-3.5 flex-shrink-0" />
             <span>
-              Fährt von {wingStart} bis {wingDest} vereint mit {wingName}
+                Fährt von {wingStart} bis {wingDest} vereint mit <a className={"hover:cursor-pointer underline"} >{wingName}</a>
             </span>
           </div>
         </div>

@@ -34,7 +34,7 @@ export default function StopBase({
 
     const constructName = (transport: Transport) =>
         transport
-            ? `${transport.category} ${transport.line} (${transport.number})`
+            ? `${transport.category} ${transport.line ? transport.line + "("+transport.number+")" : transport.number}`
             : "";
 
     const handleStopSelect = () => {
