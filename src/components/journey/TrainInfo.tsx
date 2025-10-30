@@ -44,27 +44,27 @@ export default function TrainInfo({
   const cancelledStops = train.stopovers?.filter((s) => s.cancelled) || [];
 
     return (
-    <div className="border border-gray-700 rounded-lg shadow-lg bg-gray-800 overflow-hidden">
+    <div className="border border-gray-700 rounded-lg shadow-lg dark:bg-gray-800 overflow-hidden">
       {/* Header Section */}
-      <div className="bg-gradient-to-r from-gray-900 to-gray-800 p-4 border-b border-gray-700">
+      <div className="bg-gradient-to-r dark:from-gray-900 dark:to-gray-800 p-4 border-b border-gray-700">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div className="flex flex-col gap-2">
-            <div className="flex items-center gap-2 text-sm text-gray-200">
+            <div className="flex items-center gap-2 text-sm dark:text-gray-200">
               <Building2 className="w-4 h-4 text-blue-400" />
               <span className="font-medium">{train.line?.operator?.name}</span>
             </div>
-            <div className="flex items-center gap-2 text-sm text-gray-200">
+            <div className="flex items-center gap-2 text-sm dark:text-gray-200">
               <TrainFront className="w-4 h-4 text-blue-400" />
               <span className="font-mono font-semibold">{train.line?.fahrtNr}</span>
             </div>
           </div>
 
           <div className="flex flex-col gap-2">
-            <div className="flex items-center gap-2 text-sm text-gray-200">
+            <div className="flex items-center gap-2 text-sm dark:text-gray-200">
               <List className="w-4 h-4 text-blue-400" />
               <span className="font-medium">{train.line?.productName}</span>
             </div>
-            <div className="flex items-center gap-2 text-sm text-gray-200">
+            <div className="flex items-center gap-2 text-sm dark:text-gray-200">
               <Route className="w-4 h-4 text-blue-400" />
               <span className="font-medium truncate">
                 {train.stopovers?.[0]?.stop?.name} →{" "}
@@ -84,8 +84,8 @@ export default function TrainInfo({
               key={uuidv4()}
               className="flex items-center gap-2"
             >
-              <Clock className="w-4 h-4 text-red-400 flex-shrink-0" />
-              <p className="text-xs text-red-400">{remark.text}</p>
+              <Clock className="w-4 h-4 text-red-600 dark:text-red-400 flex-shrink-0" />
+              <p className="text-xs text-red-600 dark:text-red-400">{remark.text}</p>
             </div>
           ))}
 
@@ -95,16 +95,16 @@ export default function TrainInfo({
               key={uuidv4()}
               className="flex items-center gap-2"
             >
-              <TriangleAlert className="w-4 h-4 text-orange-400 flex-shrink-0" />
-              <p className="text-xs text-orange-400">{remark.text}</p>
+              <TriangleAlert className="w-4 h-4 text-orange-500 dark:text-orange-400 flex-shrink-0" />
+              <p className="text-xs text-orange-500 dark:text-orange-400">{remark.text}</p>
             </div>
           ))}
 
           {/* Cancelled Stops */}
           {cancelledStops.length > 0 && (
             <div className="flex items-center gap-2">
-              <AlertCircle className="w-4 h-4 text-red-400 flex-shrink-0" />
-              <p className="text-xs text-red-400">
+              <AlertCircle className="w-4 h-4 text-red-700 dark:text-red-400 flex-shrink-0" />
+              <p className="text-xs text-red-700 dark:text-red-400">
                 Ohne Halt in {cancelledStops.map((s) => s.stop?.name).join(", ")}
               </p>
             </div>
@@ -151,11 +151,11 @@ function HintBadge({ text, code }: { text: string; code: string | null | undefin
       onMouseLeave={() => setIsHovered(false)}
     >
       <button
-        className="p-1.5 bg-gray-700/50 hover:bg-gray-600/50 border border-gray-600 rounded-md transition-colors cursor-help"
+        className="p-1.5 hover:bg-gray-200 dark:bg-gray-700/50 dark:hover:bg-gray-600/50 border dark:border-gray-600 rounded-md transition-colors cursor-help"
         onClick={() => setIsHovered(!isHovered)}
         aria-label={text}
       >
-        <Icon className="w-4 h-4 text-gray-300" />
+        <Icon className="w-4 h-4 dark:text-gray-300" />
       </button>
 
       {/* Tooltip */}

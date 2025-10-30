@@ -67,18 +67,18 @@ export function getDelayColor(delay: number | null, minutes = false) {
   if (delay == null) return " text-gray-500";
   if (minutes) delay = delay * 60;
   if (delay < 0) {
-    return " text-cyan-500";
+    return "text-cyan-600 dark:text-cyan-500";
   } else if (delay < 60) {
-    return " text-green-500";
+    return "text-green-600 dark:text-green-500";
   } else if (delay < 360) {
-    return " text-yellow-500";
+    return "text-yellow-600 dark:text-yellow-500";
   } else if (delay < 720) {
-    return " text-orange-500";
+    return "text-orange-600 dark:text-orange-500";
   } else if (delay < 1800) {
-    return " text-red-500";
+    return "text-red-600 dark:text-red-500";
   } else if (delay > 1800) {
     //TODO: add a different color for delays over 30 minutes
-    return " text-red-500";
+    return "text-red-600 dark:text-red-500";
   } else {
     return "text-gray-500";
   }

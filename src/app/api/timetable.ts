@@ -204,8 +204,8 @@ const mergeStationData = (
             const key = item.transport.category + "-" + item.transport.number;
             const irisItem = irisStopsIndex.get(item.transport.number);
             const existing = processedItems.get(key);
-            const scheduledDestination = item.transport.destination?.name || item.transport.direction?.stopPlaces[0].name;
             const currentStation = mergedData.stationName;
+            const scheduledDestination = item.transport.destination?.name || item.transport.direction?.stopPlaces[0]?.name || currentStation;
 
             if (isArrival) {
                 if (existing) {
