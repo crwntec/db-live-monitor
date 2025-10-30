@@ -36,11 +36,13 @@ function getHafasClient(): HafasClient {
 export const getEVAFromDS100 = async (input: string): Promise<number[] | null> => {
   const cacheKey = `eva_${input}`;
   if (isCacheValid(cacheKey) && evaCache.has(cacheKey)) {
-    return evaCache.get(cacheKey) || null;
+    const cached = evaCache.get(cacheKey);
+    if (!cached) evaCache.delete(cacheKey);
+    return cached || null
   }
 
   try {
-    let result: number[] | null = null;
+    let result: number[] | null;
 
     if (ds100Pattern.test(input)) {
       const station = await findStationByDS100(input);

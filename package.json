@@ -1,6 +1,6 @@
 {
   "name": "dbm",
-  "version": "7.9.2",
+  "version": "7.9.5",
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",
@@ -17,6 +17,7 @@
     "framer-motion": "^12.5.0",
     "hafas-client": "^6.3.5",
     "leaflet-defaulticon-compatibility": "^0.1.2",
+    "lru-cache": "^11.2.2",
     "lucide-react": "^0.477.0",
     "maplibre-gl": "^5.3.1",
     "moment-timezone": "^0.5.47",
