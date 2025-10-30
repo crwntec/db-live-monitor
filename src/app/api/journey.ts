@@ -35,7 +35,6 @@ const getHafasIds = async (
     mdate: Moment,
     trainName: string,
     lineName: string,
-    trainNumber: string,
     hafasClient: HafasClient
 ): Promise<{ vendoId: string; hafasId: string; error?: string }> => {
     try {
@@ -50,7 +49,7 @@ const getHafasIds = async (
                 "Vendo station board"
             ),
             safeAsync(
-                findTrips(trainNumber, hafasClient, 1, ["80"], mdate.toDate()),
+                findTrips(trainName, hafasClient, 1, ["80"], mdate.toDate()),
                 "Hafas trip search"
             ),
         ]);
@@ -69,9 +68,14 @@ const getHafasIds = async (
             [];
 
         const normalizedTrainName = trainName.replace(/\s+/g, "");
+        const normalizedLineName = lineName.replace(/\s+/g, "");
         const trip = vendoData.find((p) => {
             const normalizedId = p.zuglaufId.replace(/\s+/g, "");
-            return normalizedId.includes(`ZB#${normalizedTrainName}`) || normalizedId.includes(`ZB#${lineName}`);
+            const normalizedText = p.mitteltext.replace(/\s+/g, "");
+            const arrDate = p.ankunftsDatum;
+            const depDate =  p.abgangsDatum;
+            if (!arrDate && !depDate) return;
+            return normalizedId.includes(`ZB#${normalizedTrainName}`) || (normalizedText==normalizedLineName && (moment(arrDate).isSame(mdate) || moment(depDate).isSame(mdate)));
         });
 
         const vendoId = trip?.zuglaufId || "";
@@ -107,7 +111,7 @@ export const getJourneyFromTrainNumber = async (
     const hafasClient = createHafas();
 
     // Step 1: Get IDs (Vendo + Hafas)
-    const idResult = await getHafasIds(onlyArrival, evaNo, mdate, trainName, lineName, trainNumber, hafasClient);
+    const idResult = await getHafasIds(onlyArrival, evaNo, mdate, trainName, lineName, hafasClient);
     if (idResult.error) {
         return { data: null, error: idResult.error };
     }

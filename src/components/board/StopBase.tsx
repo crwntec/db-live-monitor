@@ -46,9 +46,9 @@ export default function StopBase({
             lineName: stop.transport.line ? stop.transport.category
                 + stop.transport.line : "",
             trainNumber: stop.transport.number.toString(),
-            date: stop.arrival
-                ? stop.arrival.timeSchedule
-                : stop.departure?.timeSchedule || "",
+            date: stop.departure
+                ? stop.departure.timeSchedule
+                : stop.arrival?.timeSchedule || "",
             onlyArrival: (stop.departure == null).toString()
         });
 

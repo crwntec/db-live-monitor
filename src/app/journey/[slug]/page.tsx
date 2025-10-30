@@ -20,7 +20,7 @@ export default async function Page({
     slug,
     evaNo[0].toString(),
     sp["date"],
-      sp["onlyArrival"],
+      sp["onlyArrival"]==='true',
   );
 
   return (
