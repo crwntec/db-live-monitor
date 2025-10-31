@@ -225,22 +225,10 @@ export default function Home() {
 
     const totalResults = useMemo(() => stations.length + hafasTrips.length, [stations, hafasTrips]);
 
-    // Load favorites from localStorage on mount
     useEffect(() => {
         try {
-            const stored = localStorage.getItem('favoritedStations');
-            if (stored) {
-                const parsed = JSON.parse(stored);
-                setFavoritedStations(new Map(parsed));
-            }
-        } catch (error) {
-            console.error('Error loading favorites:', error);
-        }
-    }, []);
-
-    // Save favorites to localStorage whenever they change
-    useEffect(() => {
-        try {
+            // Skip saving during SSR or if window isn't available
+            if (typeof window === 'undefined') return;
             localStorage.setItem('favoritedStations', JSON.stringify(Array.from(favoritedStations.entries())));
         } catch (error) {
             console.error('Error saving favorites:', error);
@@ -371,6 +359,7 @@ export default function Home() {
                     {error && <div className="mt-2 text-red-500 dark:text-red-400 text-sm">{error}</div>}
                 </div>
                 {/* Favorites */}
+
                 {searchQuery.length === 0 && favoritedStations.size > 0 && (
                     <motion.div
                         initial={{ opacity: 0, y: -10 }}
@@ -398,7 +387,15 @@ export default function Home() {
                     </motion.div>
                 )}
 
-
+                {searchQuery.length === 0 && favoritedStations.size === 0 && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        className="mt-3 w-full p-4 text-center text-gray-500 dark:text-gray-400 text-sm"
+                    >
+                        No favorite stations yet. Search and tap the ★ to add!
+                    </motion.div>
+                )}
                 {/* Results */}
                 {(stations.length > 0 || hafasTrips.length > 0) && (
                     <motion.div
