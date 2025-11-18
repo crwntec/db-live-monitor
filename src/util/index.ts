@@ -3,7 +3,17 @@ import moment from "moment-timezone"; // This would be in lib/utils.ts
 import { type ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
 import { StopOver } from "hafas-client";
-import { Accessibility, Wifi, UtensilsCrossed, Bike, Users, Info,  CircleCheck, PlugZap, Snowflake } from "lucide-react";
+import {
+  Accessibility,
+  Wifi,
+  UtensilsCrossed,
+  Bike,
+  Users,
+  Info,
+  CircleCheck,
+  PlugZap,
+  Snowflake,
+} from "lucide-react";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -35,6 +45,14 @@ export function getTimeJourney(stop: StopOver, usePredicted = false) {
   return (
     departureTime || arrivalTime || moment().tz("Europe/Berlin").toISOString()
   );
+}
+export function calculateDelay(
+  timeString: string,
+  scheduledTimestring: string,
+) {
+  const time = moment(timeString);
+  const plannedTime = moment(scheduledTimestring);
+  return time.diff(plannedTime, "minutes");
 }
 export const loadFactorToText = (
   loadFactor: number | string,
@@ -121,22 +139,40 @@ export function getHintIcon(code: string | null | undefined, text: string) {
   const codeStr = code?.toLowerCase() || "";
   const textStr = text.toLowerCase();
 
-  if (codeStr.includes("ro") || codeStr.includes("oc") || codeStr.includes("rg") || textStr.includes("barrierefrei")) {
+  if (
+    codeStr.includes("ro") ||
+    codeStr.includes("oc") ||
+    codeStr.includes("rg") ||
+    textStr.includes("barrierefrei")
+  ) {
     return Accessibility;
   }
   if (codeStr.includes("ls") || textStr.includes("steckdosen")) {
     return PlugZap;
   }
-  if (codeStr.includes("wifi") || textStr.includes("wlan") || textStr.includes("wifi")) {
+  if (
+    codeStr.includes("wifi") ||
+    textStr.includes("wlan") ||
+    textStr.includes("wifi")
+  ) {
     return Wifi;
   }
-  if (codeStr.includes("br") || codeStr.includes("restaurant") || textStr.includes("restaurant") || textStr.includes("bordrestaurant")) {
+  if (
+    codeStr.includes("br") ||
+    codeStr.includes("restaurant") ||
+    textStr.includes("restaurant") ||
+    textStr.includes("bordrestaurant")
+  ) {
     return UtensilsCrossed;
   }
   if (codeStr.includes("kl") || textStr.includes("klimaanlage")) {
     return Snowflake;
   }
-  if (codeStr.includes("fk") || codeStr.includes("bicycle") || textStr.includes("fahrrad")) {
+  if (
+    codeStr.includes("fk") ||
+    codeStr.includes("bicycle") ||
+    textStr.includes("fahrrad")
+  ) {
     return Bike;
   }
   if (codeStr.includes("capacity") || textStr.includes("auslastung")) {
@@ -145,6 +181,6 @@ export function getHintIcon(code: string | null | undefined, text: string) {
   if (codeStr.includes("ck") || textStr.includes("check-in")) {
     return CircleCheck;
   }
-  
+
   return Info;
 }
