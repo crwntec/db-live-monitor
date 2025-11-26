@@ -58,6 +58,8 @@ export function getColor(prodName: string) {
       return trainCatColors.LONGDISTANCE;
     case p.includes("bus"):
       return trainCatColors.BUS;
+    case p.includes("wb"):
+      return trainCatColors.WB;
     default:
       return "default-color"; // Add a default color if none of the cases match
   }
