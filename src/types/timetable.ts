@@ -173,7 +173,7 @@ export interface Stop {
     | (WebAPIStop & { path: IrisPathItem[]; destination: { name: string } })
     | null;
   isEarlyTerminated: boolean;
-  delayMessages: IrisMessage[];
-  qualityChanges: IrisMessage[];
+  irisDelayMessages: IrisMessage[];
+  irisQualityChanges: IrisMessage[];
   canceled: boolean;
 }

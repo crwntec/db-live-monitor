@@ -118,6 +118,8 @@ export function getLongNameForClassNumber(classNumber: string) {
             )
                 return "412.0 (ICE 4 12tlg.)";
             return "412.2 (ICE 4 7tlg.)";
+        case 491:
+            return "ICE L"
         case 462:
             return "Desiro HC";
         case 420:
