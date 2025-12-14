@@ -92,7 +92,7 @@ export function getLongNameForClassNumber(classNumber: string) {
         case 101:
             return "IC1 Flachpark";
         case 193:
-            return "Vectron Wagenpark";
+            return "Siemens Vectron";
         case 401:
             return "401 (ICE 1)";
         case 402:
@@ -119,6 +119,7 @@ export function getLongNameForClassNumber(classNumber: string) {
                 return "412.0 (ICE 4 12tlg.)";
             return "412.2 (ICE 4 7tlg.)";
         case 491:
+        case 91:
             return "ICE L"
         case 462:
             return "Desiro HC";

@@ -43,9 +43,9 @@ export default function StopBase({
     const params = new URLSearchParams({
       referringEva: pathname.split("/")[2] ?? "",
       trainName: stop.transport.category + stop.transport.number,
-      lineName: stop.transport.line
-        ? stop.transport.category + stop.transport.line
-        : "",
+      lineName: stop.transport.journeyDescription
+        ? stop.transport.journeyDescription
+        : stop.transport.category + stop.transport.line,
       trainNumber: stop.transport.number.toString(),
       date: stop.departure
         ? stop.departure.timeSchedule

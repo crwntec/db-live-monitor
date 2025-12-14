@@ -25,4 +25,7 @@ export const trainCatColors = {
   NEG: "#b92037",
   EST: "#0f6efe",
   WB: "#4B799D",
+    ARV: "rgb(0, 164, 227)",
+    NX: "#005abb",
+    REGIOBAHN: "#d51130"
 };

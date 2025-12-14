@@ -8,12 +8,14 @@ import { StopOver } from "hafas-client";
 export default async function Journey({
   dataPromise,
   referringEva,
+    lineName,
 }: {
   dataPromise: Promise<{
     data: JourneyT | null;
     error?: string;
   }>;
   referringEva: string;
+  lineName: string;
 }) {
   const { data, error } = await dataPromise;
   if (!data || !data.stopovers)
@@ -21,7 +23,7 @@ export default async function Journey({
   return (
     <div className="h-full">
       <Navbar
-        title={data.line?.name || ""}
+        title={lineName || data.line?.name || ""}
         referring={referringEva ? `/board/${referringEva}` : "/"}
       />
       <section className="mb-8 p-4">

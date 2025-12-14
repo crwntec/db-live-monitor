@@ -25,7 +25,7 @@ export default async function Page({
 
   return (
     <>
-      <Journey dataPromise={dataPromise} referringEva={sp["referringEva"]} />
+      <Journey dataPromise={dataPromise} referringEva={sp["referringEva"]} lineName={sp["lineName"]} />
     </>
   );
 }

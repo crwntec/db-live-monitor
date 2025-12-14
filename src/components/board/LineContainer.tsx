@@ -9,7 +9,7 @@ export default function LineContainer({ transport }: { transport: Transport }) {
       style={{ backgroundColor: color }}
     >
       <div className="text-sm text-white whitespace-nowrap">
-        {transport.category} {transport.line || transport.number}
+        {transport.journeyDescription || transport.number}
       </div>
     </div>
   );

@@ -1,6 +1,6 @@
 {
   "name": "dbm",
-  "version": "7.9.8",
+  "version": "7.9.9",
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",
@@ -21,7 +21,7 @@
     "lucide-react": "^0.477.0",
     "maplibre-gl": "^5.3.1",
     "moment-timezone": "^0.5.47",
-    "next": "^15.4.7",
+    "next": "^16.0.10",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "uuid": "^11.1.0",
