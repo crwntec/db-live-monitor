@@ -288,7 +288,6 @@ const mergeStationData = (
 
   processItems(arrivals.arrivals, true);
   processItems(departures.departures, false);
-
   // Process IRIS data
   irisData.stops.forEach((irisItem) => {
     const key = irisItem.line.productName + "-" + irisItem.line.fahrtNr;
@@ -296,8 +295,8 @@ const mergeStationData = (
     if (
       !existing &&
       irisItem.when.arrival &&
-      moment(irisItem.when.arrival, moment.ISO_8601, true).isValid() &&
-      moment(irisItem.when.arrival).valueOf() > cutoffTimestamp
+      moment.utc(irisItem.when.arrival).isValid() &&
+      moment.utc(irisItem.when.arrival).tz("Europe/Berlin").valueOf() > cutoffTimestamp
     ) {
       // Create shared transport object to avoid duplication
       const sharedTransport = {
@@ -334,7 +333,6 @@ const mergeStationData = (
             }),
         via: [],
       };
-
       processedItems.set(key, {
         irisOverride: true,
         transport: sharedTransport,
