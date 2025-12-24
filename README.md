@@ -19,7 +19,7 @@ This project is a passion-driven effort and is still evolving. While I strive fo
 This project uses multiple data sources to provide comprehensive railway information:
 
 - **[DB Vendo API](https://github.com/public-transport/db-vendo-client)**: Board data (departure/arrival information) and journey details
-- **[ÖBB HAFAS](https://github.com/public-transport/oebb-hafas)**: Train number searching
+- **[ÖBB HAFAS](https://github.com/public-transport/hafas-client)**: Train number searching
 - **[IRIS](https://iris.noncd.db.de/wbt/js/index.html)**: Timetable data and train order information
 
 **Note:** Regio Guide has been deprecated and replaced with the DB Vendo API for improved data access. Also I use semi-customized wrappers for the apis because of limitations inside of NextJS. 
