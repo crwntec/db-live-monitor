@@ -9,7 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "axios": "^1.13.5",
+    "axios": "^1.15.0",
     "clsx": "^2.1.1",
     "db-hafas-stations-autocomplete": "^2.0.0",
     "dotenv": "^16.4.7",
@@ -21,10 +21,10 @@
     "lucide-react": "^0.477.0",
     "maplibre-gl": "^5.3.1",
     "moment-timezone": "^0.5.47",
-    "next": "^16.1.7",
+    "next": "^16.2.3",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "uuid": "^11.1.0",
+    "uuid": "^14.0.0",
     "xml-js": "^1.6.11"
   },
   "devDependencies": {
