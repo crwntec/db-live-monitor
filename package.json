@@ -9,19 +9,19 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "axios": "^1.15.0",
+    "axios": "^1.20.0",
     "clsx": "^2.1.1",
     "db-hafas-stations-autocomplete": "^2.0.0",
     "dotenv": "^16.4.7",
-    "flowbite-react": "^0.10.2",
+    "flowbite-react": "^0.12.17",
     "framer-motion": "^12.5.0",
     "hafas-client": "^6.3.5",
     "leaflet-defaulticon-compatibility": "^0.1.2",
     "lru-cache": "^11.2.2",
     "lucide-react": "^0.477.0",
-    "maplibre-gl": "^5.3.1",
+    "maplibre-gl": "^6.4.1",
     "moment-timezone": "^0.5.47",
-    "next": "^16.2.3",
+    "next": "^16.3.8",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "uuid": "^14.0.0",
@@ -37,7 +37,7 @@
     "eslint": "9.25.0",
     "eslint-config-next": "15.3.1",
     "postcss": "^8",
-    "tailwindcss": "^3.4.1",
+    "tailwindcss": "^4.3.3",
     "typescript": "^5.8.2"
   }
 }
